@@ -24,25 +24,25 @@ public class BlockImpl implements Block {
      * Variable Definitions
      */
     @Builder.Default
-    protected int id = 1;
+    private int id = 1;
 
     @Builder.Default
-    protected long timestamp = System.currentTimeMillis();
+    private long timestamp = System.currentTimeMillis();
 
     @Builder.Default
-    protected int difficulty = MIN_DIFFICULTY;
+    private int difficulty = MIN_DIFFICULTY;
 
     @Builder.Default
-    protected List<Transaction> transactions = new ArrayList<>();
+    private List<Transaction> transactions = new ArrayList<>();
 
     @Builder.Default
-    protected SHA256Hash merkleRoot = NULL_SHA256_HASH;
+    private SHA256Hash merkleRoot = NULL_SHA256_HASH;
 
     @Builder.Default
-    protected SHA256Hash lastBlockHash = NULL_SHA256_HASH;
+    private SHA256Hash lastBlockHash = NULL_SHA256_HASH;
 
     @Builder.Default
-    protected SHA256Hash nonce = NULL_SHA256_HASH;
+    private SHA256Hash nonce = NULL_SHA256_HASH;
 
     /**
      * Serialization
