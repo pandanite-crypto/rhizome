@@ -35,7 +35,8 @@ public class TransactionImpl implements Transaction, Comparable<Transaction> {
     @Builder.Default
     private long timestamp = System.currentTimeMillis();
 
-    private TransactionAmount fee;
+    @Builder.Default
+    private TransactionAmount fee = new TransactionAmount(0);
 
     private Ed25519PublicKeyParameters signingKey;
 
@@ -58,9 +59,10 @@ public class TransactionImpl implements Transaction, Comparable<Transaction> {
         throw new UnsupportedOperationException("Not supported yet....");
     }
 
-    public byte[] getHash() {
-        SHA256Digest digest = new SHA256Digest();
-        byte[] ret = new byte[32];
+    public SHA256Hash getHash() {
+        var digest = new SHA256Digest();
+        var sha256Hash = new SHA256Hash();
+
         digest.update(to.address, 0, to.address.length);
         if (!isTransactionFee) {
             digest.update(from.address, 0, from.address.length);
@@ -68,28 +70,13 @@ public class TransactionImpl implements Transaction, Comparable<Transaction> {
         digest.update(longToBytes(fee.amount()), 0, 8);
         digest.update(longToBytes(amount.amount()), 0, 8);
         digest.update(longToBytes(timestamp), 0, 8);
-        digest.doFinal(ret, 0);
+        digest.doFinal(sha256Hash.hash, 0);
 
-        return ret;
+        return sha256Hash;
     }
 
-    // Method to get from wallet
-    public PublicWalletAddress fromWallet() {
-        return this.from;
-    }
-
-    // Method to get to wallet
-    public PublicWalletAddress toWallet() {
-        return this.to;
-    }
-
-    // Method to sign
     public void sign(Ed25519PublicKeyParameters pubKey, Ed25519PrivateKeyParameters signingKey) {
-        SHA256Hash sha256 = new SHA256Hash();
-        sha256.hash = getHash();
-        byte[] transactionSignature = signWithPrivateKey(sha256.hash, pubKey, signingKey);
-
-        this.signature.signature = transactionSignature;
+        this.signature.signature = signWithPrivateKey(getHash().hash, pubKey, signingKey);
     }
 
     @Override
