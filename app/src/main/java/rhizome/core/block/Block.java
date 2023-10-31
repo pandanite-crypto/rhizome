@@ -13,6 +13,8 @@ import static rhizome.core.common.Utils.stringToSHA256;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public interface Block {
 
@@ -120,15 +122,19 @@ public interface Block {
         }
     
         public Block fromJson(JSONObject json) {
-            return Serializable.deserialize(json, 
-                (JSONObject j) -> BlockImpl.builder()
-                    .id(j.getInt("id"))
-                    .timestamp(j.getLong("timestamp"))
-                    .difficulty(j.getInt("difficulty"))
-                    .merkleRoot(stringToSHA256(j.getString("merkleRoot")))
-                    .lastBlockHash(stringToSHA256(j.getString("lastBlockHash")))
-                    .nonce(stringToSHA256(j.getString("nonce")))
-                    .build());
+            return BlockImpl.builder()
+                .id(json.getInt("id"))
+                .timestamp(json.getLong("timestamp"))
+                .difficulty(json.getInt("difficulty"))
+                .merkleRoot(stringToSHA256(json.getString("merkleRoot")))
+                .lastBlockHash(stringToSHA256(json.getString("lastBlockHash")))
+                .nonce(stringToSHA256(json.getString("nonce")))
+                .transactions(
+                    IntStream.range(0, json.getJSONArray("transactions").length())
+                        .mapToObj(i -> Transaction.of(json.getJSONArray("transactions").getJSONObject(i)))
+                        .collect(Collectors.toList())
+                )
+                .build();
         }
     }
 }
