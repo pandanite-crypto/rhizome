@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.json.JSONObject;
@@ -94,8 +95,8 @@ public class BlockImpl implements Block {
         if (o == null || getClass() != o.getClass()) return false;
         BlockImpl block = (BlockImpl) o;
         return id == block.id && difficulty == block.difficulty && timestamp == block.timestamp &&
-                Objects.equals(nonce, block.nonce) && Objects.equals(merkleRoot, block.merkleRoot) &&
-                Objects.equals(lastBlockHash, block.lastBlockHash) && Objects.equals(transactions, block.transactions);
+            Arrays.equals(nonce.hash, block.nonce.hash) && Arrays.equals(merkleRoot.hash, block.merkleRoot.hash) &&
+            Arrays.equals(lastBlockHash.hash, block.lastBlockHash.hash) && transactions.containsAll(block.transactions);
     }
 
     @Override
