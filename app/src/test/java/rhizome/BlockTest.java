@@ -11,7 +11,7 @@ class BlockTest {
 
     @Test
     void checkBlockJsonSerialization() {
-        var a = Block.of();
+        var a = Block.empty();
         var miner = new User();
         var receiver = new User();
         var t = miner.mine();
@@ -27,7 +27,7 @@ class BlockTest {
 
     @Test
     void checkBlockStructSerialization() {
-        var a = Block.of();
+        var a = Block.empty();
         var miner = new User();
         var receiver = new User();
         var t = miner.mine();

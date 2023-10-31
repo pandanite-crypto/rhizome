@@ -16,7 +16,7 @@ import java.util.List;
 
 public interface Block {
 
-    public static Block of() {
+    public static Block empty() {
         return BlockImpl.builder().build();
     }
 
