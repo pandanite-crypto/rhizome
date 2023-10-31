@@ -35,5 +35,5 @@ public final class Constants {
 
     public static final SHA256Hash NULL_SHA256_HASH = new SHA256Hash();
     public static final SHA256Hash NULL_KEY = new SHA256Hash();
-    public static final PublicWalletAddress NULL_ADDRESS = new PublicWalletAddress();
+    public static final PublicWalletAddress NULL_ADDRESS = PublicWalletAddress.empty();
 }
