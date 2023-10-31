@@ -69,4 +69,12 @@ public class Utils {
         }
         return hexString.toString();
     }
+
+    public static byte[] longToBytes(long x) {
+        byte[] buffer = new byte[8];
+        for (int i = 0; i < 8; i++) {
+            buffer[7 - i] = (byte) (x >>> (i * 8));
+        }
+        return buffer;
+    }
 }
