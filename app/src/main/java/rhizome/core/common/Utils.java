@@ -21,13 +21,13 @@ public class Utils {
     public static class PublicWalletAddress {
         public byte[] address = new byte[25];
     }
-    public static class PublicKey {
-        public byte[] key = new byte[32];
-    }
+    // public static class PublicKey {
+    //     public byte[] key = new byte[32];
+    // }
     
-    public static class PrivateKey {
-        public byte[] key = new byte[64];
-    }
+    // public static class PrivateKey {
+    //     public byte[] key = new byte[64];
+    // }
     
     public static class TransactionSignature {
         public byte[] signature = new byte[64];
