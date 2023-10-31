@@ -4,12 +4,12 @@ import java.security.SecureRandom;
 import java.util.Optional;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
-import org.json.JSONObject;
 
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.transaction.Transaction;
@@ -68,13 +68,13 @@ public class User {
     public Transaction send(User to, TransactionAmount amount) {
         PublicWalletAddress fromWallet = this.getAddress();
         PublicWalletAddress toWallet = to.getAddress();
-        Transaction t = Transaction.of(fromWallet, toWallet, amount, this.publicKey);
-        this.signTransaction(t);
-        return t;
+        Transaction transaction = Transaction.of(fromWallet, toWallet, amount, this.publicKey);
+        signTransaction(transaction);
+        return transaction;
     }
 
-    public void signTransaction(Transaction t) {
-        t.sign(this.publicKey, this.privateKey);
+    public void signTransaction(Transaction transaction) {
+        transaction.sign(this.publicKey, this.privateKey);
     }
 
     private Ed25519PublicKeyParameters stringToPublicKey(String key) {
@@ -93,8 +93,37 @@ public class User {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private PublicWalletAddress walletAddressFromPublicKey(Ed25519PublicKeyParameters key) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    private PublicWalletAddress walletAddressFromPublicKey(Ed25519PublicKeyParameters inputKey) {
+        byte[] publicKeyBytes = inputKey.getEncoded();
+
+        SHA256Digest sha256 = new SHA256Digest();
+        byte[] hash1 = new byte[32];
+        sha256.update(publicKeyBytes, 0, publicKeyBytes.length);
+        sha256.doFinal(hash1, 0);
+
+        RIPEMD160Digest ripemd160 = new RIPEMD160Digest();
+        byte[] hash2 = new byte[20];
+        ripemd160.update(hash1, 0, hash1.length);
+        ripemd160.doFinal(hash2, 0);
+
+        byte[] hash3 = new byte[32];
+        byte[] hash4 = new byte[32];
+        sha256.reset();
+        sha256.update(hash2, 0, hash2.length);
+        sha256.doFinal(hash3, 0);
+        sha256.reset();
+        sha256.update(hash3, 0, hash3.length);
+        sha256.doFinal(hash4, 0);
+
+        PublicWalletAddress address = new PublicWalletAddress();
+        address.address[0] = 0;
+        System.arraycopy(hash2, 0, address.address, 1, 20);
+        address.address[21] = hash4[0];
+        address.address[22] = hash4[1];
+        address.address[23] = hash4[2];
+        address.address[24] = hash4[3];
+
+        return address;
     }
 
 
