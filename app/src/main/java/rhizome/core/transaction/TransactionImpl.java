@@ -1,15 +1,21 @@
 package rhizome.core.transaction;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import static rhizome.core.common.Utils.longToBytes;
+
 import java.util.Objects;
 
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONObject;
 
 import lombok.Builder;
 import lombok.Data;
 import rhizome.core.common.Utils.PublicWalletAddress;
+import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.common.Utils.TransactionSignature;
+
+import static rhizome.core.common.Crypto.signWithPrivateKey;
 
 @Data
 @Builder
@@ -31,7 +37,7 @@ public class TransactionImpl implements Transaction, Comparable<Transaction> {
 
     private TransactionAmount fee;
 
-    private PublicKey signingKey;
+    private Ed25519PublicKeyParameters signingKey;
 
     @Builder.Default
     private TransactionSignature signature = new TransactionSignature();
@@ -52,9 +58,19 @@ public class TransactionImpl implements Transaction, Comparable<Transaction> {
         throw new UnsupportedOperationException("Not supported yet....");
     }
 
-    // Method to get hash
     public byte[] getHash() {
-        throw new UnsupportedOperationException("Not supported yet...");
+        SHA256Digest digest = new SHA256Digest();
+        byte[] ret = new byte[32];
+        digest.update(to.address, 0, to.address.length);
+        if (!isTransactionFee) {
+            digest.update(from.address, 0, from.address.length);
+        }
+        digest.update(longToBytes(fee.amount()), 0, 8);
+        digest.update(longToBytes(amount.amount()), 0, 8);
+        digest.update(longToBytes(timestamp), 0, 8);
+        digest.doFinal(ret, 0);
+
+        return ret;
     }
 
     // Method to get from wallet
@@ -68,8 +84,12 @@ public class TransactionImpl implements Transaction, Comparable<Transaction> {
     }
 
     // Method to sign
-    public void sign(PublicKey pubKey, PrivateKey signingKey) {
-        throw new UnsupportedOperationException("Not supported yet..");
+    public void sign(Ed25519PublicKeyParameters pubKey, Ed25519PrivateKeyParameters signingKey) {
+        SHA256Hash sha256 = new SHA256Hash();
+        sha256.hash = getHash();
+        byte[] transactionSignature = signWithPrivateKey(sha256.hash, pubKey, signingKey);
+
+        this.signature.signature = transactionSignature;
     }
 
     @Override
