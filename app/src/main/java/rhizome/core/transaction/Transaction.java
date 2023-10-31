@@ -7,6 +7,12 @@ import org.json.JSONObject;
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.net.Serializable;
 
+
+import static rhizome.core.common.Utils.SHA256toString;
+import static rhizome.core.common.Utils.publicKeyToString;
+import static rhizome.core.common.Utils.walletAddressToString;
+import static rhizome.core.common.Utils.signatureToString;
+
 public interface Transaction {
 
     public static Transaction empty() {
@@ -103,18 +109,35 @@ public interface Transaction {
         static TransactionSerializer instance = new TransactionSerializer();
 
         @Override
-        public TransactionInfo serialize(Transaction block) {
+        public TransactionInfo serialize(Transaction transaction) {
             throw new UnsupportedOperationException("Not implemented.");
         }
     
         @Override
-        public Transaction deserialize(TransactionInfo object) {
+        public Transaction deserialize(TransactionInfo transactionInfo) {
             throw new UnsupportedOperationException("Not implemented..");
         }
     
         @Override
-        public JSONObject toJson(Transaction block) {            
-            throw new UnsupportedOperationException("Not implemented");
+        public JSONObject toJson(Transaction transaction) {        
+            var transactionImpl = (TransactionImpl) transaction;    
+            JSONObject result = new JSONObject();
+            result.put("to", walletAddressToString(transactionImpl.getTo().address));
+            result.put("amount", transactionImpl.getAmount().amount());
+            result.put("timestamp", Long.toString(transactionImpl.getTimestamp()));
+            result.put("fee", transactionImpl.getFee().amount());
+            
+            if (!transactionImpl.isTransactionFee()) {
+                result.put("txid", SHA256toString(transactionImpl.getHash()));
+                result.put("from", walletAddressToString(transactionImpl.getFrom().address));
+                result.put("signingKey", publicKeyToString(transactionImpl.getSigningKey().getEncoded()));
+                result.put("signature", signatureToString(transactionImpl.getSignature().signature));
+            } else {
+                result.put("txid", SHA256toString(transactionImpl.getHash()));
+                result.put("from", "");
+            }
+            
+            return result;
         }
     
         public Transaction fromJson(JSONObject json) {            
