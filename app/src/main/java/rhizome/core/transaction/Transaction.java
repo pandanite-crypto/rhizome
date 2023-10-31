@@ -1,5 +1,6 @@
 package rhizome.core.transaction;
 
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import org.json.JSONObject;
@@ -84,6 +85,8 @@ public interface Transaction {
     default JSONObject toJson(Transaction transaction) {
         return serializer().toJson(transaction);
     }
+
+    public void sign(PublicKey publicKey, PrivateKey privateKey);
 
     /**
      * Get instance of the serializer
