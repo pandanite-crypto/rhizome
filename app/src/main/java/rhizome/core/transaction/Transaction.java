@@ -1,8 +1,7 @@
 package rhizome.core.transaction;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONObject;
 
 import rhizome.core.common.Utils.PublicWalletAddress;
@@ -32,7 +31,7 @@ public interface Transaction {
                 .build();
     }
 
-    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, PublicKey signingKey, TransactionAmount fee) {
+    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, Ed25519PublicKeyParameters signingKey, TransactionAmount fee) {
         return TransactionImpl.builder()
                 .from(from)
                 .to(to)
@@ -44,7 +43,7 @@ public interface Transaction {
                 .build();
     }
 
-    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, PublicKey signingKey, TransactionAmount fee, long timestamp) {
+    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, Ed25519PublicKeyParameters signingKey, TransactionAmount fee, long timestamp) {
         return TransactionImpl.builder()
                 .from(from)
                 .to(to)
@@ -56,7 +55,7 @@ public interface Transaction {
                 .build();
     }
 
-    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, PublicKey signingKey) {
+    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, Ed25519PublicKeyParameters signingKey) {
         return TransactionImpl.builder()
                 .from(from)
                 .to(to)
@@ -86,7 +85,7 @@ public interface Transaction {
         return serializer().toJson(transaction);
     }
 
-    public void sign(PublicKey publicKey, PrivateKey privateKey);
+    public void sign(Ed25519PublicKeyParameters publicKey, Ed25519PrivateKeyParameters privateKey);
 
     /**
      * Get instance of the serializer
