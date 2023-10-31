@@ -10,6 +10,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+
+import java.util.Formatter;
 import java.util.Map;
 import java.util.Vector;
 
@@ -45,6 +47,36 @@ public class Utils {
         public byte[] hash = new byte[20];
     }
 
+    public static String walletAddressToString(byte[] p) {
+        StringBuilder sb = new StringBuilder();
+        try (Formatter formatter = new Formatter(sb)) {
+            for (byte b : p) {
+                formatter.format("%02x", b);
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String publicKeyToString(byte[] pubKey) {
+        StringBuilder sb = new StringBuilder();
+        try (Formatter formatter = new Formatter(sb)) {
+            for (byte b : pubKey) {
+                formatter.format("%02x", b);
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String signatureToString(byte[] signature) {
+        StringBuilder sb = new StringBuilder();
+        try (Formatter formatter = new Formatter(sb)) {
+            for (byte b : signature) {
+                formatter.format("%02x", b);
+            }
+        }
+        return sb.toString();
+    }
+    
     public static SHA256Hash stringToSHA256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
