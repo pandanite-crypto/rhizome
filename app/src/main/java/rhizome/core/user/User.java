@@ -10,7 +10,9 @@ import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
 import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
+import org.bouncycastle.util.Arrays;
 
+import io.activej.bytebuf.ByteBuf;
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.TransactionAmount;
@@ -77,22 +79,6 @@ public class User {
         transaction.sign(this.publicKey, this.privateKey);
     }
 
-    private Ed25519PublicKeyParameters stringToPublicKey(String key) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    private Ed25519PrivateKeyParameters stringToPrivateKey(String key) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    private String publicKeyToString(Ed25519PublicKeyParameters key) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    private String privateKeyToString(Ed25519PrivateKeyParameters key) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     private PublicWalletAddress walletAddressFromPublicKey(Ed25519PublicKeyParameters inputKey) {
         byte[] publicKeyBytes = inputKey.getEncoded();
 
@@ -115,17 +101,14 @@ public class User {
         sha256.update(hash3, 0, hash3.length);
         sha256.doFinal(hash4, 0);
 
-        PublicWalletAddress address = new PublicWalletAddress();
-        address.address[0] = 0;
-        System.arraycopy(hash2, 0, address.address, 1, 20);
-        address.address[21] = hash4[0];
-        address.address[22] = hash4[1];
-        address.address[23] = hash4[2];
-        address.address[24] = hash4[3];
+        ByteBuf buf = ByteBuf.wrapForWriting(new byte[25]);
 
-        return address;
+        buf.writeByte((byte) 0);
+        buf.put(hash2);
+        buf.put(Arrays.copyOfRange(hash4, 0, 4));
+
+        return new PublicWalletAddress(buf);
     }
-
 
     public Optional<AsymmetricCipherKeyPair> generateKeyPair() {
         try {
