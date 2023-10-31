@@ -46,36 +46,31 @@ public class Utils {
         public byte[] hash = new byte[20];
     }
 
+
     public static String walletAddressToString(byte[] p) {
         StringBuilder sb = new StringBuilder();
-        try (Formatter formatter = new Formatter(sb)) {
-            for (byte b : p) {
-                formatter.format("%02x", b);
-            }
+        for (byte b : p) {
+            sb.append(String.format("%02x", b));
         }
         return sb.toString();
     }
 
     public static PublicWalletAddress stringToWalletAddress(String s) throws IllegalArgumentException {
-        
         if (s.length() != 50) {
             throw new IllegalArgumentException("Invalid wallet address string");
         }
-
-        byte[] bytes = new BigInteger(s, 16).toByteArray();
-        if (bytes[0] == 0) {
-            bytes = Arrays.copyOfRange(bytes, 1, bytes.length);
+        
+        var wallet = new PublicWalletAddress();
+        for (int i = 0; i < s.length(); i += 2) {
+            wallet.address[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
         }
 
-        if (bytes.length != 25) {
+        if (wallet.address.length != 25) {
             throw new IllegalArgumentException("Invalid decoded byte array size");
         }
 
-        var walletAddress = new PublicWalletAddress();
-        walletAddress.address = bytes;
-        return walletAddress;
+        return wallet;
     }
-
     public static String publicKeyToString(byte[] pubKey) {
         StringBuilder sb = new StringBuilder();
         for (byte b : pubKey) {
