@@ -22,10 +22,10 @@ import static rhizome.core.common.Crypto.signWithPrivateKey;
 public class TransactionImpl implements Transaction, Comparable<Transaction> {
     
     @Builder.Default
-    private PublicWalletAddress from = new PublicWalletAddress();
+    private PublicWalletAddress from = PublicWalletAddress.empty();
 
     @Builder.Default
-    private PublicWalletAddress to = new PublicWalletAddress();
+    private PublicWalletAddress to = PublicWalletAddress.empty();
 
     private TransactionAmount amount;
 
@@ -63,9 +63,9 @@ public class TransactionImpl implements Transaction, Comparable<Transaction> {
         var digest = new SHA256Digest();
         var sha256Hash = new SHA256Hash();
 
-        digest.update(to.address, 0, to.address.length);
+        digest.update(to.address().array(), 0, to.address().readRemaining());
         if (!isTransactionFee) {
-            digest.update(from.address, 0, from.address.length);
+            digest.update(from.address().array(), 0, from.address().readRemaining());
         }
         digest.update(longToBytes(fee.amount()), 0, 8);
         digest.update(longToBytes(amount.amount()), 0, 8);
