@@ -12,6 +12,9 @@ import static rhizome.core.common.Utils.SHA256toString;
 import static rhizome.core.common.Utils.publicKeyToString;
 import static rhizome.core.common.Utils.walletAddressToString;
 import static rhizome.core.common.Utils.signatureToString;
+import static rhizome.core.common.Utils.stringToPublicKey;
+import static rhizome.core.common.Utils.stringToSignature;
+import static rhizome.core.common.Utils.stringToWalletAddress;
 
 public interface Transaction {
 
@@ -106,6 +109,15 @@ public interface Transaction {
      */
     static class TransactionSerializer implements Serializable<TransactionInfo, Transaction> {
 
+        static final String TO = "to";
+        static final String AMOUNT = "amount";
+        static final String TIMESTAMP = "timestamp";
+        static final String FEE = "fee";
+        static final String TXID = "txid";
+        static final String FROM = "from";
+        static final String SIGNING_KEY = "signingKey";
+        static final String SIGNATURE = "signature";
+
         static TransactionSerializer instance = new TransactionSerializer();
 
         @Override
@@ -119,29 +131,46 @@ public interface Transaction {
         }
     
         @Override
-        public JSONObject toJson(Transaction transaction) {        
+        public JSONObject toJson(Transaction transaction) {
             var transactionImpl = (TransactionImpl) transaction;    
             JSONObject result = new JSONObject();
-            result.put("to", walletAddressToString(transactionImpl.getTo().address));
-            result.put("amount", transactionImpl.getAmount().amount());
-            result.put("timestamp", Long.toString(transactionImpl.getTimestamp()));
-            result.put("fee", transactionImpl.getFee().amount());
+            result.put(TO, walletAddressToString(transactionImpl.getTo().address));
+            result.put(AMOUNT, transactionImpl.getAmount().amount());
+            result.put(TIMESTAMP, Long.toString(transactionImpl.getTimestamp()));
+            result.put(FEE, transactionImpl.getFee().amount());
             
             if (!transactionImpl.isTransactionFee()) {
-                result.put("txid", SHA256toString(transactionImpl.getHash()));
-                result.put("from", walletAddressToString(transactionImpl.getFrom().address));
-                result.put("signingKey", publicKeyToString(transactionImpl.getSigningKey().getEncoded()));
-                result.put("signature", signatureToString(transactionImpl.getSignature().signature));
+                result.put(TXID, SHA256toString(transactionImpl.getHash()));
+                result.put(FROM, walletAddressToString(transactionImpl.getFrom().address));
+                result.put(SIGNING_KEY, publicKeyToString(transactionImpl.getSigningKey().getEncoded()));
+                result.put(SIGNATURE, signatureToString(transactionImpl.getSignature().signature));
             } else {
-                result.put("txid", SHA256toString(transactionImpl.getHash()));
-                result.put("from", "");
+                result.put(TXID, SHA256toString(transactionImpl.getHash()));
+                result.put(FROM, "");
             }
             
             return result;
         }
     
-        public Transaction fromJson(JSONObject json) {            
-            throw new UnsupportedOperationException("Not implemented...");
+        public Transaction fromJson(JSONObject json) {     
+            var builder = TransactionImpl.builder()
+                .timestamp(json.getLong(TIMESTAMP))
+                .fee(new TransactionAmount(json.getInt(FEE)))
+                .to(stringToWalletAddress(json.getString(TO)));
+
+        
+            if (json.getString("from").isEmpty()) {
+                builder.amount(new TransactionAmount(json.getInt(AMOUNT)))
+                    .isTransactionFee(true);
+            } else {
+                builder.from(stringToWalletAddress(json.getString(FROM)))
+                    .signature(stringToSignature(json.getString(SIGNATURE)))
+                    .amount(new TransactionAmount(json.getInt(AMOUNT)))
+                    .isTransactionFee(false)
+                    .signingKey(stringToPublicKey(json.getString(SIGNING_KEY)));
+            }   
+            
+            return builder.build();
         }
     }
 }
