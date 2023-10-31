@@ -13,7 +13,9 @@ import io.activej.inject.annotation.Provides;
 import io.activej.inject.module.Module;
 import io.activej.launcher.Launcher;
 import io.activej.service.ServiceGraphModule;
+
 import static io.activej.http.HttpMethod.*;
+import static java.util.concurrent.Executors.newCachedThreadPool;
 
 public final class App extends Launcher {
     private static final int PORT = 8080;
@@ -21,8 +23,14 @@ public final class App extends Launcher {
 
     @Provides
     Eventloop eventloop() {
-    return Eventloop.create();
+        return Eventloop.create();
     }
+
+    @Provides
+	Executor executor() {
+		return newCachedThreadPool();
+	}
+
 
     @Provides
     AsyncServlet servlet(Executor executor) {
