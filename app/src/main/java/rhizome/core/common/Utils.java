@@ -2,21 +2,42 @@ package rhizome.core.common;
 
 import rhizome.core.transaction.TransactionAmount;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
+import java.util.Arrays;
 import java.util.Map;
 
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
+
+import io.activej.bytebuf.ByteBuf;
+
+import java.nio.charset.StandardCharsets;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 public class Utils {
 
     private Utils() {}
     
-    public static class PublicWalletAddress {
-        public byte[] address = new byte[25];
+    public record PublicWalletAddress(ByteBuf address) {
+        public PublicWalletAddress {
+            if (address.limit() != 25) {
+                throw new IllegalArgumentException("Invalid address size");
+            }
+        }
+
+        public static PublicWalletAddress empty() {
+            ByteBuf buf = ByteBuf.wrapForReading("0000000000000000000000000".getBytes(UTF_8));
+            return new PublicWalletAddress(buf);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof PublicWalletAddress)) {
+                return false;
+            }
+            return address.isContentEqual(((PublicWalletAddress) other).address());
+        }
     }
 
     // public static class PublicKey {
@@ -29,6 +50,15 @@ public class Utils {
     
     public static class TransactionSignature {
         public byte[] signature = new byte[64];
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof TransactionSignature)) {
+                return false;
+            }
+
+            return Arrays.equals(this.signature, ((TransactionSignature) other).signature);
+        }
     }
     
     public static class LedgerState {
@@ -43,31 +73,30 @@ public class Utils {
         public byte[] hash = new byte[20];
     }
 
-
-    public static String walletAddressToString(byte[] p) {
+    public static String walletAddressToString(ByteBuf p) {
         StringBuilder sb = new StringBuilder();
-        for (byte b : p) {
-            sb.append(String.format("%02x", b));
-        }
+        while (p.canRead()) {
+            sb.append(String.format("%02x", p.readByte()));
+		}
+        p.head(0);
         return sb.toString();
     }
-
-    public static PublicWalletAddress stringToWalletAddress(String s) throws IllegalArgumentException {
+    
+    public static PublicWalletAddress stringToWalletAddress(String s) {
         if (s.length() != 50) {
             throw new IllegalArgumentException("Invalid wallet address string");
         }
-        
-        var wallet = new PublicWalletAddress();
+
+        ByteBuf buf = ByteBuf.wrapForWriting(new byte[25]);
+
         for (int i = 0; i < s.length(); i += 2) {
-            wallet.address[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+            byte b = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+            buf.writeByte(b);
         }
 
-        if (wallet.address.length != 25) {
-            throw new IllegalArgumentException("Invalid decoded byte array size");
-        }
+        return new PublicWalletAddress(buf);
+    }  
 
-        return wallet;
-    }
     public static String publicKeyToString(byte[] pubKey) {
         StringBuilder sb = new StringBuilder();
         for (byte b : pubKey) {
