@@ -1,56 +1,57 @@
 package rhizome.core.user;
 
+import java.security.SecureRandom;
+import java.util.Optional;
+
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONObject;
 
-import lombok.Setter;
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.TransactionAmount;
+import lombok.Setter;
 import lombok.Getter;
 
 import static rhizome.core.common.Helpers.PDN;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.Optional;
-
-
 @Getter
 @Setter
 public class User {
-    private PublicKey publicKey;
-    private PrivateKey privateKey;
+    private Ed25519PublicKeyParameters publicKey;
+    private Ed25519PrivateKeyParameters privateKey;
 
     public User() {
         generateKeyPair().ifPresentOrElse(
                 kp -> {
-                    this.publicKey = kp.getPublic();
-                    this.privateKey = kp.getPrivate();
+                    this.publicKey = (Ed25519PublicKeyParameters) kp.getPublic();
+                    this.privateKey = (Ed25519PrivateKeyParameters) kp.getPrivate();
                 },
                 () -> {
-                    throw new UserException("Could not generate key pair");
+                    throw new RuntimeException("Could not generate key pair");
                 }
         );
     }
 
     // Constructor from JSON object
-    public User(JSONObject u) {
-        this.publicKey = stringToPublicKey(u.getString("publicKey"));
-        this.privateKey = stringToPrivateKey(u.getString("privateKey"));
-    }
+    // public User(JSONObject u) {
+    //     this.publicKey = stringToPublicKey(u.getString("publicKey"));
+    //     this.privateKey = stringToPrivateKey(u.getString("privateKey"));
+    // }
 
     // Convert User object to JSON object
-    public JSONObject toJson() {
-        JSONObject result = new JSONObject();
-        result.put("publicKey", publicKeyToString(this.publicKey));
-        result.put("privateKey", privateKeyToString(this.privateKey));
-        return result;
-    }
+    // public JSONObject toJson() {
+    //     JSONObject result = new JSONObject();
+    //     result.put("publicKey", publicKeyToString(this.publicKey));
+    //     result.put("privateKey", privateKeyToString(this.privateKey));
+    //     return result;
+    // }
 
-    // Getters
+    // // Getters
     public PublicWalletAddress getAddress() {
         return walletAddressFromPublicKey(this.publicKey);
     }
@@ -76,36 +77,35 @@ public class User {
         t.sign(this.publicKey, this.privateKey);
     }
 
-    private PublicKey stringToPublicKey(String key) {
-        return publicKey;
+    private Ed25519PublicKeyParameters stringToPublicKey(String key) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private PrivateKey stringToPrivateKey(String key) {
-        return privateKey;
+    private Ed25519PrivateKeyParameters stringToPrivateKey(String key) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private String publicKeyToString(PublicKey key) {
-        return null;
+    private String publicKeyToString(Ed25519PublicKeyParameters key) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private String privateKeyToString(PrivateKey key) {
-        return null;
+    private String privateKeyToString(Ed25519PrivateKeyParameters key) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private PublicWalletAddress walletAddressFromPublicKey(PublicKey key) {
-        return null;
+    private PublicWalletAddress walletAddressFromPublicKey(Ed25519PublicKeyParameters key) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public static Optional<KeyPair> generateKeyPair() {
+
+    public Optional<AsymmetricCipherKeyPair> generateKeyPair() {
         try {
-            var keyGen = KeyPairGenerator.getInstance("RSA");
-            keyGen.initialize(2048);  // Adjust key size if necessary
+            Ed25519KeyPairGenerator keyGen = new Ed25519KeyPairGenerator();
+            keyGen.init(new Ed25519KeyGenerationParameters(new SecureRandom()));
             return Optional.of(keyGen.generateKeyPair());
-        } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return Optional.empty();
     }
-
 }
