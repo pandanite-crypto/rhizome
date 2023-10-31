@@ -107,10 +107,10 @@ public interface Block {
                 e.printStackTrace();
             }
             result.put("difficulty", blockImpl.getDifficulty());
-            result.put("nonce", blockImpl.getNonce());
+            result.put("nonce", SHA256toString(blockImpl.getNonce()));
             result.put("timestamp", longToString(blockImpl.getTimestamp()));
-            result.put("merkleRoot", blockImpl.getMerkleRoot());
-            result.put("lastBlockHash", blockImpl.getLastBlockHash());
+            result.put("merkleRoot", SHA256toString(blockImpl.getMerkleRoot()));
+            result.put("lastBlockHash", SHA256toString(blockImpl.getLastBlockHash()));
             JSONArray transactionsArray = new JSONArray();
             for (Transaction transaction : blockImpl.getTransactions()) {
                 transactionsArray.put(transaction.toJson());
