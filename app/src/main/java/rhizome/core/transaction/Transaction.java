@@ -1,141 +1,122 @@
 package rhizome.core.transaction;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
+import java.security.PublicKey;
 
 import org.json.JSONObject;
 
-import lombok.Getter;
-import lombok.Setter;
-import rhizome.core.common.Utils.PrivateKey;
-import rhizome.core.common.Utils.PublicKey;
 import rhizome.core.common.Utils.PublicWalletAddress;
-import rhizome.core.common.Utils.TransactionSignature;
+import rhizome.core.net.Serializable;
 
-@Getter
-@Setter
-public class Transaction implements Comparable<Transaction> {
+public interface Transaction {
 
-    private PublicWalletAddress from;
-    private PublicWalletAddress to;
-    private TransactionAmount amount;
-    private boolean isTransactionFee;
-    private long timestamp;
-    private TransactionAmount fee;
-    private PublicKey signingKey;
-    private TransactionSignature signature;
-
-    public Transaction(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, PublicKey signingKey, TransactionAmount fee) {
-        this.from = from;
-        this.to = to;
-        this.amount = amount;
-        this.isTransactionFee = false;
-        this.timestamp = System.currentTimeMillis();
-        this.fee = fee;
-        this.signingKey = signingKey;
+    public static Transaction empty() {
+        return TransactionImpl.builder().build();
     }
 
-    public Transaction(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, PublicKey signingKey, TransactionAmount fee, long timestamp) {
-        this.from = from;
-        this.to = to;
-        this.amount = amount;
-        this.isTransactionFee = false;
-        this.timestamp = timestamp;
-        this.fee = fee;
-        this.signingKey = signingKey;
+    public static Transaction of(JSONObject json){
+        return serializer().fromJson(json);
     }
 
-    public Transaction() {
+    public static Transaction of(Transaction transaction) {
+        var transactionImpl = (TransactionImpl) transaction;
+        return TransactionImpl.builder()
+                .from(transactionImpl.getFrom())
+                .to(transactionImpl.getTo())
+                .amount(transactionImpl.getAmount())
+                .isTransactionFee(transactionImpl.isTransactionFee())
+                .timestamp(transactionImpl.getTimestamp())
+                .fee(transactionImpl.getFee())
+                .signingKey(transactionImpl.getSigningKey())
+                .signature(transactionImpl.getSignature())
+                .build();
     }
 
-    public Transaction(Transaction t) {
-        this.to = t.to;
-        this.from = t.from;
-        this.signature = t.signature;
-        this.amount = t.amount;
-        this.isTransactionFee = t.isTransactionFee;
-        this.timestamp = t.timestamp;
-        this.fee = t.fee;
-        this.signingKey = t.signingKey;
+    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, PublicKey signingKey, TransactionAmount fee) {
+        return TransactionImpl.builder()
+                .from(from)
+                .to(to)
+                .amount(amount)
+                .isTransactionFee(false)
+                .timestamp(System.currentTimeMillis())
+                .fee(fee)
+                .signingKey(signingKey)
+                .build();
     }
 
-    public Transaction(PublicWalletAddress fromWallet, PublicWalletAddress toWallet, TransactionAmount amount,
-            java.security.PublicKey publicKey) {
-                throw new UnsupportedOperationException("Not supported yet.");
+    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, PublicKey signingKey, TransactionAmount fee, long timestamp) {
+        return TransactionImpl.builder()
+                .from(from)
+                .to(to)
+                .amount(amount)
+                .isTransactionFee(false)
+                .timestamp(timestamp)
+                .fee(fee)
+                .signingKey(signingKey)
+                .build();
     }
 
-    public Transaction(PublicWalletAddress address, TransactionAmount pdn) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, PublicKey signingKey) {
+        return TransactionImpl.builder()
+                .from(from)
+                .to(to)
+                .amount(amount)
+                .isTransactionFee(false)
+                .timestamp(System.currentTimeMillis())
+                .signingKey(signingKey)
+                .build();
     }
 
-    public Transaction(JSONObject jsonObject) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public static Transaction of(PublicWalletAddress to, TransactionAmount amount) {
+        return TransactionImpl.builder()
+                .to(to)
+                .amount(amount)
+                .isTransactionFee(true)
+                .timestamp(System.currentTimeMillis())
+                .build();
     }
 
-    // Method to check if the signature is valid
-    public boolean signatureValid() {
-        // You need to implement your own logic here
-        return true;
+    public TransactionInfo serialize();
+    default TransactionInfo serialize(Transaction transaction) {
+        return serializer().serialize(transaction);
     }
 
-    // Method to get signing key
-    public PublicKey getSigningKey() {
-        return this.signingKey;
+    public JSONObject toJson();
+    default JSONObject toJson(Transaction transaction) {
+        return serializer().toJson(transaction);
     }
 
-    // Method to get hash
-    public byte[] getHash() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    /**
+     * Get instance of the serializer
+     * @return
+     */
+    static TransactionSerializer serializer(){
+        return TransactionSerializer.instance;
     }
 
-    // Method to get from wallet
-    public PublicWalletAddress fromWallet() {
-        return this.from;
-    }
+    /**
+     * Serializes the Transaction
+     */
+    static class TransactionSerializer implements Serializable<TransactionInfo, Transaction> {
 
-    // Method to get to wallet
-    public PublicWalletAddress toWallet() {
-        return this.to;
-    }
+        static TransactionSerializer instance = new TransactionSerializer();
 
-    // Method to sign
-    public void sign(PublicKey pubKey, PrivateKey signingKey) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public int compareTo(Transaction other) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Transaction that = (Transaction) obj;
-        return timestamp == that.timestamp &&
-                isTransactionFee == that.isTransactionFee &&
-                Objects.equals(from, that.from) &&
-                Objects.equals(to, that.to) &&
-                Objects.equals(amount, that.amount) &&
-                Objects.equals(fee, that.fee) &&
-                Objects.equals(signingKey, that.signingKey) &&
-                Objects.equals(signature, that.signature);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(from, to, amount, isTransactionFee, timestamp, fee, signingKey, signature);
-    }
-
-    public void sign(java.security.PublicKey publicKey, java.security.PrivateKey privateKey) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Collection<?> toJson() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        @Override
+        public TransactionInfo serialize(Transaction block) {
+            throw new UnsupportedOperationException("Not implemented.");
+        }
+    
+        @Override
+        public Transaction deserialize(TransactionInfo object) {
+            throw new UnsupportedOperationException("Not implemented..");
+        }
+    
+        @Override
+        public JSONObject toJson(Transaction block) {            
+            throw new UnsupportedOperationException("Not implemented");
+        }
+    
+        public Transaction fromJson(JSONObject json) {            
+            throw new UnsupportedOperationException("Not implemented...");
+        }
     }
 }
