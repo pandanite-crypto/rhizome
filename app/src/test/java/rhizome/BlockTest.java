@@ -1,4 +1,4 @@
-package ryzom;
+package rhizome;
 
 import org.junit.jupiter.api.Test;
 
