@@ -134,14 +134,14 @@ public interface Transaction {
         public JSONObject toJson(Transaction transaction) {
             var transactionImpl = (TransactionImpl) transaction;    
             JSONObject result = new JSONObject();
-            result.put(TO, walletAddressToString(transactionImpl.getTo().address));
+            result.put(TO, walletAddressToString(transactionImpl.getTo().address()));
             result.put(AMOUNT, transactionImpl.getAmount().amount());
             result.put(TIMESTAMP, Long.toString(transactionImpl.getTimestamp()));
             result.put(FEE, transactionImpl.getFee().amount());
             
             if (!transactionImpl.isTransactionFee()) {
                 result.put(TXID, SHA256toString(transactionImpl.getHash()));
-                result.put(FROM, walletAddressToString(transactionImpl.getFrom().address));
+                result.put(FROM, walletAddressToString(transactionImpl.getFrom().address()));
                 result.put(SIGNING_KEY, publicKeyToString(transactionImpl.getSigningKey().getEncoded()));
                 result.put(SIGNATURE, signatureToString(transactionImpl.getSignature().signature));
             } else {
