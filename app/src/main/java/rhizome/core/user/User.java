@@ -57,7 +57,7 @@ public class User {
 
     // Methods for transactions
     public Transaction mine() {
-        return new Transaction(this.getAddress(), PDN(50));
+        return Transaction.of(this.getAddress(), PDN(50));
     }
 
     public Transaction send(User receiver, int i) {
@@ -67,7 +67,7 @@ public class User {
     public Transaction send(User to, TransactionAmount amount) {
         PublicWalletAddress fromWallet = this.getAddress();
         PublicWalletAddress toWallet = to.getAddress();
-        Transaction t = new Transaction(fromWallet, toWallet, amount, this.publicKey);
+        Transaction t = Transaction.of(fromWallet, toWallet, amount, this.publicKey);
         this.signTransaction(t);
         return t;
     }
