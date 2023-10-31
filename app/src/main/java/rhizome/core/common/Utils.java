@@ -1,7 +1,5 @@
 package rhizome.core.common;
 
-import org.json.*;
-
 import rhizome.core.transaction.TransactionAmount;
 
 import java.math.BigInteger;
@@ -9,11 +7,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
-
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.Map;
-import java.util.Vector;
+
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 
 
 public class Utils {
@@ -23,6 +21,7 @@ public class Utils {
     public static class PublicWalletAddress {
         public byte[] address = new byte[25];
     }
+
     // public static class PublicKey {
     //     public byte[] key = new byte[32];
     // }
@@ -57,24 +56,67 @@ public class Utils {
         return sb.toString();
     }
 
+    public static PublicWalletAddress stringToWalletAddress(String s) throws IllegalArgumentException {
+        
+        if (s.length() != 50) {
+            throw new IllegalArgumentException("Invalid wallet address string");
+        }
+
+        byte[] bytes = new BigInteger(s, 16).toByteArray();
+        if (bytes[0] == 0) {
+            bytes = Arrays.copyOfRange(bytes, 1, bytes.length);
+        }
+
+        if (bytes.length != 25) {
+            throw new IllegalArgumentException("Invalid decoded byte array size");
+        }
+
+        var walletAddress = new PublicWalletAddress();
+        walletAddress.address = bytes;
+        return walletAddress;
+    }
+
     public static String publicKeyToString(byte[] pubKey) {
         StringBuilder sb = new StringBuilder();
-        try (Formatter formatter = new Formatter(sb)) {
-            for (byte b : pubKey) {
-                formatter.format("%02x", b);
-            }
+        for (byte b : pubKey) {
+            sb.append(String.format("%02x", b));
         }
         return sb.toString();
     }
 
+    public static Ed25519PublicKeyParameters stringToPublicKey(String s) {
+        if (s.length() != 64) {
+            throw new IllegalArgumentException("Invalid public key string");
+        }
+
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+        }
+
+        return new Ed25519PublicKeyParameters(data, 0);
+    }
+
     public static String signatureToString(byte[] signature) {
         StringBuilder sb = new StringBuilder();
-        try (Formatter formatter = new Formatter(sb)) {
-            for (byte b : signature) {
-                formatter.format("%02x", b);
-            }
+        for (byte b : signature) {
+            sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    public static TransactionSignature stringToSignature(String s) {
+        if (s.length() != 128) {
+            throw new IllegalArgumentException("Invalid signature string");
+        }
+
+        var signature = new TransactionSignature();
+        int len = s.length();
+        for (int i = 0; i < len; i += 2) {
+            signature.signature[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+        }
+        return signature;
     }
     
     public static SHA256Hash stringToSHA256(String input) {
