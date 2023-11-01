@@ -16,6 +16,7 @@ import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.common.Utils.TransactionSignature;
 
 import static rhizome.core.common.Crypto.signWithPrivateKey;
+import static rhizome.core.common.Crypto.checkSignature;
 
 @Data
 @Builder
@@ -54,12 +55,25 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
         return toJson(this);
     }
     
-    // Method to check if the signature is valid
     public boolean signatureValid() {
-        throw new UnsupportedOperationException("Not supported yet....");
+        if (isTransactionFee()) return true;
+        return checkSignature(hashContents().hash, this.signature.signature, this.signingKey);
     }
 
     public SHA256Hash getHash() {
+        var digest = new SHA256Digest();
+        var sha256Hash = new SHA256Hash();
+
+        var hashContents = hashContents().hash;
+        digest.update(hashContents, 0, hashContents.length);
+        if(!isTransactionFee) {
+            digest.update(signature.signature, 0, signature.signature.length);
+        }
+        digest.doFinal(sha256Hash.hash, 0);
+        return sha256Hash;
+    }
+
+    public SHA256Hash hashContents() {
         var digest = new SHA256Digest();
         var sha256Hash = new SHA256Hash();
 
@@ -76,7 +90,7 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
     }
 
     public void sign(Ed25519PublicKeyParameters pubKey, Ed25519PrivateKeyParameters signingKey) {
-        this.signature.signature = signWithPrivateKey(getHash().hash, pubKey, signingKey);
+        this.signature.signature = signWithPrivateKey(hashContents().hash, pubKey, signingKey);
     }
 
     @Override

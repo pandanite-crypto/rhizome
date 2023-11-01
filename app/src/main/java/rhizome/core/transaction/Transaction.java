@@ -5,6 +5,7 @@ import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONObject;
 
 import rhizome.core.common.Utils.PublicWalletAddress;
+import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.net.Serializable;
 
 import static rhizome.core.common.Utils.SHA256toString;
@@ -94,7 +95,10 @@ public sealed interface Transaction permits TransactionImpl {
     }
 
     public void sign(Ed25519PublicKeyParameters publicKey, Ed25519PrivateKeyParameters privateKey);
-
+    public boolean signatureValid();
+    public SHA256Hash hashContents();
+    public SHA256Hash getHash();
+    
     /**
      * Get instance of the serializer
      * @return
@@ -139,12 +143,12 @@ public sealed interface Transaction permits TransactionImpl {
             result.put(FEE, transactionImpl.getFee().amount());
             
             if (!transactionImpl.isTransactionFee()) {
-                result.put(TXID, SHA256toString(transactionImpl.getHash()));
+                result.put(TXID, SHA256toString(transactionImpl.hashContents()));
                 result.put(FROM, walletAddressToString(transactionImpl.getFrom().address()));
                 result.put(SIGNING_KEY, publicKeyToString(transactionImpl.getSigningKey().getEncoded()));
                 result.put(SIGNATURE, signatureToString(transactionImpl.getSignature().signature));
             } else {
-                result.put(TXID, SHA256toString(transactionImpl.getHash()));
+                result.put(TXID, SHA256toString(transactionImpl.hashContents()));
                 result.put(FROM, "");
             }
             
