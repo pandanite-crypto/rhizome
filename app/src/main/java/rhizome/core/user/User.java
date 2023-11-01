@@ -63,7 +63,7 @@ public class User {
         return Transaction.of(this.getAddress(), PDN(50));
     }
 
-    public Transaction send(User receiver, int i) {
+    public Transaction send(User receiver, double i) {
         return send(receiver, PDN(i));
     }
 
