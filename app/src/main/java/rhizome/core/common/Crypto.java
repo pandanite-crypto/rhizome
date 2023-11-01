@@ -27,4 +27,15 @@ public class Crypto {
             return new byte[0];
         }
     }
+
+    public static boolean checkSignature(String content, byte[] signature, Ed25519PublicKeyParameters publicKey) {
+        return checkSignature(content.getBytes(), signature, publicKey);
+    }
+    
+    public static boolean checkSignature(byte[] bytes, byte[] signature, Ed25519PublicKeyParameters publicKey) {
+        Ed25519Signer signer = new Ed25519Signer();
+        signer.init(false, publicKey);
+        signer.update(bytes, 0, bytes.length);
+        return signer.verifySignature(signature);
+    }
 }
