@@ -11,7 +11,7 @@ import static rhizome.core.common.Utils.signatureToString;
 import static rhizome.core.common.Utils.stringToSignature;
 import static rhizome.core.common.Utils.stringToWalletAddress;
 
-class SerializationTest {
+class UtilsTest {
     
     @Test
     void checkAddressSerialisation() {
