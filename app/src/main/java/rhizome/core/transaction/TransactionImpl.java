@@ -19,7 +19,7 @@ import static rhizome.core.common.Crypto.signWithPrivateKey;
 
 @Data
 @Builder
-public class TransactionImpl implements Transaction, Comparable<Transaction> {
+public final class TransactionImpl implements Transaction, Comparable<Transaction> {
     
     @Builder.Default
     private PublicWalletAddress from = PublicWalletAddress.empty();

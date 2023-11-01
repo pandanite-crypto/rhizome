@@ -19,7 +19,7 @@ import rhizome.core.transaction.Transaction;
 
 @Data
 @Builder
-public class BlockImpl implements Block {
+public final class BlockImpl implements Block {
 
     /**
      * Variable Definitions

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public interface Block {
+public sealed interface Block permits BlockImpl {
 
     public static Block empty() {
         return BlockImpl.builder().build();
@@ -77,6 +77,15 @@ public interface Block {
      */
     static class BlockSerializer implements Serializable<BlockHeader, Block> {
 
+        static final String ID = "id";
+        static final String HASH = "hash";
+        static final String TIMESTAMP = "timestamp";
+        static final String DIFFICULTY = "difficulty";
+        static final String NONCE = "nonce";
+        static final String MERKLE_ROOT = "merkleRoot";
+        static final String LAST_BLOCK_HASH = "lastBlockHash";
+        static final String TRANSACTIONS = "transactions";        
+
         static BlockSerializer instance = new BlockSerializer();
 
         @Override
@@ -102,36 +111,36 @@ public interface Block {
         public JSONObject toJson(Block block) {
             var blockImpl = (BlockImpl) block;
             JSONObject result = new JSONObject();
-            result.put("id", blockImpl.getId());
+            result.put(ID, blockImpl.getId());
             try {
-                result.put("hash", SHA256toString(blockImpl.getHash()));
+                result.put(HASH, SHA256toString(blockImpl.getHash()));
             } catch (JSONException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-            result.put("difficulty", blockImpl.getDifficulty());
-            result.put("nonce", SHA256toString(blockImpl.getNonce()));
-            result.put("timestamp", longToString(blockImpl.getTimestamp()));
-            result.put("merkleRoot", SHA256toString(blockImpl.getMerkleRoot()));
-            result.put("lastBlockHash", SHA256toString(blockImpl.getLastBlockHash()));
+            result.put(DIFFICULTY, blockImpl.getDifficulty());
+            result.put(NONCE, SHA256toString(blockImpl.getNonce()));
+            result.put(TIMESTAMP, longToString(blockImpl.getTimestamp()));
+            result.put(MERKLE_ROOT, SHA256toString(blockImpl.getMerkleRoot()));
+            result.put(LAST_BLOCK_HASH, SHA256toString(blockImpl.getLastBlockHash()));
             JSONArray transactionsArray = new JSONArray();
             for (Transaction transaction : blockImpl.getTransactions()) {
                 transactionsArray.put(transaction.toJson());
             }
-            result.put("transactions", transactionsArray);
+            result.put(TRANSACTIONS, transactionsArray);
             return result;
         }
     
         public Block fromJson(JSONObject json) {
             return BlockImpl.builder()
-                .id(json.getInt("id"))
-                .timestamp(json.getLong("timestamp"))
-                .difficulty(json.getInt("difficulty"))
-                .merkleRoot(stringToSHA256(json.getString("merkleRoot")))
-                .lastBlockHash(stringToSHA256(json.getString("lastBlockHash")))
-                .nonce(stringToSHA256(json.getString("nonce")))
+                .id(json.getInt(ID))
+                .timestamp(json.getLong(TIMESTAMP))
+                .difficulty(json.getInt(DIFFICULTY))
+                .merkleRoot(stringToSHA256(json.getString(MERKLE_ROOT)))
+                .lastBlockHash(stringToSHA256(json.getString(LAST_BLOCK_HASH)))
+                .nonce(stringToSHA256(json.getString(NONCE)))
                 .transactions(
-                    IntStream.range(0, json.getJSONArray("transactions").length())
-                        .mapToObj(i -> Transaction.of(json.getJSONArray("transactions").getJSONObject(i)))
+                    IntStream.range(0, json.getJSONArray(TRANSACTIONS).length())
+                        .mapToObj(i -> Transaction.of(json.getJSONArray(TRANSACTIONS).getJSONObject(i)))
                         .collect(Collectors.toList())
                 )
                 .build();

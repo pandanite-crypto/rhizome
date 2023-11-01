@@ -7,7 +7,6 @@ import org.json.JSONObject;
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.net.Serializable;
 
-
 import static rhizome.core.common.Utils.SHA256toString;
 import static rhizome.core.common.Utils.publicKeyToString;
 import static rhizome.core.common.Utils.walletAddressToString;
@@ -16,7 +15,7 @@ import static rhizome.core.common.Utils.stringToPublicKey;
 import static rhizome.core.common.Utils.stringToSignature;
 import static rhizome.core.common.Utils.stringToWalletAddress;
 
-public interface Transaction {
+public sealed interface Transaction permits TransactionImpl {
 
     public static Transaction empty() {
         return TransactionImpl.builder().build();
