@@ -96,7 +96,7 @@ public final class BlockImpl implements Block {
         BlockImpl block = (BlockImpl) o;
         return id == block.id && difficulty == block.difficulty && timestamp == block.timestamp &&
             Arrays.equals(nonce.hash, block.nonce.hash) && Arrays.equals(merkleRoot.hash, block.merkleRoot.hash) &&
-            Arrays.equals(lastBlockHash.hash, block.lastBlockHash.hash) && transactions.containsAll(block.transactions);
+            Arrays.equals(lastBlockHash.hash, block.lastBlockHash.hash) && transactions.equals(block.transactions);
     }
 
     @Override
