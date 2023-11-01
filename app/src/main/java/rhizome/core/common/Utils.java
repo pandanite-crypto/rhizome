@@ -4,31 +4,28 @@ import rhizome.core.transaction.TransactionAmount;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Map;
-
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
-
 import io.activej.bytebuf.ByteBuf;
-
 import java.nio.charset.StandardCharsets;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 
 public class Utils {
 
     private Utils() {}
     
-    public record PublicWalletAddress(ByteBuf address) {
+    public record PublicWalletAddress(ByteBuf address) implements SimpleHashType {
         public PublicWalletAddress {
-            if (address.limit() != 25) {
-                throw new IllegalArgumentException("Invalid address size");
-            }
+            checkSize(address);
         }
 
         public static PublicWalletAddress empty() {
-            ByteBuf buf = ByteBuf.wrapForReading("0000000000000000000000000".getBytes(UTF_8));
-            return new PublicWalletAddress(buf);
+            return new PublicWalletAddress(SimpleHashType.empty(SIZE));
+        }
+
+        public static PublicWalletAddress random() {
+            return new PublicWalletAddress(SimpleHashType.random(SIZE));
         }
 
         @Override
@@ -37,6 +34,12 @@ public class Utils {
                 return false;
             }
             return address.isContentEqual(((PublicWalletAddress) other).address());
+        }
+
+        public static int SIZE = 25;
+        @Override
+        public int getSize() {
+            return 25;
         }
     }
 
@@ -50,6 +53,12 @@ public class Utils {
     
     public static class TransactionSignature {
         public byte[] signature = new byte[64];
+
+        public static TransactionSignature random() {
+            var random = new TransactionSignature();
+            new SecureRandom().nextBytes(random.signature);
+            return random;
+        }
 
         @Override
         public boolean equals(Object other) {
@@ -67,6 +76,15 @@ public class Utils {
     
     public static class SHA256Hash {
         public byte[] hash = new byte[32];
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof SHA256Hash)) {
+                return false;
+            }
+
+            return Arrays.equals(this.hash, ((SHA256Hash) other).hash);
+        }
     }
     
     public static class RIPEMD160Hash {
