@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.common.Utils.TransactionSignature;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static rhizome.core.common.Utils.walletAddressToString;
 import static rhizome.core.common.Utils.signatureToString;

@@ -13,8 +13,8 @@ class TransactionTests {
 
     @Test
     void checkTransactionJsonSerialization() {
-        User miner = new User();
-        User receiver = new User();
+        User miner = User.create();
+        User receiver = User.create();
 
         Transaction t = miner.mine();
         Transaction t2 = miner.send(receiver, 30.0);

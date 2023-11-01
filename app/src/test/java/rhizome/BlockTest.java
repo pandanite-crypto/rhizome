@@ -13,8 +13,8 @@ class BlockTest {
     @Test
     void checkBlockJsonSerialization() {
         var a = Block.empty();
-        var miner = new User();
-        var receiver = new User();
+        var miner = User.create();
+        var receiver = User.create();
         var t = miner.mine();
         a.addTransaction(t);
         // send tiny shares to receiver:
@@ -29,8 +29,8 @@ class BlockTest {
     @Test
     void checkBlockStructSerialization() {
         var a = Block.empty();
-        var miner = new User();
-        var receiver = new User();
+        var miner = User.create();
+        var receiver = User.create();
         var t = miner.mine();
         a.addTransaction(t);
         // send tiny shares to receiver:
