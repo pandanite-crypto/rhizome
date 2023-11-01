@@ -3,6 +3,7 @@ package rhizome;
 import org.junit.jupiter.api.Test;
 
 import rhizome.core.block.Block;
+import rhizome.core.block.BlockHeader;
 import rhizome.core.user.User;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,7 +44,7 @@ class BlockTest {
 
     // @Test
     // void checkBlockNetworkSerialization() {
-    //     var a = Block.of();
+    //     var a = Block.empty();
     //     var miner = new User();
     //     var receiver = new User();
     //     var t = miner.mine();
