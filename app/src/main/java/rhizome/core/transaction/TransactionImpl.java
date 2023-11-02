@@ -2,6 +2,7 @@ package rhizome.core.transaction;
 
 import static rhizome.core.common.Utils.longToBytes;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -89,8 +90,9 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
         return sha256Hash;
     }
 
-    public void sign(Ed25519PublicKeyParameters pubKey, Ed25519PrivateKeyParameters signingKey) {
+    public Transaction sign(Ed25519PublicKeyParameters pubKey, Ed25519PrivateKeyParameters signingKey) {
         this.signature.signature = signWithPrivateKey(hashContents().hash, signingKey);
+        return this;
     }
 
     @Override
@@ -102,15 +104,20 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
+        
         TransactionImpl that = (TransactionImpl) obj;
+        boolean isSigningKeyEqual = (signingKey == null && that.signingKey == null) ||
+                                    (signingKey != null && that.signingKey != null &&
+                                     Arrays.equals(signingKey.getEncoded(), that.signingKey.getEncoded()));
+        
         return timestamp == that.timestamp &&
-                isTransactionFee == that.isTransactionFee &&
-                Objects.equals(from, that.from) &&
-                Objects.equals(to, that.to) &&
-                Objects.equals(amount, that.amount) &&
-                Objects.equals(fee, that.fee) &&
-                Objects.equals(signingKey, that.signingKey) &&
-                Objects.equals(signature, that.signature);
+               isTransactionFee == that.isTransactionFee &&
+               Objects.equals(from, that.from) &&
+               Objects.equals(to, that.to) &&
+               Objects.equals(amount, that.amount) &&
+               Objects.equals(fee, that.fee) &&
+               isSigningKeyEqual &&
+               Objects.equals(signature, that.signature);
     }
 
     @Override

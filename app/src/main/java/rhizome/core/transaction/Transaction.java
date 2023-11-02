@@ -40,6 +40,10 @@ public sealed interface Transaction permits TransactionImpl {
                 .build();
     }
 
+    public static Transaction of(TransactionInfo transactionInfo) {
+        return serializer().deserialize(transactionInfo);
+    }
+
     public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, Ed25519PublicKeyParameters signingKey, TransactionAmount fee) {
         return TransactionImpl.builder()
                 .from(from)
@@ -94,11 +98,11 @@ public sealed interface Transaction permits TransactionImpl {
         return serializer().toJson(transaction);
     }
 
-    public void sign(Ed25519PublicKeyParameters publicKey, Ed25519PrivateKeyParameters privateKey);
+    public Transaction sign(Ed25519PublicKeyParameters publicKey, Ed25519PrivateKeyParameters privateKey);
     public boolean signatureValid();
     public SHA256Hash hashContents();
     public SHA256Hash getHash();
-    
+
     /**
      * Get instance of the serializer
      * @return
@@ -125,12 +129,31 @@ public sealed interface Transaction permits TransactionImpl {
 
         @Override
         public TransactionInfo serialize(Transaction transaction) {
-            throw new UnsupportedOperationException("Not implemented.");
+            var transactionImpl = (TransactionImpl) transaction;
+            return new TransactionInfo(
+                signatureToString(transactionImpl.getSignature().signature),
+                publicKeyToString(transactionImpl.getSigningKey()),
+                transactionImpl.getTimestamp(),
+                transactionImpl.getTo(),
+                transactionImpl.getFrom(),
+                transactionImpl.getAmount(),
+                transactionImpl.getFee(),
+                transactionImpl.isTransactionFee()
+            );
         }
     
         @Override
         public Transaction deserialize(TransactionInfo transactionInfo) {
-            throw new UnsupportedOperationException("Not implemented..");
+            return TransactionImpl.builder()
+                .from(transactionInfo.from())
+                .to(transactionInfo.to())
+                .amount(transactionInfo.amount())
+                .isTransactionFee(transactionInfo.isTransactionFee())
+                .timestamp(transactionInfo.timestamp())
+                .fee(transactionInfo.fee())
+                .signingKey(stringToPublicKey(transactionInfo.signingKey()))
+                .signature(stringToSignature(transactionInfo.signature()))
+                .build();
         }
     
         @Override
@@ -145,7 +168,7 @@ public sealed interface Transaction permits TransactionImpl {
             if (!transactionImpl.isTransactionFee()) {
                 result.put(TXID, SHA256toString(transactionImpl.hashContents()));
                 result.put(FROM, walletAddressToString(transactionImpl.getFrom().address()));
-                result.put(SIGNING_KEY, publicKeyToString(transactionImpl.getSigningKey().getEncoded()));
+                result.put(SIGNING_KEY, publicKeyToString(transactionImpl.getSigningKey()));
                 result.put(SIGNATURE, signatureToString(transactionImpl.getSignature().signature));
             } else {
                 result.put(TXID, SHA256toString(transactionImpl.hashContents()));
