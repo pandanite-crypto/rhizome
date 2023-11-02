@@ -1,32 +1,14 @@
 package rhizome;
 
-import org.bouncycastle.crypto.Signer;
-import org.bouncycastle.crypto.digests.SHA512Digest;
-import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
-import org.bouncycastle.crypto.signers.Ed25519Signer;
-import org.bouncycastle.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.common.Utils.TransactionSignature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static rhizome.core.common.Utils.walletAddressToString;
-
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
 import static rhizome.core.common.Crypto.signWithPrivateKey;
 import static rhizome.core.common.Utils.bytesToHex;
