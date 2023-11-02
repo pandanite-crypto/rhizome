@@ -6,15 +6,21 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.Map;
 
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
+import org.bouncycastle.util.encoders.Hex;
+
 import io.activej.bytebuf.ByteBuf;
 import java.nio.charset.StandardCharsets;
 
 public class Utils {
+
+    private static final HexFormat hexFormat = HexFormat.of().withUpperCase();
 
     private Utils() {}
     
@@ -102,6 +108,11 @@ public class Utils {
 
             return Arrays.equals(this.signature, ((TransactionSignature) other).signature);
         }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(signature);
+        }
     }
     
     public static class LedgerState {
@@ -118,6 +129,11 @@ public class Utils {
             }
 
             return Arrays.equals(this.hash, ((SHA256Hash) other).hash);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(hash);
         }
     }
     
@@ -149,54 +165,54 @@ public class Utils {
         return new PublicWalletAddress(buf);
     }  
 
-    public static String publicKeyToString(byte[] pubKey) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : pubKey) {
-            sb.append(String.format("%02x", b));
+    public static String publicKeyToString(Ed25519PublicKeyParameters pubKey) {
+        if (pubKey == null) {
+            return "";
         }
-        return sb.toString();
+        return hexFormat.formatHex(pubKey.getEncoded() == null ? new byte[0] : pubKey.getEncoded());
     }
 
     public static Ed25519PublicKeyParameters stringToPublicKey(String s) {
+        if ("".equals(s)) {
+            return null;
+        }
         if (s.length() != 64) {
-            throw new IllegalArgumentException("Invalid public key string");
+            throw new IllegalArgumentException("Invalid public key string length. Expected 64 characters for a 32-byte key.");
         }
+        return new Ed25519PublicKeyParameters(Hex.decode(s), 0);
+    }
 
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+    public static String privateKeyToString(Ed25519PrivateKeyParameters privateKey) {
+        return hexFormat.formatHex(privateKey.getEncoded() == null ? new byte[0] : privateKey.getEncoded());
+    }
+
+    public static Ed25519PrivateKeyParameters stringToPrivateKey(String hexString) throws IllegalArgumentException {
+        if (hexString.length() != 64) { // 32 bytes * 2 characters per byte
+            throw new IllegalArgumentException("Invalid private key string length");
         }
-
-        return new Ed25519PublicKeyParameters(data, 0);
+        return new Ed25519PrivateKeyParameters(Hex.decode(hexString), 0);
     }
 
     public static String signatureToString(byte[] signature) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : signature) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
+        return hexFormat.formatHex(signature);
     }
 
     public static TransactionSignature stringToSignature(String s) {
         if (s.length() != 128) {
             throw new IllegalArgumentException("Invalid signature string");
         }
-
+        
         var signature = new TransactionSignature();
-        int len = s.length();
-        for (int i = 0; i < len; i += 2) {
-            signature.signature[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
-        }
+        byte[] bytes = HexFormat.of().parseHex(s);
+        System.arraycopy(bytes, 0, signature.signature, 0, bytes.length);
+        
         return signature;
     }
     
     public static SHA256Hash stringToSHA256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedhash = digest.digest(
-              input.getBytes(StandardCharsets.UTF_8));
+            byte[] encodedhash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             SHA256Hash sha256Hash = new SHA256Hash();
             System.arraycopy(encodedhash, 0, sha256Hash.hash, 0, encodedhash.length);
             return sha256Hash;
@@ -206,15 +222,7 @@ public class Utils {
     }
 
     public static String SHA256toString(SHA256Hash sha256Hash) {
-        StringBuilder hexString = new StringBuilder(2 * sha256Hash.hash.length);
-        for (byte b : sha256Hash.hash) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
-        }
-        return hexString.toString();
+        return hexFormat.formatHex(sha256Hash.hash);
     }
 
     public static byte[] longToBytes(long x) {
@@ -226,20 +234,10 @@ public class Utils {
     }
 
     public static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString().toUpperCase();
+        return hexFormat.formatHex(bytes);
     }
 
     public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                                 + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
+        return hexFormat.parseHex(s);
     }
 }
