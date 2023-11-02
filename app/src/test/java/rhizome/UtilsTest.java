@@ -28,6 +28,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import static rhizome.core.common.Crypto.signWithPrivateKey;
 import static rhizome.core.common.Utils.bytesToHex;
 import static rhizome.core.common.Utils.hexStringToByteArray;
 import static rhizome.core.common.Utils.signatureToString;
@@ -60,58 +61,8 @@ class UtilsTest {
     void checkSignWithPrivateKey() {
         var messageToSign = TEST_MESSAGE;
         var signtureExpected = LEGACY_SIGNATURE;
-        var pubKey = hexStringToByteArray(TEST_PUBLIC_KEY);
-        var privateKey = hexStringToByteArray(TEST_PRIVATE_KEY);
-        var signature = signWithPrivateKey(messageToSign.getBytes(UTF_8), pubKey, privateKey);
+        var privateKey = new Ed25519PrivateKeyParameters(hexStringToByteArray(TEST_PRIVATE_KEY), 0);
+        var signature = signWithPrivateKey(messageToSign.getBytes(UTF_8), privateKey);
         assertEquals(signtureExpected,bytesToHex(signature));
-    }
-
-    // public static byte[] ed25519Sign(byte[] message, byte[] publicKey, byte[] privateKey) {
-    //     SHA512Digest sha512 = new SHA512Digest();
-        
-    //     sha512.update(publicKey, 0, publicKey.length);
-    //     sha512.update(message, 0, message.length);
-    //     byte[] hashedMessage = new byte[64];
-    //     sha512.doFinal(hashedMessage, 0);
-    //     Ed25519Signer signer = new Ed25519Signer();
-    //     Ed25519PrivateKeyParameters privateKeyParameters = new Ed25519PrivateKeyParameters(privateKey, 0);
-    //     signer.init(true, privateKeyParameters);
-    //     signer.update(hashedMessage, 0, hashedMessage.length);
-    //     return signer.generateSignature();
-    // }
-
-    // public static byte[] signWithPrivateKey(byte[] bytes, byte[] publicKey, byte[] privateKey) {
-    //     return ed25519Sign(bytes, publicKey, privateKey);
-    // }
-
-    public static byte[] signWithPrivateKey(byte[] message, byte[] publicKeyBytes, byte[] privateKeyBytes) {
-        try {
-            KeyFactory keyFactory = KeyFactory.getInstance("EdDSA");
-                
-            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-            PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
-
-            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-            PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-
-            Signature sig = Signature.getInstance("EdDSA");
-            sig.initSign(privateKey);
-            sig.update(message);
-            return sig.sign();
-        } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SignatureException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return null;
     }
 }

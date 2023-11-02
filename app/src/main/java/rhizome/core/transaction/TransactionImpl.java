@@ -90,7 +90,7 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
     }
 
     public void sign(Ed25519PublicKeyParameters pubKey, Ed25519PrivateKeyParameters signingKey) {
-        this.signature.signature = signWithPrivateKey(hashContents().hash, pubKey, signingKey);
+        this.signature.signature = signWithPrivateKey(hashContents().hash, signingKey);
     }
 
     @Override
