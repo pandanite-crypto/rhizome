@@ -21,13 +21,14 @@ public class MerkleTree {
     }
 
     public void setItems(List<Transaction> items) {
-        items.sort(Comparator.comparing(Transaction::getHash, Comparator.reverseOrder()));
+        var sortedItems = new ArrayList<>(items);
+        sortedItems.sort(Comparator.comparing(Transaction::getHash).reversed());
 
-        Queue<HashTree> q = new LinkedList<>();
-        items.forEach(item -> {
-            SHA256Hash h = item.getHash();
-            HashTree node = new HashTree(h);
-            this.fringeNodes.put(h, node);
+        var q = new LinkedList<HashTree>();
+        sortedItems.forEach(item -> {
+            var hash = item.getHash();
+            var node = new HashTree(hash);
+            fringeNodes.put(hash, node);
             q.add(node);
         });
 
@@ -36,9 +37,9 @@ public class MerkleTree {
         }
 
         while (q.size() > 1) {
-            HashTree a = q.poll();
-            HashTree b = q.poll();
-            HashTree parent = new HashTree(concatHashes(a.getHash(), b.getHash(), false, false));
+            var a = q.poll();
+            var b = q.poll();
+            var parent = new HashTree(concatHashes(a.getHash(), b.getHash(), false, false));
             a.setParent(parent);
             b.setParent(parent);
             parent.setLeft(a);
@@ -54,14 +55,12 @@ public class MerkleTree {
     }
 
     public Optional<HashTree> getMerkleProof(Transaction t) {
-        SHA256Hash hash = t.getHash();
-        HashTree fringe = fringeNodes.get(hash);
-        return Optional.ofNullable(fringe)
+        return Optional.ofNullable(fringeNodes.get(t.getHash()))
                        .map(f -> buildProof(f, null));
     }
     
     private HashTree buildProof(HashTree fringe, HashTree previousNode) {
-        HashTree result = new HashTree(fringe.getHash());
+        var result = new HashTree(fringe.getHash());
         if (previousNode != null) {
             if (fringe.getLeft() != null && fringe.getLeft() != previousNode) {
                 result.setLeft(fringe.getLeft());
