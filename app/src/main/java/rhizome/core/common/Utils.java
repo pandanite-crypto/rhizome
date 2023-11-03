@@ -122,6 +122,13 @@ public class Utils {
     public static class SHA256Hash {
         public byte[] hash = new byte[32];
 
+        public SHA256Hash(byte[] readNetworkSHA256) {
+            this.hash = readNetworkSHA256;
+        }
+
+        public SHA256Hash() {
+        }
+
         @Override
         public boolean equals(Object other) {
             if (!(other instanceof SHA256Hash)) {
