@@ -1,9 +1,6 @@
 package rhizome.core.blockchain;
 
 
-import java.util.*;
-import java.math.BigInteger;
-
 public class HeaderChain {
     // private static final int MAX_HASH_RETENTION = 1000;
 

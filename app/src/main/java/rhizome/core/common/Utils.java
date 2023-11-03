@@ -2,8 +2,6 @@ package rhizome.core.common;
 
 import rhizome.core.transaction.TransactionAmount;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HexFormat;
@@ -16,7 +14,6 @@ import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.bouncycastle.util.encoders.Hex;
 
 import io.activej.bytebuf.ByteBuf;
-import java.nio.charset.StandardCharsets;
 
 public class Utils {
 
@@ -82,14 +79,6 @@ public class Utils {
             return 25;
         }
     }
-
-    // public static class PublicKey {
-    //     public byte[] key = new byte[32];
-    // }
-    
-    // public static class PrivateKey {
-    //     public byte[] key = new byte[64];
-    // }
     
     public static class TransactionSignature {
         public byte[] signature = new byte[64];
