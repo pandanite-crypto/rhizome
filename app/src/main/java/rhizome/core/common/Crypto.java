@@ -1,6 +1,11 @@
 package rhizome.core.common;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.Signer;
@@ -9,6 +14,8 @@ import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.bouncycastle.crypto.signers.Ed25519Signer;
+
+import rhizome.core.common.Utils.SHA256Hash;
 
 public class Crypto {
 
@@ -47,4 +54,130 @@ public class Crypto {
         keyGen.init(new Ed25519KeyGenerationParameters(new SecureRandom()));
         return keyGen.generateKeyPair();
     }
+
+    private static final ConcurrentHashMap<SHA256Hash, SHA256Hash> pufferfishCache = new ConcurrentHashMap<>();
+
+    public static SHA256Hash PUFFERFISH(byte[] input, boolean useCache) {
+        SHA256Hash inputHash = new SHA256Hash(input);
+        
+        if (useCache) {
+            // Implement cache retrieval logic here
+            SHA256Hash cachedHash = pufferfishCache.get(inputHash);
+            if (cachedHash != null) {
+                return cachedHash;
+            }
+        }
+        
+        byte[] hash = new byte[PufferfishConstants.PF_HASHSPACE];
+        hash = PufferfishAlgorithm.compute(input);
+        
+        SHA256Hash finalHash = SHA256(hash); // Assuming SHA256 is standard SHA-256 hash
+        
+        if (useCache) {
+            // Implement cache storage logic here
+            pufferfishCache.put(inputHash, finalHash);
+        }
+        
+        return finalHash;
+    }
+
+    public static SHA256Hash SHA256(byte[] hash) {
+        return SHA256(hash, false, false);
+    }
+
+    public static SHA256Hash SHA256(byte[] data, boolean usePufferFish, boolean useCache) {
+        if (usePufferFish) {
+            return PUFFERFISH(data, useCache);
+        }
+        
+        // Standard SHA-256 Hashing
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(data);
+            return new SHA256Hash(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Unable to find SHA-256 algorithm", e);
+        }
+    }
+
+    public SHA256Hash mineHash(SHA256Hash target, byte challengeSize, boolean usePufferFish) {
+        int hashes = 0;
+        long st = System.currentTimeMillis();
+
+        byte[] concat = new byte[2 * 32];
+        SHA256Hash solution = new SHA256Hash(new byte[32]);
+        Random rand = new SecureRandom();
+
+        // Copy the target hash into the first part of concat.
+        System.arraycopy(target.hash, 0, concat, 0, 32);
+        // Fill with random data for privacy
+        byte[] randomBytes = new byte[32];
+        rand.nextBytes(randomBytes);
+        System.arraycopy(randomBytes, 0, concat, 32, 32);
+
+        long i = 0;
+
+        while (true) {
+            if (++hashes > 1024) {
+                long elapsed = System.currentTimeMillis() - st;
+                double hps = hashes / (elapsed / 1000.0);
+                System.out.println("Mining at " + hps + " h/sec");
+                hashes = 0;
+                st = System.currentTimeMillis();
+            }
+
+            i++;
+            incrementByteArrayByOne(concat, 32);
+
+            // This assumes solution is mutable.
+            solution.hash = Arrays.copyOfRange(concat, 32, 64);
+            SHA256Hash fullHash = concatHashes(target, solution, usePufferFish, false);
+
+            boolean found = checkLeadingZeroBits(fullHash, challengeSize);
+
+            if (found) {
+                break;
+            }
+        }
+
+        return solution;
+    }
+
+    private void incrementByteArrayByOne(byte[] array, int offset) {
+        for (int i = offset; i < array.length; i++) {
+            if (++array[i] != 0) {
+                break;
+            }
+        }
+    }
+
+    public static SHA256Hash concatHashes(SHA256Hash a, SHA256Hash b, boolean usePufferFish, boolean useCache) {
+        // Assuming SHA256 is a method that takes a byte array and returns a SHA256Hash object
+        // Pufferfish and caching functionality would need to be implemented within the SHA256 method.
+        byte[] data = new byte[64];
+        System.arraycopy(a.hash, 0, data, 0, 32);
+        System.arraycopy(b.hash, 0, data, 32, 32);
+        
+        // Instead of 'usePufferFish' and 'useCache' which are not standard,
+        // you'd typically call a standard Java SHA-256 implementation here.
+        // If 'usePufferFish' refers to a custom hashing algorithm, you'd need to implement it accordingly.
+        return SHA256(data);
+    }
+
+    public static boolean checkLeadingZeroBits(SHA256Hash hash, int challengeSize) {
+        byte[] a = hash.hash;
+        int bytes = challengeSize / 8;
+        for (int i = 0; i < bytes; i++) {
+            if (a[i] != 0) return false;
+        }
+        int remainingBits = challengeSize % 8;
+        if (remainingBits > 0) {
+            // Create a bitmask to check only the required remaining bits
+            int bitmask = (1 << remainingBits) - 1;
+            return (a[bytes] & (bitmask << (8 - remainingBits))) == 0;
+        } else {
+            return true;
+        }
+    }
+
 }
