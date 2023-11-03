@@ -216,18 +216,11 @@ public class Utils {
         return signature;
     }
     
-    public static SHA256Hash stringToSHA256(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedhash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-            SHA256Hash sha256Hash = new SHA256Hash();
-            System.arraycopy(encodedhash, 0, sha256Hash.hash, 0, encodedhash.length);
-            return sha256Hash;
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not found", e);
-        }
+    public static SHA256Hash stringToSHA256(String hexString) {
+        return new SHA256Hash(hexStringToByteArray(hexString));
     }
 
+    
     public static String SHA256toString(SHA256Hash sha256Hash) {
         return hexFormat.formatHex(sha256Hash.hash);
     }
