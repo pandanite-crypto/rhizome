@@ -108,28 +108,38 @@ public class Utils {
         public Map<PublicWalletAddress, TransactionAmount> state;
     }
     
-    public static class SHA256Hash {
+    public static class SHA256Hash implements Comparable<SHA256Hash> {
         public byte[] hash = new byte[32];
-
+    
         public SHA256Hash(byte[] readNetworkSHA256) {
             this.hash = readNetworkSHA256;
         }
-
+    
         public SHA256Hash() {
         }
-
+    
         @Override
         public boolean equals(Object other) {
             if (!(other instanceof SHA256Hash)) {
                 return false;
             }
-
             return Arrays.equals(this.hash, ((SHA256Hash) other).hash);
         }
-
+    
         @Override
         public int hashCode() {
             return Arrays.hashCode(hash);
+        }
+    
+        @Override
+        public int compareTo(SHA256Hash o) {
+            for (int i = 0; i < this.hash.length; i++) {
+                int compare = Byte.compare(this.hash[i], o.hash[i]);
+                if (compare != 0) {
+                    return compare;
+                }
+            }
+            return 0;
         }
     }
     
