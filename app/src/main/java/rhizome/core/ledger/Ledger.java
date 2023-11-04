@@ -4,8 +4,8 @@ import lombok.SneakyThrows;
 import org.iq80.leveldb.DBException;
 
 import rhizome.core.common.Utils.PublicWalletAddress;
-import rhizome.core.persistence.DataStore;
 import rhizome.core.transaction.TransactionAmount;
+import rhizome.persistence.DataStore;
 
 import static rhizome.core.common.Utils.bytesToLong;
 import static rhizome.core.common.Utils.longToBytes;
