@@ -2,6 +2,8 @@ package rhizome.core.common;
 
 import rhizome.core.transaction.TransactionAmount;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HexFormat;
@@ -223,13 +225,18 @@ public class Utils {
     public static String SHA256toString(SHA256Hash sha256Hash) {
         return hexFormat.formatHex(sha256Hash.hash);
     }
-
-    public static byte[] longToBytes(long x) {
-        byte[] buffer = new byte[8];
-        for (int i = 0; i < 8; i++) {
-            buffer[7 - i] = (byte) (x >>> (i * 8));
-        }
-        return buffer;
+    
+    public static byte[] longToBytes(long value) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.order(ByteOrder.BIG_ENDIAN);
+        buffer.putLong(value);
+        return buffer.array();
+    }
+    
+    public static long bytesToLong(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        buffer.order(ByteOrder.BIG_ENDIAN);
+        return buffer.getLong();
     }
 
     public static String bytesToHex(byte[] bytes) {
