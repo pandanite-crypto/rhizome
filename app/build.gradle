@@ -44,9 +44,15 @@ dependencies {
 
     // TODO: TBD
     implementation 'org.json:json:20231013'
+
+    // https://mvnrepository.com/artifact/org.iq80.leveldb/leveldb
+    implementation 'org.iq80.leveldb:leveldb:0.12'
     
     // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
     implementation 'org.bouncycastle:bcprov-jdk18on:1.76'
+
+    // https://mvnrepository.com/artifact/commons-io/commons-io
+    implementation 'commons-io:commons-io:2.15.0'
 
     // JNI support for crypto libs PUFFERFISH2
     implementation 'org.bytedeco:javacpp:1.5.9'
