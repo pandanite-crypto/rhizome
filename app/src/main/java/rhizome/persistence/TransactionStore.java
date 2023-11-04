@@ -1,0 +1,79 @@
+package rhizome.persistence;
+
+import org.iq80.leveldb.*;
+import rhizome.core.transaction.Transaction;
+import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.ledger.LedgerException;
+
+import java.nio.ByteBuffer;
+import java.io.IOException;
+
+
+public class TransactionStore extends DataStore {
+
+    public TransactionStore(String path) throws IOException {
+        super.init(path);
+    }
+
+    public boolean hasTransaction(Transaction t) {
+        SHA256Hash txHash = t.hashContents();
+        byte[] key = txHash.hash;
+        try {
+            byte[] value = getDb().get(key);
+            return value != null;
+        } catch (DBException e) {
+            throw new LedgerException("Failed to check transaction existence", e);
+        }
+    }
+
+    public int blockForTransaction(Transaction t) {
+        SHA256Hash txHash = t.hashContents();
+        byte[] key = txHash.hash;
+        try {
+            byte[] value = getDb().get(key);
+            if (value == null) {
+                return 0; // Or throw an exception if that's the required logic
+            }
+            ByteBuffer buffer = ByteBuffer.wrap(value);
+            return buffer.getInt();
+        } catch (DBException e) {
+            throw new LedgerException("Could not find block for specified transaction", e);
+        }
+    }
+
+    public int blockForTransactionId(SHA256Hash txHash) {
+        byte[] key = txHash.hash;
+        try {
+            byte[] value = getDb().get(key);
+            if (value == null) {
+                return 0; // Or throw an exception if that's the required logic
+            }
+            ByteBuffer buffer = ByteBuffer.wrap(value);
+            return buffer.getInt();
+        } catch (DBException e) {
+            throw new LedgerException("Could not find block for specified transaction ID", e);
+        }
+    }
+
+    public void insertTransaction(Transaction t, int blockId) {
+        SHA256Hash txHash = t.hashContents();
+        byte[] key = txHash.hash;
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+        buffer.putInt(blockId);
+        try {
+            getDb().put(key, buffer.array());
+        } catch (DBException e) {
+            throw new LedgerException("Could not write transaction to DB", e);
+        }
+    }
+
+    public void removeTransaction(Transaction t) {
+        SHA256Hash txHash = t.hashContents();
+        byte[] key = txHash.hash;
+        try {
+            getDb().delete(key);
+        } catch (DBException e) {
+            throw new LedgerException("Could not remove transaction from DB", e);
+        }
+    }
+}
