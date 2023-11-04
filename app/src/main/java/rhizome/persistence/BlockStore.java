@@ -1,13 +1,21 @@
 package rhizome.persistence;
 
 import org.iq80.leveldb.DBException;
+import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.ReadOptions;
 import org.iq80.leveldb.WriteOptions;
 
 import io.activej.bytebuf.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
+import rhizome.core.block.Block;
 import rhizome.core.block.BlockHeader;
+import rhizome.core.common.Utils.PublicWalletAddress;
+import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.transaction.Transaction;
+import rhizome.core.transaction.TransactionImpl;
 import rhizome.core.transaction.TransactionInfo;
+import static rhizome.core.transaction.TransactionInfo.TRANSACTIONINFO_BUFFER_SIZE;
+import static rhizome.core.block.BlockHeader.BLOCKHEADER_BUFFER_SIZE;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -15,7 +23,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -78,12 +88,11 @@ public class BlockStore extends DataStore {
     }
 
     public BlockHeader getBlockHeader(int blockId) {
-        ByteBuffer keyBuffer = ByteBuffer.allocate(Integer.BYTES);
-        keyBuffer.putInt(blockId);
-        byte[] key = keyBuffer.array();
+        var key = ByteBuf.wrapForWriting(new byte[Integer.BYTES]);
+        key.writeInt(blockId);
         
-        var value = ByteBuf.wrapForWriting(getDb().get(key, new ReadOptions()));
-        if (value == null) {
+        var value = ByteBuf.wrapForReading(getDb().get(key.asArray(), new ReadOptions()));
+        if (!value.canRead()) {
             throw new BlockStoreException("Could not read block header " + blockId + " from BlockStore db.");
         }
 
@@ -91,21 +100,122 @@ public class BlockStore extends DataStore {
     }
 
     public List<TransactionInfo> getBlockTransactions(BlockHeader block) {
-        List<TransactionInfo> transactions = new ArrayList<>();
+        var transactions = new ArrayList<TransactionInfo>();
         for (int i = 0; i < block.numTranactions(); i++) {
-            ByteBuffer keyBuffer = ByteBuffer.allocate(2 * Integer.BYTES);
-            keyBuffer.putInt(block.id());
-            keyBuffer.putInt(i);
-            byte[] key = keyBuffer.array();
+            var keyBuffer = ByteBuf.wrapForWriting(new byte[2 * Integer.BYTES]);
+            keyBuffer.writeInt(block.id());
+            keyBuffer.writeInt(i);
             
-            byte[] value = getDb().get(key, new ReadOptions());
-            if (value == null) {
+            var value = ByteBuf.wrapForReading(getDb().get(keyBuffer.asArray(), new ReadOptions()));
+            if (!value.canRead()) {
                 throw new BlockStoreException("Could not read transaction from BlockStore db.");
             }
             
-            TransactionInfo transaction = TransactionInfo.of(ByteBuf.wrapForReading(value)); // Implémentation hypothétique de la désérialisation
-            transactions.add(transaction);
+            transactions.add(TransactionInfo.of(value));
         }
         return transactions;
+    }
+
+    public ByteBuf getRawData(int blockId) {
+        var blockHeader = this.getBlockHeader(blockId);
+        var buffer = ByteBuf.wrapForWriting(new byte[BLOCKHEADER_BUFFER_SIZE + (TRANSACTIONINFO_BUFFER_SIZE * blockHeader.numTranactions())]);
+        buffer.put(blockHeader.toBuffer());
+
+        for (int i = 0; i < blockHeader.numTranactions(); i++) {
+            var key = ByteBuf.wrapForWriting(new byte[2 * Integer.BYTES]);
+            key.writeInt(blockId);
+            key.writeInt(i);
+
+            var value = ByteBuf.wrapForReading(getDb().get(key.asArray(), new ReadOptions()));
+            if (!value.canRead()) {
+                throw new BlockStoreException("Could not read transaction from BlockStore db.");
+            }
+            buffer.put(TransactionInfo.of(value).toBuffer());
+        }
+
+        buffer.head(0);
+        return buffer;
+    }
+
+    public Block getBlock(int blockId) {
+        BlockHeader block = this.getBlockHeader(blockId);
+        List<TransactionInfo> transactionInfos = this.getBlockTransactions(block);
+        List<Transaction> transactions = new ArrayList<>();
+
+        for (TransactionInfo t : transactionInfos) {
+            transactions.add(Transaction.of(t));
+        }
+        return Block.of(block, transactions);
+    }
+
+
+    public List<SHA256Hash> getTransactionsForWallet(PublicWalletAddress wallet) {
+        WalletTransactionKey startKey = new WalletTransactionKey(wallet.address().getArray(), null, true);
+        WalletTransactionKey endKey = new WalletTransactionKey(wallet.address().getArray(), null, false);
+        
+        List<SHA256Hash> transactions = new ArrayList<>();
+
+        try (DBIterator iterator = getDb().iterator(new ReadOptions())) {
+            for(iterator.seek(startKey.toByteArray()); iterator.hasNext(); iterator.next()) {
+                byte[] key = iterator.peekNext().getKey();
+                if (Arrays.compare(key, endKey.toByteArray()) >= 0) {
+                    break;
+                }
+                byte[] txidBytes = Arrays.copyOfRange(key, 25, 57);
+                SHA256Hash txid = new SHA256Hash(txidBytes);
+                transactions.add(txid);
+            }
+        } catch (IOException e) {
+            throw new BlockStoreException("Failed to iterate over the database", e);
+        }
+        
+        return transactions;
+    }
+
+    public void removeBlockWalletTransactions(Block block) {
+        for(Transaction t : block.getTransactions()) {
+            SHA256Hash txid = t.hashContents();
+            
+            WalletTransactionKey w1Key = new WalletTransactionKey(((TransactionImpl) t).getFrom().address().getArray(), txid.hash, true);
+            WalletTransactionKey w2Key = new WalletTransactionKey(((TransactionImpl) t).getTo().address().getArray(), txid.hash, true);
+            
+        try {
+            deleteTransaction(w1Key);
+            deleteTransaction(w2Key);
+        } catch (DBException e) {
+            throw new BlockStoreException("Could not remove transaction from wallet in blockstore db: " + e.getMessage(), e);
+        }
+        }
+    }
+
+    private void deleteTransaction(WalletTransactionKey key) throws DBException {
+        WriteOptions writeOptions = new WriteOptions().sync(true);
+        getDb().delete(key.toByteArray(), writeOptions);
+    }
+
+
+
+    private static class WalletTransactionKey {
+        byte[] addr = new byte[25];
+        byte[] txId = new byte[32];
+        
+        public WalletTransactionKey(byte[] walletData, byte[] transactionId, boolean isStartKey) {
+            System.arraycopy(walletData, 0, this.addr, 0, walletData.length);
+            if(isStartKey) {
+                Arrays.fill(this.txId, (byte) 0);
+            } else {
+                Arrays.fill(this.txId, (byte) 255);
+            }
+            if (transactionId != null) {
+                System.arraycopy(transactionId, 0, this.txId, 0, transactionId.length);
+            }
+        }
+        
+        public byte[] toByteArray() {
+            ByteBuffer buffer = ByteBuffer.allocate(addr.length + txId.length);
+            buffer.put(addr);
+            buffer.put(txId);
+            return buffer.array();
+        }
     }
 }
