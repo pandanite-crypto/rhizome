@@ -83,7 +83,8 @@ public class Utils {
     }
     
     public static class TransactionSignature {
-        public byte[] signature = new byte[64];
+        public static final int SIGNATURE_LENGTH = 64;
+        public byte[] signature = new byte[SIGNATURE_LENGTH];
 
         public static TransactionSignature random() {
             var random = new TransactionSignature();
@@ -111,7 +112,8 @@ public class Utils {
     }
     
     public static class SHA256Hash implements Comparable<SHA256Hash> {
-        public byte[] hash = new byte[32];
+        public static final int SHA256_LENGTH = 32;
+        public byte[] hash = new byte[SHA256_LENGTH];
     
         public SHA256Hash(byte[] readNetworkSHA256) {
             this.hash = readNetworkSHA256;

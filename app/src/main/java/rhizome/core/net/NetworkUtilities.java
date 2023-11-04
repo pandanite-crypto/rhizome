@@ -1,35 +1,51 @@
 package rhizome.core.net;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import io.activej.bytebuf.ByteBuf;
 
 public class NetworkUtilities {
 
     NetworkUtilities() {}
 
+    public static boolean readNetworkBoolean(ByteBuf buffer) {
+        return buffer.readBoolean();
+    }
+
     public static int readNetworkUint32(ByteBuf buffer) {
-        int x = buffer.readInt();
+        var x = buffer.readInt();
         return networkToHostUint32(x);
     }
 
     public static long readNetworkUint64(ByteBuf buffer) {
-        long x = buffer.readLong();
+        var x = buffer.readLong();
         return networkToHostUint64(x);
     }
 
+    public static String readNetworkString(ByteBuf buffer, int stringLength) {
+        var bytes = new byte[stringLength];
+        buffer.read(bytes);
+        return ByteBuf.wrapForReading(bytes).getString(UTF_8);
+    }
+
     public static byte[] readNetworkSHA256(ByteBuf buffer) {
-        byte[] h = new byte[32];
+        var h = new byte[32];
         buffer.read(h);
         return h;
     }
 
     public static byte[] readNetworkPublicWalletAddress(ByteBuf buffer, int addressLength) {
-        byte[] w = new byte[addressLength];
+        var w = new byte[addressLength];
         buffer.read(w);
         return w;
     }
 
     public static void readNetworkNBytes(ByteBuf buffer, byte[] outBuffer, int N) {
         buffer.read(outBuffer, 0, N);
+    }
+
+    public static void writeNetworkBoolean(ByteBuf buffer, boolean x) {
+        buffer.writeBoolean(x);
     }
 
     public static void writeNetworkUint32(ByteBuf buffer, int x) {
@@ -40,6 +56,10 @@ public class NetworkUtilities {
     public static void writeNetworkUint64(ByteBuf buffer, long x) {
         x = hostToNetworkUint64(x);
         buffer.writeLong(x);
+    }
+
+    public static void writeNetworkString(ByteBuf buffer, String x) {
+        buffer.write(x.getBytes(UTF_8));
     }
 
     public static void writeNetworkSHA256(ByteBuf buffer, byte[] x) {
