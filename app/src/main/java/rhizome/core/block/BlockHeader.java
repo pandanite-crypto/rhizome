@@ -15,6 +15,8 @@ public record BlockHeader (
     SHA256Hash nonce
 ) implements NetworkSerializable {
 
+    public static final int BLOCKHEADER_BUFFER_SIZE = 116;
+
 	public static BlockHeader of(ByteBuf buffer) {
         int id = NetworkUtilities.readNetworkUint32(buffer);
         long timestamp = NetworkUtilities.readNetworkUint64(buffer);

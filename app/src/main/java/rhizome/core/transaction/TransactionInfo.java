@@ -18,6 +18,8 @@ public record TransactionInfo(
     boolean isTransactionFee
 ) implements NetworkSerializable {
 
+    public static int TRANSACTIONINFO_BUFFER_SIZE = 149;
+
     public static TransactionInfo of(ByteBuf buffer) {
         String signature = NetworkUtilities.readNetworkString(buffer, TransactionSignature.SIGNATURE_LENGTH);
         String signingKey = NetworkUtilities.readNetworkString(buffer, SHA256Hash.SHA256_LENGTH);
