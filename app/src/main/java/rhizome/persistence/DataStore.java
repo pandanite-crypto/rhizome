@@ -1,4 +1,4 @@
-package rhizome.core.persistence;
+package rhizome.persistence;
 
 import org.apache.commons.io.FileUtils;
 import org.iq80.leveldb.DB;

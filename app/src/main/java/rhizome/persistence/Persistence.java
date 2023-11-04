@@ -1,4 +1,4 @@
-package rhizome.core.persistence;
+package rhizome.persistence;
 
 public interface Persistence {
     
