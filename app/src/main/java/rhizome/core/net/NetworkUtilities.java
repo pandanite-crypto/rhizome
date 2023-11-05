@@ -2,6 +2,8 @@ package rhizome.core.net;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.util.Arrays;
+
 import io.activej.bytebuf.ByteBuf;
 
 public class NetworkUtilities {
@@ -59,7 +61,7 @@ public class NetworkUtilities {
     }
 
     public static void writeNetworkString(ByteBuf buffer, String x) {
-        buffer.write(x.getBytes(UTF_8));
+        buffer.write(x.getBytes());
     }
 
     public static void writeNetworkSHA256(ByteBuf buffer, byte[] x) {
@@ -72,8 +74,15 @@ public class NetworkUtilities {
         buffer.write(x);
     }
 
+    // NOTE: TEMP FIX FOR DEBUGGING, it should be buffer.write(inputBuffer, 0, N);
     public static void writeNetworkNBytes(ByteBuf buffer, byte[] inputBuffer, int N) {
-        buffer.write(inputBuffer, 0, N);
+        int inputLength = inputBuffer.length;
+        buffer.write(inputBuffer, 0, Math.min(inputLength, N));
+        if (inputLength < N) {
+            byte[] padding = new byte[N - inputLength];
+            Arrays.fill(padding, (byte) 0x00);
+            buffer.write(padding);
+        }
     }
 
     private static int networkToHostUint32(int networkValue) {

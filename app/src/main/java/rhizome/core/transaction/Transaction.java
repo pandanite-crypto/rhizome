@@ -127,6 +127,7 @@ public sealed interface Transaction permits TransactionImpl {
 
         static TransactionSerializer instance = new TransactionSerializer();
 
+        // TODO: Bug on signature serialization, 2x the size
         @Override
         public TransactionInfo serialize(Transaction transaction) {
             var transactionImpl = (TransactionImpl) transaction;

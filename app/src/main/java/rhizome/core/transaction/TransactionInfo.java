@@ -35,21 +35,15 @@ public record TransactionInfo(
 
     @Override
     public ByteBuf toBuffer() {
-        ByteBuf buffer = ByteBuf.wrapForWriting(new byte[getSerializedSize()]);
-        NetworkUtilities.writeNetworkString(buffer, this.signature);
-        NetworkUtilities.writeNetworkString(buffer, this.signingKey);
+        ByteBuf buffer = ByteBuf.wrapForWriting(new byte[TRANSACTIONINFO_BUFFER_SIZE]);
+        NetworkUtilities.writeNetworkNBytes(buffer, this.signature.getBytes(), TransactionSignature.SIGNATURE_LENGTH);
+        NetworkUtilities.writeNetworkNBytes(buffer, this.signingKey.getBytes(), SHA256Hash.SHA256_LENGTH);
         NetworkUtilities.writeNetworkUint64(buffer, this.timestamp);
-        NetworkUtilities.writeNetworkString(buffer, this.to.address().toString());
-        NetworkUtilities.writeNetworkString(buffer, this.from.address().toString());
+        NetworkUtilities.writeNetworkNBytes(buffer, this.to.address().getArray(), PublicWalletAddress.SIZE);
+        NetworkUtilities.writeNetworkNBytes(buffer, this.from.address().getArray(), PublicWalletAddress.SIZE);
         NetworkUtilities.writeNetworkUint64(buffer, this.amount.amount());
         NetworkUtilities.writeNetworkUint64(buffer, this.fee.amount());
         NetworkUtilities.writeNetworkBoolean(buffer, this.isTransactionFee);
         return buffer;
-    }
-
-    private int getSerializedSize() {
-        // Approximation, you need to calculate the exact size based on your network string serialization
-        return signature.length() + signingKey.length() + Long.BYTES + to.toString().length() +
-               from.toString().length() + Long.BYTES + Long.BYTES + 1;
     }
 }
