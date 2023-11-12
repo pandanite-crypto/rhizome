@@ -45,6 +45,9 @@ dependencies {
     // TODO: TBD
     implementation 'org.json:json:20231013'
 
+    // CQEngine
+    implementation 'com.googlecode.cqengine:cqengine:3.6.0'
+    
     // https://mvnrepository.com/artifact/org.iq80.leveldb/leveldb
     implementation 'org.iq80.leveldb:leveldb:0.12'
     
