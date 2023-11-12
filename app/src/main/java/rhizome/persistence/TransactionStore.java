@@ -2,6 +2,7 @@ package rhizome.persistence;
 
 import org.iq80.leveldb.*;
 import rhizome.core.transaction.Transaction;
+import rhizome.persistence.leveldb.DataStore;
 import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.ledger.LedgerException;
 

@@ -1,4 +1,4 @@
-package rhizome.persistence;
+package rhizome.persistence.leveldb;
 
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
@@ -16,6 +16,8 @@ import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.TransactionImpl;
 import rhizome.core.transaction.TransactionInfo;
+import rhizome.persistence.BlockPersistence;
+
 import static rhizome.core.transaction.TransactionInfo.TRANSACTIONINFO_BUFFER_SIZE;
 import static rhizome.core.block.BlockHeader.BLOCKHEADER_BUFFER_SIZE;
 
@@ -30,12 +32,12 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-public class BlockStore extends DataStore {
+public class LevelDBPersistence extends DataStore implements BlockPersistence {
 
     static final String BLOCK_COUNT_KEY = "BLOCK_COUNT";
     static final String TOTAL_WORK_KEY = "TOTAL_WORK";
 
-    public BlockStore(String path) throws IOException {
+    public LevelDBPersistence(String path) throws IOException {
         super.init(path);
     }
 
@@ -197,44 +199,39 @@ public class BlockStore extends DataStore {
 
     public void setBlock(Block block) throws BlockStoreException {
         var blockImpl = (BlockImpl) block;
-        try {
-            DB db = getDb();
+        DB db = getDb();
 
-            int blockId = blockImpl.getId();
-            ByteBuffer keyBuffer = ByteBuffer.allocate(Integer.BYTES);
-            keyBuffer.putInt(blockId);
-            byte[] key = keyBuffer.array();
+        int blockId = blockImpl.getId();
+        ByteBuffer keyBuffer = ByteBuffer.allocate(Integer.BYTES);
+        keyBuffer.putInt(blockId);
+        byte[] key = keyBuffer.array();
+        
+        BlockHeader blockStruct = block.serialize();
+        byte[] value = blockStruct.toBuffer().getArray();
+        db.put(key, value, new WriteOptions().sync(true));
+
+        for (int i = 0; i < block.getTransactions().size(); i++) {
+            ByteBuffer txKeyBuffer = ByteBuffer.allocate(2 * Integer.BYTES);
+            txKeyBuffer.putInt(blockId);
+            txKeyBuffer.putInt(i);
+            byte[] txKey = txKeyBuffer.array();
             
-            BlockHeader blockStruct = block.serialize();
-            byte[] value = blockStruct.toBuffer().getArray();
-            db.put(key, value, new WriteOptions().sync(true));
+            TransactionInfo t = block.getTransactions().get(i).serialize();
+            byte[] txValue = t.toBuffer().getArray();
+            db.put(txKey, txValue, new WriteOptions().sync(true));
 
-            for (int i = 0; i < block.getTransactions().size(); i++) {
-                ByteBuffer txKeyBuffer = ByteBuffer.allocate(2 * Integer.BYTES);
-                txKeyBuffer.putInt(blockId);
-                txKeyBuffer.putInt(i);
-                byte[] txKey = txKeyBuffer.array();
-                
-                TransactionInfo t = block.getTransactions().get(i).serialize();
-                byte[] txValue = t.toBuffer().getArray();
-                db.put(txKey, txValue, new WriteOptions().sync(true));
+            // Ajout des transactions aux portefeuilles (from et to)
+            byte[] txid = block.getTransactions().get(i).hashContents().hash;
+            byte[] w1Key = new byte[25 + 32];
+            byte[] w2Key = new byte[25 + 32];
 
-                // Ajout des transactions aux portefeuilles (from et to)
-                byte[] txid = block.getTransactions().get(i).hashContents().hash;
-                byte[] w1Key = new byte[25 + 32];
-                byte[] w2Key = new byte[25 + 32];
+            System.arraycopy(t.from().address().getArray(), 0, w1Key, 0, 25);
+            System.arraycopy(txid, 0, w1Key, 25, 32);
+            System.arraycopy(t.to().address().getArray(), 0, w2Key, 0, 25);
+            System.arraycopy(txid, 0, w2Key, 25, 32);
 
-                System.arraycopy(t.from().address().getArray(), 0, w1Key, 0, 25);
-                System.arraycopy(txid, 0, w1Key, 25, 32);
-                System.arraycopy(t.to().address().getArray(), 0, w2Key, 0, 25);
-                System.arraycopy(txid, 0, w2Key, 25, 32);
-
-                db.put(w1Key, new byte[0], new WriteOptions().sync(true));
-                db.put(w2Key, new byte[0], new WriteOptions().sync(true));
-            }
-        } catch (Exception e) {
-            log.error("Could not write block to BlockStore db: ", e);
-            throw new BlockStoreException("Could not write block to BlockStore db: " + e.getMessage(), e);
+            db.put(w1Key, new byte[0], new WriteOptions().sync(true));
+            db.put(w2Key, new byte[0], new WriteOptions().sync(true));
         }
     }
 

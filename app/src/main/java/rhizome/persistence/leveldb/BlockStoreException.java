@@ -1,4 +1,4 @@
-package rhizome.persistence;
+package rhizome.persistence.leveldb;
 
 public class BlockStoreException extends RuntimeException {
     public BlockStoreException(String message) {

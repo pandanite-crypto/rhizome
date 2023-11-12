@@ -5,7 +5,7 @@ import org.iq80.leveldb.DBException;
 
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.transaction.TransactionAmount;
-import rhizome.persistence.DataStore;
+import rhizome.persistence.leveldb.DataStore;
 
 import static rhizome.core.common.Utils.bytesToLong;
 import static rhizome.core.common.Utils.longToBytes;

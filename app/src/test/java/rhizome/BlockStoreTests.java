@@ -18,18 +18,18 @@ import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.TransactionImpl;
 import rhizome.core.user.User;
-import rhizome.persistence.BlockStore;
+import rhizome.persistence.leveldb.LevelDBPersistence;
 
 class BlockStoreTests {
 
     private static final String TEST_DB_PATH = "./test-data/tmpdb";
-    private BlockStore blocks;
+    private LevelDBPersistence blocks;
     private User miner;
     private User receiver;
 
     @BeforeEach
     void setUp() throws IOException {
-        blocks = new BlockStore(TEST_DB_PATH);
+        blocks = new LevelDBPersistence(TEST_DB_PATH);
         miner = User.create();
         receiver = User.create();
     }
