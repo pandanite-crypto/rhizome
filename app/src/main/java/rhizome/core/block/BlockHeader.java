@@ -1,6 +1,8 @@
 package rhizome.core.block;
 
 import io.activej.bytebuf.ByteBuf;
+import io.activej.bytebuf.ByteBufPool;
+import io.activej.common.MemSize;
 import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.net.NetworkSerializable;
 import rhizome.core.net.NetworkUtilities;
@@ -25,13 +27,13 @@ public record BlockHeader (
         SHA256Hash lastBlockHash = new SHA256Hash(NetworkUtilities.readNetworkSHA256(buffer));
         SHA256Hash merkleRoot = new SHA256Hash(NetworkUtilities.readNetworkSHA256(buffer));
         SHA256Hash nonce = new SHA256Hash(NetworkUtilities.readNetworkSHA256(buffer));
-
+        buffer.recycle();
         return new BlockHeader(id, timestamp, difficulty, numTransactions, lastBlockHash, merkleRoot, nonce);
 	}
 
 	@Override
 	public ByteBuf toBuffer() {
-        ByteBuf buffer = ByteBuf.wrapForWriting(new byte[116]);
+        var buffer = ByteBufPool.allocateExact(MemSize.of(BLOCKHEADER_BUFFER_SIZE));
         NetworkUtilities.writeNetworkUint32(buffer, this.id());
         NetworkUtilities.writeNetworkUint64(buffer, this.timestamp());
         NetworkUtilities.writeNetworkUint32(buffer, this.difficulty());

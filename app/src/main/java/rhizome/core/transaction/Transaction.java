@@ -102,6 +102,8 @@ public sealed interface Transaction permits TransactionImpl {
     public boolean signatureValid();
     public SHA256Hash hashContents();
     public SHA256Hash getHash();
+    public PublicWalletAddress getFrom();
+    public PublicWalletAddress getTo();
 
     /**
      * Get instance of the serializer

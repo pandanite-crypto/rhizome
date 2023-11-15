@@ -61,8 +61,9 @@ public sealed interface Block permits BlockImpl {
         return serializer().toJson(block);
     }
 
-    void addTransaction(Transaction t);
-    List<Transaction> getTransactions();
+    public int getId();
+    public void addTransaction(Transaction t);
+    public List<Transaction> getTransactions();
 
     /**
      * Get instance of the serializer
