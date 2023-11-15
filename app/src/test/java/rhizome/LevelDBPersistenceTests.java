@@ -20,7 +20,7 @@ import rhizome.core.transaction.TransactionImpl;
 import rhizome.core.user.User;
 import rhizome.persistence.leveldb.LevelDBPersistence;
 
-class BlockStoreTests {
+class LevelDBPersistenceTests {
 
     private static final String TEST_DB_PATH = "./test-data/tmpdb";
     private LevelDBPersistence blocks;
@@ -40,7 +40,7 @@ class BlockStoreTests {
     }
 
     @Test
-    void testBlockstoreStoresBlock() throws IOException {
+    void testStoresBlock() throws IOException {
 
         Block a = Block.empty();
         ((BlockImpl) a).setId(2);
@@ -55,7 +55,7 @@ class BlockStoreTests {
         }
 
         assertFalse(blocks.hasBlock(2));
-        blocks.setBlock(a);
+        blocks.addBlock(a);
         assertTrue(blocks.hasBlock(2));
         Block b = blocks.getBlock(2);
         assertEquals(b, a);
