@@ -1,37 +1,30 @@
 package rhizome.persistence.leveldb;
 
-import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.ReadOptions;
 import org.iq80.leveldb.WriteOptions;
 
 import io.activej.bytebuf.ByteBuf;
-import lombok.extern.slf4j.Slf4j;
+import io.activej.bytebuf.ByteBufPool;
+import io.activej.common.MemSize;
 import rhizome.core.block.Block;
 import rhizome.core.block.BlockHeader;
-import rhizome.core.block.BlockImpl;
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.transaction.Transaction;
-import rhizome.core.transaction.TransactionImpl;
 import rhizome.core.transaction.TransactionInfo;
 import rhizome.persistence.BlockPersistence;
 
 import static rhizome.core.transaction.TransactionInfo.TRANSACTIONINFO_BUFFER_SIZE;
 import static rhizome.core.block.BlockHeader.BLOCKHEADER_BUFFER_SIZE;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Slf4j
 public class LevelDBPersistence extends DataStore implements BlockPersistence {
 
     static final String BLOCK_COUNT_KEY = "BLOCK_COUNT";
@@ -42,119 +35,67 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
     }
 
     public void setBlockCount(long count) {
-        getDb().put(
-            BLOCK_COUNT_KEY.getBytes(UTF_8), 
-            ByteBuffer.allocate(Long.BYTES).putLong(count).array(), 
-            new WriteOptions().sync(true)
-        );
+        set(BLOCK_COUNT_KEY, count);
     }
 
     public long getBlockCount() {
-        var value = getDb().get(BLOCK_COUNT_KEY.getBytes(), new ReadOptions());
-        if (value == null || value.length != Long.BYTES) {
-            throw new BlockStoreException("Invalid block count value");
-        }
-        return ByteBuffer.wrap(value).getLong();
+        return (long) get(BLOCK_COUNT_KEY, Long.class);
     }
 
     public void setTotalWork(BigInteger count) {
-            getDb().put(TOTAL_WORK_KEY.getBytes(UTF_8), 
-                count.toByteArray(),
-                new WriteOptions().sync(true)
-            );
+        set(TOTAL_WORK_KEY, count);
     }
 
     public BigInteger getTotalWork() {
-        var value = getDb().get(TOTAL_WORK_KEY.getBytes(), new ReadOptions());
-        if (value == null) {
-            throw new BlockStoreException("Invalid block count value");
-        }
-        return new BigInteger(new String(value, StandardCharsets.UTF_8));
+        return (BigInteger) get(TOTAL_WORK_KEY, BigInteger.class);
     }
 
     public boolean hasBlockCount() {
-        try {
-            return getDb().get(BLOCK_COUNT_KEY.getBytes(UTF_8)) != null;
-        } catch (DBException e) {
-            log.error("Error checking block count", e);
-            return false;
-        }
+        return hasKey(BLOCK_COUNT_KEY);        
     }
 
     public boolean hasBlock(int blockId) {
-        try {
-            return getDb().get(ByteBuffer.allocate(Integer.BYTES).putInt(blockId).array()) != null;
-        } catch (DBException e) {
-            log.error("Error checking block with ID: " + blockId, e);
-            return false;
-        }
+        return hasKey(blockId);
     }
 
-    public BlockHeader getBlockHeader(int blockId) {
-        var key = ByteBuf.wrapForWriting(new byte[Integer.BYTES]);
-        key.writeInt(blockId);
-        
-        var value = ByteBuf.wrapForReading(getDb().get(key.asArray(), new ReadOptions()));
-        if (!value.canRead()) {
-            throw new BlockStoreException("Could not read block header " + blockId + " from BlockStore db.");
-        }
-
-        return BlockHeader.of(value);
+    public BlockHeader getBlockHeader(int blockId) {       
+        return BlockHeader.of(getBlockHeadeAsByteBuf(blockId));
+    }
+    public ByteBuf getBlockHeadeAsByteBuf(int blockId) {       
+        return (ByteBuf) get(blockId, ByteBuf.class);
     }
 
     public List<TransactionInfo> getBlockTransactions(BlockHeader block) {
         var transactions = new ArrayList<TransactionInfo>();
-        for (int i = 0; i < block.numTranactions(); i++) {
-            var keyBuffer = ByteBuf.wrapForWriting(new byte[2 * Integer.BYTES]);
-            keyBuffer.writeInt(block.id());
-            keyBuffer.writeInt(i);
-            
-            var value = ByteBuf.wrapForReading(getDb().get(keyBuffer.asArray(), new ReadOptions()));
-            if (!value.canRead()) {
-                throw new BlockStoreException("Could not read transaction from BlockStore db.");
-            }
-            
+        for (int i = 0; i < block.numTranactions(); i++) {            
+            var value = (ByteBuf) get(composeKey(block.id(), i), ByteBuf.class);
             transactions.add(TransactionInfo.of(value));
         }
         return transactions;
     }
 
     public ByteBuf getRawData(int blockId) {
-        var blockHeader = this.getBlockHeader(blockId);
-        var buffer = ByteBuf.wrapForWriting(new byte[BLOCKHEADER_BUFFER_SIZE + (TRANSACTIONINFO_BUFFER_SIZE * blockHeader.numTranactions())]);
+        var blockHeader = getBlockHeader(blockId);
+        var bufferSize = MemSize.of((long) BLOCKHEADER_BUFFER_SIZE + (TRANSACTIONINFO_BUFFER_SIZE * blockHeader.numTranactions()));
+        var buffer = ByteBufPool.allocateExact(bufferSize);
         buffer.put(blockHeader.toBuffer());
 
-        for (int i = 0; i < blockHeader.numTranactions(); i++) {
-            var key = ByteBuf.wrapForWriting(new byte[2 * Integer.BYTES]);
-            key.writeInt(blockId);
-            key.writeInt(i);
-
-            var value = ByteBuf.wrapForReading(getDb().get(key.asArray(), new ReadOptions()));
-            if (!value.canRead()) {
-                throw new BlockStoreException("Could not read transaction from BlockStore db.");
-            }
-            buffer.put(TransactionInfo.of(value).toBuffer());
-        }
-
+        getBlockTransactions(blockHeader).forEach(transaction -> buffer.put(transaction.toBuffer()));
         buffer.head(0);
         return buffer;
     }
 
     public Block getBlock(int blockId) {
-        BlockHeader block = this.getBlockHeader(blockId);
-        List<TransactionInfo> transactionInfos = this.getBlockTransactions(block);
+        BlockHeader block = getBlockHeader(blockId);
         List<Transaction> transactions = new ArrayList<>();
-
-        for (TransactionInfo t : transactionInfos) {
-            transactions.add(Transaction.of(t));
-        }
+        getBlockTransactions(block).forEach(transaction -> transactions.add(Transaction.of(transaction)));
         return Block.of(block, transactions);
     }
 
 
     public List<SHA256Hash> getTransactionsForWallet(PublicWalletAddress wallet) {
-        WalletTransactionKey startKey = new WalletTransactionKey(wallet.address().getArray(), null, true);
-        WalletTransactionKey endKey = new WalletTransactionKey(wallet.address().getArray(), null, false);
+        var startKey = new WalletTransactionKey(wallet, null, true);
+        var endKey = new WalletTransactionKey(wallet, null, false);
         
         List<SHA256Hash> transactions = new ArrayList<>();
 
@@ -169,7 +110,7 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
                 transactions.add(txid);
             }
         } catch (IOException e) {
-            throw new BlockStoreException("Failed to iterate over the database", e);
+            throw new DataStoreException("Failed to iterate over the database", e);
         }
         
         return transactions;
@@ -179,14 +120,14 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
         for(Transaction t : block.getTransactions()) {
             SHA256Hash txid = t.hashContents();
             
-            WalletTransactionKey w1Key = new WalletTransactionKey(((TransactionImpl) t).getFrom().address().getArray(), txid.hash, true);
-            WalletTransactionKey w2Key = new WalletTransactionKey(((TransactionImpl) t).getTo().address().getArray(), txid.hash, true);
+            var w1Key = new WalletTransactionKey(t.getFrom(), txid, true);
+            var w2Key = new WalletTransactionKey(t.getTo(), txid, true);
             
         try {
             deleteTransaction(w1Key);
             deleteTransaction(w2Key);
         } catch (DBException e) {
-            throw new BlockStoreException("Could not remove transaction from wallet in blockstore db: " + e.getMessage(), e);
+            throw new DataStoreException("Could not remove transaction from wallet in blockstore db: " + e.getMessage(), e);
         }
         }
     }
@@ -197,65 +138,43 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
     }
 
 
-    public void setBlock(Block block) throws BlockStoreException {
-        var blockImpl = (BlockImpl) block;
-        DB db = getDb();
-
-        int blockId = blockImpl.getId();
-        ByteBuffer keyBuffer = ByteBuffer.allocate(Integer.BYTES);
-        keyBuffer.putInt(blockId);
-        byte[] key = keyBuffer.array();
-        
-        BlockHeader blockStruct = block.serialize();
-        byte[] value = blockStruct.toBuffer().getArray();
-        db.put(key, value, new WriteOptions().sync(true));
+    public void addBlock(Block block) throws DataStoreException {
+        set(block.getId(), block.serialize().toBuffer().asArray());
 
         for (int i = 0; i < block.getTransactions().size(); i++) {
-            ByteBuffer txKeyBuffer = ByteBuffer.allocate(2 * Integer.BYTES);
-            txKeyBuffer.putInt(blockId);
-            txKeyBuffer.putInt(i);
-            byte[] txKey = txKeyBuffer.array();
-            
-            TransactionInfo t = block.getTransactions().get(i).serialize();
-            byte[] txValue = t.toBuffer().getArray();
-            db.put(txKey, txValue, new WriteOptions().sync(true));
-
-            // Ajout des transactions aux portefeuilles (from et to)
-            byte[] txid = block.getTransactions().get(i).hashContents().hash;
-            byte[] w1Key = new byte[25 + 32];
-            byte[] w2Key = new byte[25 + 32];
-
-            System.arraycopy(t.from().address().getArray(), 0, w1Key, 0, 25);
-            System.arraycopy(txid, 0, w1Key, 25, 32);
-            System.arraycopy(t.to().address().getArray(), 0, w2Key, 0, 25);
-            System.arraycopy(txid, 0, w2Key, 25, 32);
-
-            db.put(w1Key, new byte[0], new WriteOptions().sync(true));
-            db.put(w2Key, new byte[0], new WriteOptions().sync(true));
+            var transaction = block.getTransactions().get(i);
+            var transactionInfo = transaction.serialize();
+            set(composeKey(block.getId(), i), transactionInfo.toBuffer().asArray());
+            set(WalletTransactionKey.key(transactionInfo.from(), transaction.hashContents()), new byte[0]);
+            set(WalletTransactionKey.key(transactionInfo.to(), transaction.hashContents()), new byte[0]);
         }
     }
 
     private static class WalletTransactionKey {
-        byte[] addr = new byte[25];
-        byte[] txId = new byte[32];
+        PublicWalletAddress addr;
+        SHA256Hash txId;
         
-        public WalletTransactionKey(byte[] walletData, byte[] transactionId, boolean isStartKey) {
-            System.arraycopy(walletData, 0, this.addr, 0, walletData.length);
+        public WalletTransactionKey(PublicWalletAddress address, SHA256Hash txId, boolean isStartKey) {
+            this.addr = address;
+            this.txId = txId;
+
             if(isStartKey) {
-                Arrays.fill(this.txId, (byte) 0);
+                Arrays.fill(this.txId.hash, (byte) 0);
             } else {
-                Arrays.fill(this.txId, (byte) 255);
+                Arrays.fill(this.txId.hash, (byte) 255);
             }
-            if (transactionId != null) {
-                System.arraycopy(transactionId, 0, this.txId, 0, transactionId.length);
+
+            if(txId.hash != null) {
+                System.arraycopy(txId.hash, 0, this.txId.hash, 0, txId.hash.length);
             }
         }
-        
-        public byte[] toByteArray() {
-            ByteBuffer buffer = ByteBuffer.allocate(addr.length + txId.length);
-            buffer.put(addr);
-            buffer.put(txId);
-            return buffer.array();
+                
+        byte[] toByteArray() {
+            return key(addr, txId);
+        }
+
+        static byte[] key(PublicWalletAddress address, SHA256Hash sha256) {
+            return composeKey(address.address().getArray(), sha256.hash);
         }
     }
 }
