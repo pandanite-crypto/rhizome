@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.net.Serializable;
+import rhizome.core.transaction.dto.TransactionDto;
 
 import static rhizome.core.common.Utils.SHA256toString;
 import static rhizome.core.common.Utils.publicKeyToString;
@@ -40,8 +41,8 @@ public sealed interface Transaction permits TransactionImpl {
                 .build();
     }
 
-    public static Transaction of(TransactionInfo transactionInfo) {
-        return serializer().deserialize(transactionInfo);
+    public static Transaction of(TransactionDto transactionDto) {
+        return serializer().deserialize(transactionDto);
     }
 
     public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, Ed25519PublicKeyParameters signingKey, TransactionAmount fee) {
@@ -88,8 +89,8 @@ public sealed interface Transaction permits TransactionImpl {
                 .build();
     }
 
-    public TransactionInfo serialize();
-    default TransactionInfo serialize(Transaction transaction) {
+    public TransactionDto serialize();
+    default TransactionDto serialize(Transaction transaction) {
         return serializer().serialize(transaction);
     }
 
@@ -116,7 +117,7 @@ public sealed interface Transaction permits TransactionImpl {
     /**
      * Serializes the Transaction
      */
-    static class TransactionSerializer implements Serializable<TransactionInfo, Transaction> {
+    static class TransactionSerializer implements Serializable<TransactionDto, Transaction> {
 
         static final String TO = "to";
         static final String AMOUNT = "amount";
@@ -129,33 +130,32 @@ public sealed interface Transaction permits TransactionImpl {
 
         static TransactionSerializer instance = new TransactionSerializer();
 
-        // TODO: Bug on signature serialization, 2x the size
         @Override
-        public TransactionInfo serialize(Transaction transaction) {
+        public TransactionDto serialize(Transaction transaction) {
             var transactionImpl = (TransactionImpl) transaction;
-            return new TransactionInfo(
+            return new TransactionDto(
                 signatureToString(transactionImpl.getSignature().signature),
                 publicKeyToString(transactionImpl.getSigningKey()),
                 transactionImpl.getTimestamp(),
-                transactionImpl.getTo(),
-                transactionImpl.getFrom(),
-                transactionImpl.getAmount(),
-                transactionImpl.getFee(),
+                transactionImpl.getTo().address().asArray(),
+                transactionImpl.getFrom().address().asArray(),
+                transactionImpl.getAmount().amount(),
+                transactionImpl.getFee().amount(),
                 transactionImpl.isTransactionFee()
             );
         }
     
         @Override
-        public Transaction deserialize(TransactionInfo transactionInfo) {
+        public Transaction deserialize(TransactionDto transactionDto) {
             return TransactionImpl.builder()
-                .from(transactionInfo.from())
-                .to(transactionInfo.to())
-                .amount(transactionInfo.amount())
-                .isTransactionFee(transactionInfo.isTransactionFee())
-                .timestamp(transactionInfo.timestamp())
-                .fee(transactionInfo.fee())
-                .signingKey(stringToPublicKey(transactionInfo.signingKey()))
-                .signature(stringToSignature(transactionInfo.signature()))
+                .from(PublicWalletAddress.fromBuffer(transactionDto.getFrom()))
+                .to(PublicWalletAddress.fromBuffer(transactionDto.getTo()))
+                .amount(new TransactionAmount(transactionDto.getAmount()))
+                .isTransactionFee(transactionDto.isTransactionFee())
+                .timestamp(transactionDto.getTimestamp())
+                .fee(new TransactionAmount(transactionDto.getFee()))
+                .signingKey(stringToPublicKey(transactionDto.getSigningKey()))
+                .signature(stringToSignature(transactionDto.getSignature()))
                 .build();
         }
     
