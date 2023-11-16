@@ -26,7 +26,7 @@ public class NetworkUtilities {
 
     public static String readNetworkString(ByteBuf buffer, int stringLength) {
         var bytes = new byte[stringLength];
-        buffer.read(bytes);
+        buffer.read(bytes, 0, stringLength);
         return ByteBuf.wrapForReading(bytes).getString(UTF_8);
     }
 
@@ -77,12 +77,13 @@ public class NetworkUtilities {
     // NOTE: TEMP FIX FOR DEBUGGING, it should be buffer.write(inputBuffer, 0, N);
     public static void writeNetworkNBytes(ByteBuf buffer, byte[] inputBuffer, int N) {
         int inputLength = inputBuffer.length;
-        buffer.write(inputBuffer, 0, Math.min(inputLength, N));
+        buffer.put(inputBuffer, 0, Math.min(inputLength, N));
         if (inputLength < N) {
             byte[] padding = new byte[N - inputLength];
             Arrays.fill(padding, (byte) 0x00);
-            buffer.write(padding);
+            buffer.put(padding);
         }
+        // buffer.put(inputBuffer, 0, N);
     }
 
     private static int networkToHostUint32(int networkValue) {
