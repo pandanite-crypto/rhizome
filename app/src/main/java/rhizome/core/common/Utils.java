@@ -67,6 +67,10 @@ public class Utils {
             return new PublicWalletAddress(buf); 
         }
 
+        public static PublicWalletAddress fromBuffer(byte[] address) {
+            return new PublicWalletAddress(ByteBuf.wrapForReading(address));
+        }
+
         @Override
         public boolean equals(Object other) {
             if (!(other instanceof PublicWalletAddress)) {
@@ -83,8 +87,8 @@ public class Utils {
     }
     
     public static class TransactionSignature {
-        public static final int SIGNATURE_LENGTH = 64;
-        public byte[] signature = new byte[SIGNATURE_LENGTH];
+        public static final int SIZE = 64;
+        public byte[] signature = new byte[SIZE];
 
         public static TransactionSignature random() {
             var random = new TransactionSignature();
