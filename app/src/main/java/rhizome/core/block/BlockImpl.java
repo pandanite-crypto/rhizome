@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import lombok.Builder;
 import lombok.Data;
+import rhizome.core.block.dto.BlockDto;
 import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.transaction.Transaction;
 
@@ -48,7 +49,7 @@ public final class BlockImpl implements Block {
     /**
      * Serialization
      */
-    public BlockHeader serialize() {
+    public BlockDto serialize() {
        return serialize(this);
     }
 
