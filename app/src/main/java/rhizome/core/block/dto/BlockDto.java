@@ -4,8 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import lombok.Getter;
 import rhizome.core.net.BinarySerializable;
 
+@Getter
 public class BlockDto implements BinarySerializable {
     @Serialize public final int id;
     @Serialize public final long timestamp;
