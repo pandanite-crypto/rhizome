@@ -4,10 +4,10 @@ import java.math.BigInteger;
 import java.util.List;
 
 import rhizome.core.block.Block;
-import rhizome.core.block.BlockHeader;
+import rhizome.core.block.dto.BlockDto;
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.common.Utils.SHA256Hash;
-import rhizome.core.transaction.TransactionInfo;
+import rhizome.core.transaction.dto.TransactionDto;
 
 public interface BlockPersistence {
     long getBlockCount();
@@ -16,9 +16,9 @@ public interface BlockPersistence {
 
     boolean hasBlock(int blockId);
 
-    BlockHeader getBlockHeader(int blockId);
+    BlockDto getBlockHeader(int blockId);
 
-    List<TransactionInfo> getBlockTransactions(BlockHeader block);
+    List<TransactionDto> getBlockTransactions(BlockDto block);
 
     Block getBlock(int blockId);
 
