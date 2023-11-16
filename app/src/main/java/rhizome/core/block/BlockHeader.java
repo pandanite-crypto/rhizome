@@ -4,9 +4,9 @@ import io.activej.bytebuf.ByteBuf;
 import io.activej.bytebuf.ByteBufPool;
 import io.activej.common.MemSize;
 import rhizome.core.common.Utils.SHA256Hash;
-import rhizome.core.net.NetworkSerializable;
 import rhizome.core.net.NetworkUtilities;
 
+@Deprecated
 public record BlockHeader (
     int id,
     long timestamp,
@@ -15,7 +15,7 @@ public record BlockHeader (
     SHA256Hash lastBlockHash,
     SHA256Hash merkleRoot,
     SHA256Hash nonce
-) implements NetworkSerializable {
+) {
 
     public static final int BLOCKHEADER_BUFFER_SIZE = 116;
 
@@ -31,7 +31,6 @@ public record BlockHeader (
         return new BlockHeader(id, timestamp, difficulty, numTransactions, lastBlockHash, merkleRoot, nonce);
 	}
 
-	@Override
 	public ByteBuf toBuffer() {
         var buffer = ByteBufPool.allocateExact(MemSize.of(BLOCKHEADER_BUFFER_SIZE));
         NetworkUtilities.writeNetworkUint32(buffer, this.id());
