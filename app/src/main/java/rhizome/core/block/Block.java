@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import rhizome.core.block.dto.BlockDto;
+import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.net.Serializable;
 import rhizome.core.transaction.Transaction;
 
@@ -39,20 +41,20 @@ public sealed interface Block permits BlockImpl {
                 .build();
     }
 
-    public static Block of(BlockHeader blockHeader, List<Transaction> transactions) {
+    public static Block of(BlockDto blockDto, List<Transaction> transactions) {
         return BlockImpl.builder()
-                .id(blockHeader.id())
-                .timestamp(blockHeader.timestamp())
-                .difficulty(blockHeader.difficulty())
-                .merkleRoot(blockHeader.merkleRoot())
-                .lastBlockHash(blockHeader.lastBlockHash())
-                .nonce(blockHeader.nonce())
+                .id(blockDto.getId())
+                .timestamp(blockDto.getTimestamp())
+                .difficulty(blockDto.getDifficulty())
+                .merkleRoot(new SHA256Hash(blockDto.getMerkleRoot()))
+                .lastBlockHash(new SHA256Hash(blockDto.getLastBlockHash()))
+                .nonce(new SHA256Hash(blockDto.getNonce()))
                 .transactions(transactions)
                 .build();
     }
 
-    public BlockHeader serialize();
-    default BlockHeader serialize(Block block) {
+    public BlockDto serialize();
+    default BlockDto serialize(Block block) {
         return serializer().serialize(block);
     }
 
@@ -76,7 +78,7 @@ public sealed interface Block permits BlockImpl {
     /**
      * Serializes the block
      */
-    static class BlockSerializer implements Serializable<BlockHeader, Block> {
+    static class BlockSerializer implements Serializable<BlockDto, Block> {
 
         static final String ID = "id";
         static final String HASH = "hash";
@@ -90,21 +92,21 @@ public sealed interface Block permits BlockImpl {
         static BlockSerializer instance = new BlockSerializer();
 
         @Override
-        public BlockHeader serialize(Block block) {
+        public BlockDto serialize(Block block) {
             var blockImpl = (BlockImpl) block;
-            return new BlockHeader(
+            return new BlockDto(
                 blockImpl.getId(),
                 blockImpl.getTimestamp(),
                 blockImpl.getDifficulty(),
                 blockImpl.getTransactions().size(),
-                blockImpl.getLastBlockHash(),
-                blockImpl.getMerkleRoot(),
-                blockImpl.getNonce()
+                blockImpl.getLastBlockHash().hash,
+                blockImpl.getMerkleRoot().hash,
+                blockImpl.getNonce().hash
             );
         }
     
         @Override
-        public Block deserialize(BlockHeader object) {
+        public Block deserialize(BlockDto object) {
             throw new UnsupportedOperationException("Not implemented");
         }
     
