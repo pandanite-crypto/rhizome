@@ -17,7 +17,7 @@ public class BlockDto implements BinarySerializable {
     @Serialize public final byte[] merkleRoot;
     @Serialize public final byte[] nonce;
 
-    public static final int BUFFER_SIZE = 116;
+    public static final int BUFFER_SIZE = 119;
 
     public BlockDto(
         @Deserialize("id") int id, 
