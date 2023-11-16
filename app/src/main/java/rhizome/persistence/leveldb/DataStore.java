@@ -132,7 +132,7 @@ public class DataStore {
             return value;
         } else if (type == ByteBuf.class) {
             var buff = ByteBufPool.allocate(MemSize.of(value.length));
-            buff.write(value);
+            buff.put(value);
 
             if (!buff.canRead()) {
                 throw new DataStoreException("Could not read value of record " + key + " from BlockStore db.");

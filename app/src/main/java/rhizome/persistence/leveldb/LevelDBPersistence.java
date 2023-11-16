@@ -10,10 +10,12 @@ import io.activej.bytebuf.ByteBufPool;
 import io.activej.common.MemSize;
 import rhizome.core.block.Block;
 import rhizome.core.block.BlockHeader;
+import rhizome.core.block.dto.BlockDto;
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.net.BinarySerializable;
 import rhizome.core.transaction.Transaction;
-import rhizome.core.transaction.TransactionInfo;
+import rhizome.core.transaction.dto.TransactionDto;
 import rhizome.persistence.BlockPersistence;
 
 import static rhizome.core.transaction.TransactionInfo.TRANSACTIONINFO_BUFFER_SIZE;
@@ -58,25 +60,25 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
         return hasKey(blockId);
     }
 
-    public BlockHeader getBlockHeader(int blockId) {       
-        return BlockHeader.of(getBlockHeadeAsByteBuf(blockId));
+    public BlockDto  getBlockHeader(int blockId) {       
+        return BinarySerializable.fromBuffer((byte[])get(blockId, byte[].class), BlockDto.class);
     }
     public ByteBuf getBlockHeadeAsByteBuf(int blockId) {       
         return (ByteBuf) get(blockId, ByteBuf.class);
     }
 
-    public List<TransactionInfo> getBlockTransactions(BlockHeader block) {
-        var transactions = new ArrayList<TransactionInfo>();
-        for (int i = 0; i < block.numTranactions(); i++) {            
-            var value = (ByteBuf) get(composeKey(block.id(), i), ByteBuf.class);
-            transactions.add(TransactionInfo.of(value));
+    public List<TransactionDto> getBlockTransactions(BlockDto block) {
+        var transactions = new ArrayList<TransactionDto>();
+        for (int i = 0; i < block.getNumTranactions(); i++) {            
+            var value = (byte[]) get(composeKey(block.getId(), i), byte[].class);
+            transactions.add(BinarySerializable.fromBuffer(value, TransactionDto.class));
         }
         return transactions;
     }
 
     public ByteBuf getRawData(int blockId) {
         var blockHeader = getBlockHeader(blockId);
-        var bufferSize = MemSize.of((long) BLOCKHEADER_BUFFER_SIZE + (TRANSACTIONINFO_BUFFER_SIZE * blockHeader.numTranactions()));
+        var bufferSize = MemSize.of((long) BlockDto.BUFFER_SIZE + (TransactionDto.BUFFER_SIZE * blockHeader.getNumTranactions()));
         var buffer = ByteBufPool.allocateExact(bufferSize);
         buffer.put(blockHeader.toBuffer());
 
@@ -86,7 +88,7 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
     }
 
     public Block getBlock(int blockId) {
-        BlockHeader block = getBlockHeader(blockId);
+        BlockDto block = getBlockHeader(blockId);
         List<Transaction> transactions = new ArrayList<>();
         getBlockTransactions(block).forEach(transaction -> transactions.add(Transaction.of(transaction)));
         return Block.of(block, transactions);
@@ -139,14 +141,14 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
 
 
     public void addBlock(Block block) throws DataStoreException {
-        set(block.getId(), block.serialize().toBuffer().asArray());
+        set(block.getId(), block.serialize().toBuffer());
 
         for (int i = 0; i < block.getTransactions().size(); i++) {
             var transaction = block.getTransactions().get(i);
-            var transactionInfo = transaction.serialize();
-            set(composeKey(block.getId(), i), transactionInfo.toBuffer().asArray());
-            set(WalletTransactionKey.key(transactionInfo.from(), transaction.hashContents()), new byte[0]);
-            set(WalletTransactionKey.key(transactionInfo.to(), transaction.hashContents()), new byte[0]);
+            var transactionDto = transaction.serialize();
+            set(composeKey(block.getId(), i), transactionDto.toBuffer());
+            set(composeKey(transactionDto.getFrom(), transaction.hashContents().hash), new byte[0]);
+            set(composeKey(transactionDto.getTo(), transaction.hashContents().hash), new byte[0]);
         }
     }
 
