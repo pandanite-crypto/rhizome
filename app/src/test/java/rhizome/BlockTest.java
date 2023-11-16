@@ -2,9 +2,9 @@ package rhizome;
 
 import org.junit.jupiter.api.Test;
 
-import io.activej.bytebuf.ByteBuf;
 import rhizome.core.block.Block;
-import rhizome.core.block.BlockHeader;
+import rhizome.core.block.dto.BlockDto;
+import rhizome.core.net.BinarySerializable;
 import rhizome.core.user.User;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,21 +47,20 @@ class BlockTest {
 
     @Test
     void checkBlockNetworkSerialization() {
-        var a = Block.empty();
+        var blockA = Block.empty();
         var miner = User.create();
         var receiver = User.create();
-        var t = miner.mine();
-        a.addTransaction(t);
+        var transaction = miner.mine();
+        blockA.addTransaction(transaction);
         // send tiny shares to receiver:
         for(int i = 0; i < 5; i++) {
-            a.addTransaction(miner.send(receiver, 1));
+            blockA.addTransaction(miner.send(receiver, 1));
         }
-        var d = a.serialize();
-        // Assuming blockHeaderToBuffer and blockHeaderFromBuffer are defined
-        ByteBuf buf = d.toBuffer();
-        BlockHeader c = BlockHeader.of(buf);
-        Block check = Block.of(c, a.getTransactions());
-        assertEquals(check, a);
+        var blockADto = blockA.serialize();
+        var blockABuf = blockADto.toBuffer();
+        var blockBDto = BinarySerializable.fromBuffer(blockABuf, BlockDto.class);
+        var blockB = Block.of(blockBDto, blockA.getTransactions());
+        assertEquals(blockB, blockA);
     }
 
     @Test

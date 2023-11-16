@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.TransactionImpl;
-import rhizome.core.transaction.TransactionInfo;
+import rhizome.core.transaction.dto.TransactionDto;
 import rhizome.core.user.User;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,7 +50,7 @@ class TransactionTests {
 
         // Test the send transaction
         long ts = ((TransactionImpl) t2).getTimestamp();
-        TransactionInfo serialized = t2.serialize();
+        TransactionDto serialized = t2.serialize();
         Transaction deserialized = Transaction.of(serialized);
 
         assertTrue(deserialized.signatureValid());
