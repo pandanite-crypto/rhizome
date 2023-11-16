@@ -15,6 +15,7 @@ import lombok.Data;
 import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.common.Utils.SHA256Hash;
 import rhizome.core.common.Utils.TransactionSignature;
+import rhizome.core.transaction.dto.TransactionDto;
 
 import static rhizome.core.common.Crypto.signWithPrivateKey;
 import static rhizome.core.common.Crypto.checkSignature;
@@ -48,7 +49,7 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
     /**
      * Serialization
      */
-    public TransactionInfo serialize() {
+    public TransactionDto serialize() {
        return serialize(this);
     }
 
