@@ -23,6 +23,7 @@ public class Utils {
 
     private Utils() {}
     
+    @Deprecated    
     public record PublicWalletAddress(ByteBuf address) implements SimpleHashType {
         public PublicWalletAddress {
             checkSize(address);
@@ -86,6 +87,7 @@ public class Utils {
         }
     }
     
+    @Deprecated
     public static class TransactionSignature {
         public static final int SIZE = 64;
         public byte[] signature = new byte[SIZE];
@@ -110,7 +112,8 @@ public class Utils {
             return Arrays.hashCode(signature);
         }
     }
-    
+
+    @Deprecated
     public static class SHA256Hash implements Comparable<SHA256Hash> {
         public static final int SHA256_LENGTH = 32;
         public byte[] hash = new byte[SHA256_LENGTH];
@@ -147,6 +150,7 @@ public class Utils {
         }
     }
     
+    @Deprecated
     public static String walletAddressToString(ByteBuf p) {
         StringBuilder sb = new StringBuilder();
         while (p.canRead()) {
@@ -156,6 +160,7 @@ public class Utils {
         return sb.toString();
     }
     
+    @Deprecated
     public static PublicWalletAddress stringToWalletAddress(String s) {
         if (s.length() != 50) {
             throw new IllegalArgumentException("Invalid wallet address string");
@@ -171,6 +176,7 @@ public class Utils {
         return new PublicWalletAddress(buf);
     }  
 
+    @Deprecated
     public static String publicKeyToString(Ed25519PublicKeyParameters pubKey) {
         if (pubKey == null) {
             return "";
@@ -178,6 +184,7 @@ public class Utils {
         return hexFormat.formatHex(pubKey.getEncoded() == null ? new byte[0] : pubKey.getEncoded());
     }
 
+    @Deprecated
     public static Ed25519PublicKeyParameters stringToPublicKey(String s) {
         if ("".equals(s)) {
             return null;
