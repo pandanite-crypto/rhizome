@@ -18,7 +18,7 @@ public class TransactionDto implements BinarySerializable {
     @Serialize public final long fee;
     @Serialize public final boolean isTransactionFee;
 
-    public static final int BUFFER_SIZE = 149;
+    public static final int BUFFER_SIZE = 1024;
 
     public TransactionDto(
         @Deserialize("signature") String signature, 
