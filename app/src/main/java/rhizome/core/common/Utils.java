@@ -111,10 +111,6 @@ public class Utils {
         }
     }
     
-    public static class LedgerState {
-        public Map<PublicWalletAddress, TransactionAmount> state;
-    }
-    
     public static class SHA256Hash implements Comparable<SHA256Hash> {
         public static final int SHA256_LENGTH = 32;
         public byte[] hash = new byte[SHA256_LENGTH];
@@ -151,10 +147,6 @@ public class Utils {
         }
     }
     
-    public static class RIPEMD160Hash {
-        public byte[] hash = new byte[20];
-    }
-
     public static String walletAddressToString(ByteBuf p) {
         StringBuilder sb = new StringBuilder();
         while (p.canRead()) {
