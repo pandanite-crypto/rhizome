@@ -79,9 +79,9 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
         var digest = new SHA256Digest();
         var sha256Hash = new SHA256Hash();
 
-        digest.update(to.address().array(), 0, to.address().readRemaining());
+        digest.update(to.address().getArray(), 0, to.address().readRemaining());
         if (!isTransactionFee) {
-            digest.update(from.address().array(), 0, from.address().readRemaining());
+            digest.update(from.address().getArray(), 0, from.address().readRemaining());
         }
         digest.update(longToBytes(fee.amount()), 0, 8);
         digest.update(longToBytes(amount.amount()), 0, 8);
