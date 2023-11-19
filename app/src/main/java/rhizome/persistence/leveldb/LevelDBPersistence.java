@@ -81,8 +81,26 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
         buffer.put(blockHeader.toBuffer());
 
         getBlockTransactions(blockHeader).forEach(transaction -> buffer.put(transaction.toBuffer()));
-        buffer.head(0);
         return buffer;
+    }
+
+    public Block fromRawData(byte[] rawData) {
+        var buffer = ByteBuf.wrapForReading(rawData);
+    
+        var blockHeaderData = new byte[BlockDto.BUFFER_SIZE];
+        buffer.read(blockHeaderData);
+        var blockHeader = BinarySerializable.fromBuffer(blockHeaderData, BlockDto.class);
+    
+        var block = Block.of(blockHeader, new ArrayList<>());
+    
+        for (var i = 0; i < blockHeader.getNumTranactions(); i++) {
+            var transactionData = new byte[TransactionDto.BUFFER_SIZE];
+            buffer.read(transactionData);
+            TransactionDto transactionDto = BinarySerializable.fromBuffer(transactionData, TransactionDto.class);
+            block.addTransaction(Transaction.of(transactionDto));
+        }
+    
+        return block;
     }
 
     public Block getBlock(int blockId) {
@@ -156,7 +174,7 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
         public WalletTransactionKey(PublicWalletAddress address, SHA256Hash txId, boolean isStartKey) {
             this.addr = address;
             this.txId = new SHA256Hash();
-            
+
             if(isStartKey) {
                 Arrays.fill(this.txId.hash, (byte) -128);
             } else {

@@ -64,6 +64,7 @@ public sealed interface Block permits BlockImpl {
     }
 
     public int getId();
+    public void setId(int id);
     public void addTransaction(Transaction t);
     public List<Transaction> getTransactions();
 
