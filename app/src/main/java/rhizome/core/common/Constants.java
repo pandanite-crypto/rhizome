@@ -1,7 +1,6 @@
 package rhizome.core.common;
 
 import rhizome.core.common.Utils.PublicWalletAddress;
-import rhizome.core.common.Utils.SHA256Hash;
 
 public final class Constants {
 
@@ -33,7 +32,5 @@ public final class Constants {
     public static final int MIN_DIFFICULTY = 6;
     public static final int MAX_DIFFICULTY = 255;
 
-    public static final SHA256Hash NULL_SHA256_HASH = new SHA256Hash();
-    public static final SHA256Hash NULL_KEY = new SHA256Hash();
     public static final PublicWalletAddress NULL_ADDRESS = PublicWalletAddress.empty();
 }
