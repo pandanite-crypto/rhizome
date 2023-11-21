@@ -1,7 +1,5 @@
 package rhizome.core.common;
 
-import rhizome.core.common.Utils.PublicWalletAddress;
-
 public final class Constants {
 
     private Constants() {}
@@ -31,6 +29,4 @@ public final class Constants {
     public static final int DESIRED_BLOCK_TIME_SEC = 90;
     public static final int MIN_DIFFICULTY = 6;
     public static final int MAX_DIFFICULTY = 255;
-
-    public static final PublicWalletAddress NULL_ADDRESS = PublicWalletAddress.empty();
 }
