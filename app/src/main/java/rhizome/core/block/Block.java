@@ -5,13 +5,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import rhizome.core.block.dto.BlockDto;
-import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.net.Serializable;
 import rhizome.core.transaction.Transaction;
 
 import static rhizome.core.common.Helpers.longToString;
-import static rhizome.core.common.Utils.SHA256toString;
-import static rhizome.core.common.Utils.stringToSHA256;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -46,9 +44,9 @@ public sealed interface Block permits BlockImpl {
                 .id(blockDto.getId())
                 .timestamp(blockDto.getTimestamp())
                 .difficulty(blockDto.getDifficulty())
-                .merkleRoot(new SHA256Hash(blockDto.getMerkleRoot()))
-                .lastBlockHash(new SHA256Hash(blockDto.getLastBlockHash()))
-                .nonce(new SHA256Hash(blockDto.getNonce()))
+                .merkleRoot(blockDto.getMerkleRoot())
+                .lastBlockHash(blockDto.getLastBlockHash())
+                .nonce(blockDto.getNonce())
                 .transactions(transactions)
                 .build();
     }
@@ -100,9 +98,9 @@ public sealed interface Block permits BlockImpl {
                 blockImpl.getTimestamp(),
                 blockImpl.getDifficulty(),
                 blockImpl.getTransactions().size(),
-                blockImpl.getLastBlockHash().hash,
-                blockImpl.getMerkleRoot().hash,
-                blockImpl.getNonce().hash
+                blockImpl.getLastBlockHash(),
+                blockImpl.getMerkleRoot(),
+                blockImpl.getNonce()
             );
         }
     
@@ -117,15 +115,15 @@ public sealed interface Block permits BlockImpl {
             JSONObject result = new JSONObject();
             result.put(ID, blockImpl.getId());
             try {
-                result.put(HASH, SHA256toString(blockImpl.getHash()));
+                result.put(HASH, blockImpl.getHash().toHexString());
             } catch (JSONException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
             result.put(DIFFICULTY, blockImpl.getDifficulty());
-            result.put(NONCE, SHA256toString(blockImpl.getNonce()));
+            result.put(NONCE, blockImpl.getNonce().toHexString());
             result.put(TIMESTAMP, longToString(blockImpl.getTimestamp()));
-            result.put(MERKLE_ROOT, SHA256toString(blockImpl.getMerkleRoot()));
-            result.put(LAST_BLOCK_HASH, SHA256toString(blockImpl.getLastBlockHash()));
+            result.put(MERKLE_ROOT, blockImpl.getMerkleRoot().toHexString());
+            result.put(LAST_BLOCK_HASH, blockImpl.getLastBlockHash().toHexString());
             JSONArray transactionsArray = new JSONArray();
             for (Transaction transaction : blockImpl.getTransactions()) {
                 transactionsArray.put(transaction.toJson());
@@ -139,9 +137,9 @@ public sealed interface Block permits BlockImpl {
                 .id(json.getInt(ID))
                 .timestamp(json.getLong(TIMESTAMP))
                 .difficulty(json.getInt(DIFFICULTY))
-                .merkleRoot(stringToSHA256(json.getString(MERKLE_ROOT)))
-                .lastBlockHash(stringToSHA256(json.getString(LAST_BLOCK_HASH)))
-                .nonce(stringToSHA256(json.getString(NONCE)))
+                .merkleRoot(SHA256Hash.of(json.getString(MERKLE_ROOT)))
+                .lastBlockHash(SHA256Hash.of(json.getString(LAST_BLOCK_HASH)))
+                .nonce(SHA256Hash.of(json.getString(NONCE)))
                 .transactions(
                     IntStream.range(0, json.getJSONArray(TRANSACTIONS).length())
                         .mapToObj(i -> Transaction.of(json.getJSONArray(TRANSACTIONS).getJSONObject(i)))
