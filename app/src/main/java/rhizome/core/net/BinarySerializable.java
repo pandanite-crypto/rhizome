@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 
 import io.activej.serializer.BinarySerializer;
 import io.activej.serializer.SerializerBuilder;
+import rhizome.core.crypto.SHA256Hash;
+import rhizome.core.ledger.PublicAddress;
 
 public interface BinarySerializable {
     static Map<Class<? extends BinarySerializable>, BinarySerializer<? extends BinarySerializable>> serializerCache = new ConcurrentHashMap<>();
@@ -27,6 +29,10 @@ public interface BinarySerializable {
     int getSize();
 
     static <T extends BinarySerializable> BinarySerializer<T> getSerializer(Class<T> clazz) {
-        return (BinarySerializer<T>) serializerCache.computeIfAbsent(clazz, k -> SerializerBuilder.create().build(k));
+        return (BinarySerializer<T>) serializerCache.computeIfAbsent(clazz, k -> 
+            SerializerBuilder.create()
+            .with(SHA256Hash.class, ctx -> new SerializerDefSHA256Hash())
+            .with(PublicAddress.class, ctx -> new SerializerDefPublicAddress())
+            .build(k));
     }
 }
