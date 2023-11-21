@@ -4,7 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import io.activej.serializer.annotations.SerializeFixedSize;
 import lombok.Getter;
+import rhizome.core.ledger.PublicAddress;
 import rhizome.core.net.BinarySerializable;
 
 @Getter
@@ -12,8 +14,8 @@ public class TransactionDto implements BinarySerializable {
     @Serialize public final String signature;
     @Serialize public final String signingKey;
     @Serialize public final long timestamp;
-    @Serialize public final byte[] to;
-    @Serialize public final byte[] from;
+    @Serialize public final byte @SerializeFixedSize(PublicAddress.SIZE) [] to;
+    @Serialize public final byte @SerializeFixedSize(PublicAddress.SIZE) [] from;
     @Serialize public final long amount;
     @Serialize public final long fee;
     @Serialize public final boolean isTransactionFee;
