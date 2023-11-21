@@ -18,7 +18,7 @@ import rhizome.core.transaction.TransactionImpl;
 import rhizome.core.user.User;
 import rhizome.persistence.leveldb.LevelDBPersistence;
 
-class LevelDBPersistenceTests {
+class LevelDBBlockPersistenceTests {
 
     private static final String TEST_DB_PATH = "./test-data/tmpdb";
     private LevelDBPersistence blocks;
