@@ -2,6 +2,10 @@ package rhizome;
 
 import org.junit.jupiter.api.Test;
 
+import rhizome.core.crypto.PrivateKey;
+import rhizome.core.crypto.PublicKey;
+import rhizome.core.crypto.SHA256Hash;
+
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -11,13 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static rhizome.core.common.Crypto.SHA256;
 import static rhizome.core.common.Crypto.generateKeyPair;
 import static rhizome.core.common.Crypto.signWithPrivateKey;
+import static rhizome.core.common.Utils.bytesToHex;
+import static rhizome.core.common.Utils.hexStringToByteArray;
 import static rhizome.core.common.Crypto.checkSignature;
-import static rhizome.core.common.Utils.signatureToString;
-import static rhizome.core.common.Utils.SHA256toString;
-import static rhizome.core.common.Utils.stringToSHA256;
-import static rhizome.core.common.Utils.stringToPublicKey;
-import static rhizome.core.common.Utils.publicKeyToString;
-import static rhizome.core.common.Utils.stringToSignature;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -27,12 +27,12 @@ class CryptoTests {
     @Test
     void testKeyStringConversion() {
         var keys = generateKeyPair();
-        var publicKey = (Ed25519PublicKeyParameters) keys.getPublic();
-        var publicKeyData = publicKey.getEncoded();
+        var publicKey = new PublicKey((Ed25519PublicKeyParameters) keys.getPublic());
+        var publicKeyData = publicKey.key().getEncoded();
 
-        var publicKeyString = publicKeyToString(publicKey);
-        var convertedPublicKey = stringToPublicKey(publicKeyString);
-        var convertedPublicKeyData = convertedPublicKey.getEncoded();
+        var publicKeyString = publicKey.toHexString();
+        var convertedPublicKey = PublicKey.of(publicKeyString);
+        var convertedPublicKeyData = convertedPublicKey.key().getEncoded();
 
         assertArrayEquals(publicKeyData, convertedPublicKeyData);
     }
@@ -40,21 +40,21 @@ class CryptoTests {
     @Test
     void testSignatureStringConversion() {
         var keys = generateKeyPair();
-        var privateKey = (Ed25519PrivateKeyParameters) keys.getPrivate();
+        var privateKey = new PrivateKey((Ed25519PrivateKeyParameters) keys.getPrivate());
         var message = "FOOBAR";
         var signature = signWithPrivateKey(message.getBytes(StandardCharsets.UTF_8), privateKey);
 
-        var signatureString = signatureToString(signature);
-        var convertedSignature = stringToSignature(signatureString);
+        var signatureString = bytesToHex(signature);
+        var convertedSignature = hexStringToByteArray(signatureString);
 
-        assertArrayEquals(signature, convertedSignature.signature);
+        assertArrayEquals(signature, convertedSignature);
     }
 
     @Test
     void testSignatureVerifications() {
         var keys = generateKeyPair();
-        var privateKey = (Ed25519PrivateKeyParameters) keys.getPrivate();
-        var publicKey = (Ed25519PublicKeyParameters) keys.getPublic();
+        var privateKey = new PrivateKey((Ed25519PrivateKeyParameters) keys.getPrivate());
+        var publicKey = new PublicKey((Ed25519PublicKeyParameters) keys.getPublic());
 
         var message = "FOOBAR";
         var signature = signWithPrivateKey(message.getBytes(StandardCharsets.UTF_8), privateKey);
@@ -63,7 +63,7 @@ class CryptoTests {
 
         // check with wrong public key
         var wrongKeys = generateKeyPair();
-        var wrongPrivateKey = (Ed25519PrivateKeyParameters) wrongKeys.getPrivate();
+        var wrongPrivateKey = new PrivateKey((Ed25519PrivateKeyParameters) wrongKeys.getPrivate());
         var wrongSignature = signWithPrivateKey(message.getBytes(StandardCharsets.UTF_8), wrongPrivateKey);
         status = checkSignature(message.getBytes(StandardCharsets.UTF_8), wrongSignature, publicKey);
         assertFalse(status);
@@ -109,10 +109,10 @@ class CryptoTests {
     void sha256ToString() {
         var message = "FOOBAR";
         var hash = SHA256(message.getBytes(StandardCharsets.UTF_8));
-        var hashString = SHA256toString(hash);
-        var convertedHash = stringToSHA256(hashString);
+        var hashString = hash.toHexString();
+        var convertedHash = SHA256Hash.of(hashString);
 
-        assertArrayEquals(hash.hash, convertedHash.hash);
+        assertTrue(hash.hash().isContentEqual(convertedHash.hash()));
     }
 
     private BigInteger addWork(BigInteger work, int exponent) {

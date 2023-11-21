@@ -11,40 +11,39 @@ import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.generators.Ed25519KeyPairGenerator;
 import org.bouncycastle.crypto.params.Ed25519KeyGenerationParameters;
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.bouncycastle.crypto.signers.Ed25519Signer;
 
-import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.crypto.PrivateKey;
+import rhizome.core.crypto.PublicKey;
+import rhizome.core.crypto.SHA256Hash;
 
 public class Crypto {
 
     private Crypto() {}
 
-    public static byte[] signWithPrivateKey(String content, Ed25519PrivateKeyParameters privateKey) {
+    public static byte[] signWithPrivateKey(String content, PrivateKey privateKey) {
         return signWithPrivateKey(content.getBytes(), privateKey);
     }
 
-    public static byte[] signWithPrivateKey(byte[] message, Ed25519PrivateKeyParameters privateKey) {
+    public static byte[] signWithPrivateKey(byte[] message, PrivateKey privateKey) {
         try {
             Signer signer = new Ed25519Signer();
-            signer.init(true, privateKey);
+            signer.init(true, privateKey.key());
             signer.update(message, 0, message.length);
             return signer.generateSignature();
-
         } catch (Exception e) {
             e.printStackTrace();
             return new byte[0];
         }
     }
 
-    public static boolean checkSignature(String content, byte[] signature, Ed25519PublicKeyParameters publicKey) {
+    public static boolean checkSignature(String content, byte[] signature, PublicKey publicKey) {
         return checkSignature(content.getBytes(), signature, publicKey);
     }
     
-    public static boolean checkSignature(byte[] bytes, byte[] signature, Ed25519PublicKeyParameters publicKey) {
+    public static boolean checkSignature(byte[] bytes, byte[] signature, PublicKey publicKey) {
         Ed25519Signer signer = new Ed25519Signer();
-        signer.init(false, publicKey);
+        signer.init(false, publicKey.key());
         signer.update(bytes, 0, bytes.length);
         return signer.verifySignature(signature);
     }
@@ -58,7 +57,7 @@ public class Crypto {
     private static final ConcurrentHashMap<SHA256Hash, SHA256Hash> pufferfishCache = new ConcurrentHashMap<>();
 
     public static SHA256Hash PUFFERFISH(byte[] input, boolean useCache) {
-        SHA256Hash inputHash = new SHA256Hash(input);
+        SHA256Hash inputHash = SHA256Hash.of(input);
         
         if (useCache) {
             // Implement cache retrieval logic here
@@ -94,7 +93,7 @@ public class Crypto {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(data);
-            return new SHA256Hash(hash);
+            return SHA256Hash.of(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Unable to find SHA-256 algorithm", e);
         }
@@ -105,18 +104,17 @@ public class Crypto {
         long st = System.currentTimeMillis();
 
         byte[] concat = new byte[2 * 32];
-        SHA256Hash solution = new SHA256Hash(new byte[32]);
         Random rand = new SecureRandom();
 
         // Copy the target hash into the first part of concat.
-        System.arraycopy(target.hash, 0, concat, 0, 32);
+        System.arraycopy(target.hash().getArray(), 0, concat, 0, 32);
         // Fill with random data for privacy
         byte[] randomBytes = new byte[32];
         rand.nextBytes(randomBytes);
         System.arraycopy(randomBytes, 0, concat, 32, 32);
 
         long i = 0;
-
+        SHA256Hash solution;
         while (true) {
             if (++hashes > 1024) {
                 long elapsed = System.currentTimeMillis() - st;
@@ -130,7 +128,7 @@ public class Crypto {
             incrementByteArrayByOne(concat, 32);
 
             // This assumes solution is mutable.
-            solution.hash = Arrays.copyOfRange(concat, 32, 64);
+            solution = SHA256Hash.of(Arrays.copyOfRange(concat, 32, 64));
             SHA256Hash fullHash = concatHashes(target, solution, usePufferFish, false);
 
             boolean found = checkLeadingZeroBits(fullHash, challengeSize);
@@ -155,8 +153,8 @@ public class Crypto {
         // Assuming SHA256 is a method that takes a byte array and returns a SHA256Hash object
         // Pufferfish and caching functionality would need to be implemented within the SHA256 method.
         byte[] data = new byte[64];
-        System.arraycopy(a.hash, 0, data, 0, 32);
-        System.arraycopy(b.hash, 0, data, 32, 32);
+        System.arraycopy(a.hash().getArray(), 0, data, 0, 32);
+        System.arraycopy(b.hash().getArray(), 0, data, 32, 32);
         
         // Instead of 'usePufferFish' and 'useCache' which are not standard,
         // you'd typically call a standard Java SHA-256 implementation here.
@@ -165,7 +163,7 @@ public class Crypto {
     }
 
     public static boolean checkLeadingZeroBits(SHA256Hash hash, int challengeSize) {
-        byte[] a = hash.hash;
+        byte[] a = hash.hash().getArray();
         int bytes = challengeSize / 8;
         for (int i = 0; i < bytes; i++) {
             if (a[i] != 0) return false;

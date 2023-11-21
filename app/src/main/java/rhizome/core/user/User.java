@@ -5,16 +5,14 @@ import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import rhizome.core.common.Utils.PublicWalletAddress;
+import rhizome.core.crypto.PrivateKey;
+import rhizome.core.crypto.PublicKey;
+import rhizome.core.ledger.PublicAddress;
 import rhizome.core.net.Serializable;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.TransactionAmount;
 
 import static rhizome.core.common.Helpers.PDN;
-import static rhizome.core.common.Utils.privateKeyToString;
-import static rhizome.core.common.Utils.publicKeyToString;
-import static rhizome.core.common.Utils.stringToPrivateKey;
-import static rhizome.core.common.Utils.stringToPublicKey;
 import static rhizome.core.common.Crypto.generateKeyPair;
 
 public interface User {
@@ -22,8 +20,8 @@ public interface User {
     public static User create() {
         var kp = generateKeyPair();
         return UserImpl.builder()
-                .publicKey((Ed25519PublicKeyParameters) kp.getPublic())
-                .privateKey((Ed25519PrivateKeyParameters) kp.getPrivate())
+                .publicKey(new PublicKey((Ed25519PublicKeyParameters) kp.getPublic()))
+                .privateKey(new PrivateKey((Ed25519PrivateKeyParameters) kp.getPrivate()))
                 .build();
     }
 
@@ -31,11 +29,11 @@ public interface User {
         return serializer().fromJson(json);
     }
 
-    public Ed25519PublicKeyParameters getPublicKey();
-    public Ed25519PrivateKeyParameters getPrivateKey();
+    public PublicKey getPublicKey();
+    public PrivateKey getPrivateKey();
 
-    default PublicWalletAddress getAddress() {
-        return PublicWalletAddress.fromPublicKey(getPublicKey());
+    default PublicAddress getAddress() {
+        return PublicAddress.of(getPublicKey());
     }
 
     default Transaction mine() {
@@ -48,11 +46,11 @@ public interface User {
 
     default Transaction send(User to, TransactionAmount amount) {
         return Transaction.of(getAddress(), to.getAddress(), amount, getPublicKey())
-            .sign(getPublicKey(), getPrivateKey());
+            .sign(getPrivateKey());
     }
 
     default void signTransaction(Transaction transaction) {
-        transaction.sign(getPublicKey(), getPrivateKey());
+        transaction.sign(getPrivateKey());
     }
 
     public JSONObject toJson();
@@ -86,8 +84,8 @@ public interface User {
         public User fromJson(JSONObject json) {
             try {
                 return UserImpl.builder()
-                        .publicKey(stringToPublicKey(json.getString(PUBLIC_KEY)))
-                        .privateKey(stringToPrivateKey(json.getString(PRIVATE_KEY)))
+                        .publicKey(PublicKey.of(json.getString(PUBLIC_KEY)))
+                        .privateKey(PrivateKey.of(json.getString(PRIVATE_KEY)))
                         .build();
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -98,8 +96,8 @@ public interface User {
         public JSONObject toJson(User user) {
             var userImpl = (UserImpl) user;
             JSONObject result = new JSONObject();
-            result.put(PUBLIC_KEY, publicKeyToString(userImpl.getPublicKey()));
-            result.put(PRIVATE_KEY, privateKeyToString(userImpl.getPrivateKey()));
+            result.put(PUBLIC_KEY, userImpl.getPublicKey().toHexString());
+            result.put(PRIVATE_KEY, userImpl.getPrivateKey().toHexString());
             return result;
         }
     }

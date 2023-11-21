@@ -1,7 +1,7 @@
 package rhizome.core.merkletree;
 import lombok.Getter;
 import lombok.Setter;
-import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.transaction.Transaction;
 
 

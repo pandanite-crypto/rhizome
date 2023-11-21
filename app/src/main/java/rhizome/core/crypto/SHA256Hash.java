@@ -1,12 +1,13 @@
 package rhizome.core.crypto;
 
+import java.util.Arrays;
 import io.activej.bytebuf.ByteBuf;
 import rhizome.core.common.SimpleHashType;
 
 import static rhizome.core.common.Utils.bytesToHex;
 import static rhizome.core.common.Utils.hexStringToByteArray;
 
-public record SHA256Hash (ByteBuf hash) implements SimpleHashType {
+public record SHA256Hash (ByteBuf hash) implements SimpleHashType, Comparable<SHA256Hash> {
 
     public static SHA256Hash empty() {
         return new SHA256Hash(SimpleHashType.empty(SIZE));
@@ -28,12 +29,32 @@ public record SHA256Hash (ByteBuf hash) implements SimpleHashType {
         return bytesToHex(hash.getArray());
     }
 
+    public byte[] toBytes() {
+        return hash.getArray();
+    }
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof SHA256Hash)) {
             return false;
         }
         return hash.isContentEqual(((SHA256Hash) other).hash());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(hash.getArray());
+    }
+
+    @Override
+    public int compareTo(SHA256Hash o) {
+        for (int i = 0; i < this.hash.getArray().length; i++) {
+            int compare = Byte.compare(this.hash.getArray()[i], o.hash.getArray()[i]);
+            if (compare != 0) {
+                return compare;
+            }
+        }
+        return 0;
     }
 
     public static final int SIZE = 32;

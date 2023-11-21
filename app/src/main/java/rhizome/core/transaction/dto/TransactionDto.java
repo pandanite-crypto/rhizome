@@ -4,30 +4,29 @@ import org.jetbrains.annotations.NotNull;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
-import io.activej.serializer.annotations.SerializeFixedSize;
 import lombok.Getter;
+import rhizome.core.crypto.PublicKey;
 import rhizome.core.ledger.PublicAddress;
 import rhizome.core.net.BinarySerializable;
+import rhizome.core.transaction.TransactionSignature;
 
 @Getter
 public class TransactionDto implements BinarySerializable {
-    @Serialize public final String signature;
-    @Serialize public final String signingKey;
+    @Serialize public final TransactionSignature signature;
+    @Serialize public final PublicKey signingKey;
     @Serialize public final long timestamp;
-    @Serialize public final byte @SerializeFixedSize(PublicAddress.SIZE) [] to;
-    @Serialize public final byte @SerializeFixedSize(PublicAddress.SIZE) [] from;
+    @Serialize public final PublicAddress to;
     @Serialize public final long amount;
     @Serialize public final long fee;
     @Serialize public final boolean isTransactionFee;
 
-    public static final int BUFFER_SIZE = 1024;
+    public static final int BUFFER_SIZE = 149;
 
     public TransactionDto(
-        @Deserialize("signature") String signature, 
-        @Deserialize("signingKey") String signingKey, 
+        @Deserialize("signature") TransactionSignature signature, 
+        @Deserialize("signingKey") PublicKey signingKey, 
         @Deserialize("timestamp") long timestamp, 
-        @Deserialize("to") byte[] to, 
-        @Deserialize("from") byte[] from, 
+        @Deserialize("to") PublicAddress to,
         @Deserialize("amount") long amount, 
         @Deserialize("fee") long fee, 
         @Deserialize("isTransactionFee") boolean isTransactionFee) {
@@ -36,7 +35,6 @@ public class TransactionDto implements BinarySerializable {
         this.signingKey = signingKey;
         this.timestamp = timestamp;
         this.to = to;
-        this.from = from;
         this.amount = amount;
         this.fee = fee;
         this.isTransactionFee = isTransactionFee;

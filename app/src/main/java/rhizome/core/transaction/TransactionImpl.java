@@ -6,15 +6,14 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONObject;
 
 import lombok.Builder;
 import lombok.Data;
-import rhizome.core.common.Utils.PublicWalletAddress;
-import rhizome.core.common.Utils.SHA256Hash;
-import rhizome.core.common.Utils.TransactionSignature;
+import rhizome.core.crypto.PrivateKey;
+import rhizome.core.crypto.PublicKey;
+import rhizome.core.crypto.SHA256Hash;
+import rhizome.core.ledger.PublicAddress;
 import rhizome.core.transaction.dto.TransactionDto;
 
 import static rhizome.core.common.Crypto.signWithPrivateKey;
@@ -25,10 +24,10 @@ import static rhizome.core.common.Crypto.checkSignature;
 public final class TransactionImpl implements Transaction, Comparable<Transaction> {
     
     @Builder.Default
-    private PublicWalletAddress from = PublicWalletAddress.empty();
+    private PublicAddress from = PublicAddress.empty();
 
     @Builder.Default
-    private PublicWalletAddress to = PublicWalletAddress.empty();
+    private PublicAddress to = PublicAddress.empty();
 
     private TransactionAmount amount;
 
@@ -41,10 +40,10 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
     @Builder.Default
     private TransactionAmount fee = new TransactionAmount(0);
 
-    private Ed25519PublicKeyParameters signingKey;
+    private PublicKey signingKey;
 
     @Builder.Default
-    private TransactionSignature signature = new TransactionSignature();
+    private TransactionSignature signature = TransactionSignature.empty();
 
     /**
      * Serialization
@@ -59,25 +58,25 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
     
     public boolean signatureValid() {
         if (isTransactionFee()) return true;
-        return checkSignature(hashContents().hash, this.signature.signature, this.signingKey);
+        return checkSignature(hashContents().toBytes(), this.signature.toBytes(), this.signingKey);
     }
 
     public SHA256Hash getHash() {
         var digest = new SHA256Digest();
-        var sha256Hash = new SHA256Hash();
+        var sha256Hash = new byte[SHA256Hash.SIZE];
 
-        var hashContents = hashContents().hash;
+        var hashContents = hashContents().toBytes();
         digest.update(hashContents, 0, hashContents.length);
         if(!isTransactionFee) {
-            digest.update(signature.signature, 0, signature.signature.length);
+            digest.update(signature.toBytes(), 0, signature.toBytes().length);
         }
-        digest.doFinal(sha256Hash.hash, 0);
-        return sha256Hash;
+        digest.doFinal(sha256Hash, 0);
+        return SHA256Hash.of(sha256Hash);
     }
 
     public SHA256Hash hashContents() {
         var digest = new SHA256Digest();
-        var sha256Hash = new SHA256Hash();
+        var sha256Hash = new byte[SHA256Hash.SIZE];
 
         digest.update(to.address().getArray(), 0, to.address().readRemaining());
         if (!isTransactionFee) {
@@ -86,13 +85,13 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
         digest.update(longToBytes(fee.amount()), 0, 8);
         digest.update(longToBytes(amount.amount()), 0, 8);
         digest.update(longToBytes(timestamp), 0, 8);
-        digest.doFinal(sha256Hash.hash, 0);
+        digest.doFinal(sha256Hash, 0);
 
-        return sha256Hash;
+        return SHA256Hash.of(sha256Hash);
     }
 
-    public Transaction sign(Ed25519PublicKeyParameters pubKey, Ed25519PrivateKeyParameters signingKey) {
-        this.signature.signature = signWithPrivateKey(hashContents().hash, signingKey);
+    public Transaction sign(PrivateKey signingKey) {
+        this.signature = TransactionSignature.of(signWithPrivateKey(hashContents().toBytes(), signingKey));
         return this;
     }
 
@@ -109,7 +108,7 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
         TransactionImpl that = (TransactionImpl) obj;
         boolean isSigningKeyEqual = (signingKey == null && that.signingKey == null) ||
                                     (signingKey != null && that.signingKey != null &&
-                                     Arrays.equals(signingKey.getEncoded(), that.signingKey.getEncoded()));
+                                     Arrays.equals(signingKey.key().getEncoded(), that.signingKey.key().getEncoded()));
         
         return timestamp == that.timestamp &&
                isTransactionFee == that.isTransactionFee &&

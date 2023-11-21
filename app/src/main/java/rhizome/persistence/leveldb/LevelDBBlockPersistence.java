@@ -8,11 +8,10 @@ import org.iq80.leveldb.WriteOptions;
 import io.activej.bytebuf.ByteBuf;
 import io.activej.bytebuf.ByteBufPool;
 import io.activej.common.MemSize;
-import lombok.extern.slf4j.Slf4j;
 import rhizome.core.block.Block;
 import rhizome.core.block.dto.BlockDto;
-import rhizome.core.common.Utils.PublicWalletAddress;
-import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.crypto.SHA256Hash;
+import rhizome.core.ledger.PublicAddress;
 import rhizome.core.net.BinarySerializable;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.dto.TransactionDto;
@@ -24,13 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Slf4j
-public class LevelDBPersistence extends DataStore implements BlockPersistence {
+public class LevelDBBlockPersistence extends DataStore implements BlockPersistence {
 
     static final String BLOCK_COUNT_KEY = "BLOCK_COUNT";
     static final String TOTAL_WORK_KEY = "TOTAL_WORK";
 
-    public LevelDBPersistence(String path) throws IOException {
+    public LevelDBBlockPersistence(String path) throws IOException {
         super.init(path);
     }
 
@@ -111,19 +109,19 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
     }
 
     // NOTE: seek method looks like bugged as it return everything wi
-    public List<SHA256Hash> getTransactionsForWallet(PublicWalletAddress wallet) {
-         var addrress = wallet.address().getArray();
+    public List<SHA256Hash> getTransactionsForWallet(PublicAddress wallet) {
+        var address = wallet.toBytes();
         List<SHA256Hash> transactions = new ArrayList<>();
 
         try (DBIterator iterator = getDb().iterator(new ReadOptions())) {
-            for(iterator.seek(addrress); iterator.hasNext(); iterator.next()) {
+            for(iterator.seek(address); iterator.hasNext(); iterator.next()) {
                 byte[] key = iterator.peekNext().getKey();
                 byte[] addressKey = Arrays.copyOfRange(key, 0, 25);
-                if (!Arrays.equals(addressKey, addrress)) {
+                if (!Arrays.equals(addressKey, address)) {
                     continue;
                 }
                 byte[] txidBytes = Arrays.copyOfRange(key, 25, 57);
-                SHA256Hash txid = new SHA256Hash(txidBytes);
+                SHA256Hash txid = SHA256Hash.of(txidBytes);
                 transactions.add(txid);
             }
         } catch (IOException e) {
@@ -162,27 +160,29 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
             var transaction = block.getTransactions().get(i);
             var transactionDto = transaction.serialize();
             set(composeKey(block.getId(), i), transactionDto.toBuffer());
-            set(composeKey(transactionDto.getFrom(), transaction.hashContents().hash), new byte[0]);
-            set(composeKey(transactionDto.getTo(), transaction.hashContents().hash), new byte[0]);
+            set(composeKey(PublicAddress.of(transactionDto.signingKey).toBytes(), transaction.hashContents().toBytes()), new byte[0]);
+            set(composeKey(transactionDto.to.toBytes(), transaction.hashContents().toBytes()), new byte[0]);
         }
     }
 
     private static class WalletTransactionKey {
-        PublicWalletAddress addr;
+        PublicAddress addr;
         SHA256Hash txId;
         
-        public WalletTransactionKey(PublicWalletAddress address, SHA256Hash txId, boolean isStartKey) {
+        public WalletTransactionKey(PublicAddress address, SHA256Hash txId, boolean isStartKey) {
             this.addr = address;
-            this.txId = new SHA256Hash();
+            var buf = new byte[SHA256Hash.SIZE];
 
             if(isStartKey) {
-                Arrays.fill(this.txId.hash, (byte) -128);
+                Arrays.fill(buf, (byte) -128);
             } else {
-                Arrays.fill(this.txId.hash, (byte) 127);
+                Arrays.fill(buf, (byte) 127);
             }
 
-            if(txId.hash != null) {
-                System.arraycopy(txId.hash, 0, this.txId.hash, 0, txId.hash.length);
+            if(txId != null) {
+                this.txId = txId;
+            } else {
+                this.txId = SHA256Hash.of(buf);
             }
         }
                 
@@ -190,8 +190,8 @@ public class LevelDBPersistence extends DataStore implements BlockPersistence {
             return key(addr, txId);
         }
 
-        static byte[] key(PublicWalletAddress address, SHA256Hash sha256) {
-            return composeKey(address.address().array(), sha256.hash);
+        static byte[] key(PublicAddress address, SHA256Hash sha256) {
+            return composeKey(address.address().array(), sha256.toBytes());
         }
     }
 }

@@ -3,7 +3,7 @@ package rhizome.persistence;
 import org.iq80.leveldb.*;
 import rhizome.core.transaction.Transaction;
 import rhizome.persistence.leveldb.DataStore;
-import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.ledger.LedgerException;
 
 import java.nio.ByteBuffer;
@@ -18,7 +18,7 @@ public class TransactionStore extends DataStore {
 
     public boolean hasTransaction(Transaction t) {
         SHA256Hash txHash = t.hashContents();
-        byte[] key = txHash.hash;
+        byte[] key = txHash.toBytes();
         try {
             byte[] value = getDb().get(key);
             return value != null;
@@ -29,7 +29,7 @@ public class TransactionStore extends DataStore {
 
     public int blockForTransaction(Transaction t) {
         SHA256Hash txHash = t.hashContents();
-        byte[] key = txHash.hash;
+        byte[] key = txHash.toBytes();
         try {
             byte[] value = getDb().get(key);
             if (value == null) {
@@ -43,7 +43,7 @@ public class TransactionStore extends DataStore {
     }
 
     public int blockForTransactionId(SHA256Hash txHash) {
-        byte[] key = txHash.hash;
+        byte[] key = txHash.toBytes();
         try {
             byte[] value = getDb().get(key);
             if (value == null) {
@@ -58,7 +58,7 @@ public class TransactionStore extends DataStore {
 
     public void insertTransaction(Transaction t, int blockId) {
         SHA256Hash txHash = t.hashContents();
-        byte[] key = txHash.hash;
+        byte[] key = txHash.toBytes();
         ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
         buffer.putInt(blockId);
         try {
@@ -70,7 +70,7 @@ public class TransactionStore extends DataStore {
 
     public void removeTransaction(Transaction t) {
         SHA256Hash txHash = t.hashContents();
-        byte[] key = txHash.hash;
+        byte[] key = txHash.toBytes();
         try {
             getDb().delete(key);
         } catch (DBException e) {

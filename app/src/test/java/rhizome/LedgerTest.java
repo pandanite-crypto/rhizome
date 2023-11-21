@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import rhizome.core.crypto.PublicKey;
 import rhizome.core.ledger.Ledger;
 import rhizome.core.ledger.PublicAddress;
 
@@ -22,9 +23,8 @@ class LedgerTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        // Simulate the generateKeyPair and walletAddressFromPublicKey functions
         var pair = generateKeyPair();
-        wallet = PublicAddress.of((Ed25519PublicKeyParameters) pair.getPublic());
+        wallet = PublicAddress.of(new PublicKey((Ed25519PublicKeyParameters) pair.getPublic()));
 
         ledger = new Ledger(TEST_DB_PATH);
     }

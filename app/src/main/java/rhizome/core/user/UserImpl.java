@@ -3,18 +3,18 @@ package rhizome.core.user;
 import java.util.Arrays;
 import java.util.Objects;
 
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONObject;
 
 import lombok.Builder;
 import lombok.Data;
+import rhizome.core.crypto.PrivateKey;
+import rhizome.core.crypto.PublicKey;
 
 @Data
 @Builder
 public class UserImpl implements User {
-    private Ed25519PublicKeyParameters publicKey;
-    private Ed25519PrivateKeyParameters privateKey;
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
 
     @Override
     public JSONObject toJson() {
@@ -26,8 +26,8 @@ public class UserImpl implements User {
         if (o == this) return true;
         if (!(o instanceof User)) return false;
         User user = (User) o;
-        return Arrays.equals(getPublicKey().getEncoded(), user.getPublicKey().getEncoded()) &&
-            Arrays.equals(getPrivateKey().getEncoded(), user.getPrivateKey().getEncoded());
+        return Arrays.equals(getPublicKey().key().getEncoded(), user.getPublicKey().key().getEncoded()) &&
+            Arrays.equals(getPrivateKey().key().getEncoded(), user.getPrivateKey().key().getEncoded());
     }
 
     @Override

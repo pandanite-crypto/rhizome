@@ -16,18 +16,18 @@ import rhizome.core.common.Constants;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.TransactionImpl;
 import rhizome.core.user.User;
-import rhizome.persistence.leveldb.LevelDBPersistence;
+import rhizome.persistence.leveldb.LevelDBBlockPersistence;
 
 class LevelDBBlockPersistenceTests {
 
     private static final String TEST_DB_PATH = "./test-data/tmpdb";
-    private LevelDBPersistence blocks;
+    private LevelDBBlockPersistence blocks;
     private User miner;
     private User receiver;
 
     @BeforeEach
     void setUp() throws IOException {
-        blocks = new LevelDBPersistence(TEST_DB_PATH);
+        blocks = new LevelDBBlockPersistence(TEST_DB_PATH);
         miner = User.create();
         receiver = User.create();
     }

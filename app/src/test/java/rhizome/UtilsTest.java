@@ -3,19 +3,16 @@ package rhizome;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 import org.junit.jupiter.api.Test;
 
-import rhizome.core.common.Utils.PublicWalletAddress;
-import rhizome.core.common.Utils.TransactionSignature;
+import rhizome.core.crypto.PrivateKey;
+import rhizome.core.ledger.PublicAddress;
+import rhizome.core.transaction.TransactionSignature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static rhizome.core.common.Utils.walletAddressToString;
 
 import static rhizome.core.common.Crypto.signWithPrivateKey;
 import static rhizome.core.common.Utils.bytesToHex;
 import static rhizome.core.common.Utils.hexStringToByteArray;
-import static rhizome.core.common.Utils.signatureToString;
-import static rhizome.core.common.Utils.stringToSignature;
-import static rhizome.core.common.Utils.stringToWalletAddress;
 
 class UtilsTest {
 
@@ -27,15 +24,15 @@ class UtilsTest {
 
     @Test
     void checkAddressSerialisation() {
-        var a = PublicWalletAddress.random();
-        var b = stringToWalletAddress(walletAddressToString(a.address()));
+        var a = PublicAddress.random();
+        var b = PublicAddress.of(a.toHexString());
         assertEquals(a,b);
     }
 
     @Test
     void checkTransactionSignatureSerialisation() {
         var a = TransactionSignature.random();
-        var b = stringToSignature(signatureToString(a.signature));
+        var b = TransactionSignature.of(a.toHexString());
         assertEquals(a,b);
     }
 
@@ -43,7 +40,7 @@ class UtilsTest {
     void checkSignWithPrivateKey() {
         var messageToSign = TEST_MESSAGE;
         var signtureExpected = LEGACY_SIGNATURE;
-        var privateKey = new Ed25519PrivateKeyParameters(hexStringToByteArray(TEST_PRIVATE_KEY), 0);
+        var privateKey = new PrivateKey(new Ed25519PrivateKeyParameters(hexStringToByteArray(TEST_PRIVATE_KEY), 0));
         var signature = signWithPrivateKey(messageToSign.getBytes(UTF_8), privateKey);
         assertEquals(signtureExpected,bytesToHex(signature));
     }

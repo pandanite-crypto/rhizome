@@ -1,12 +1,15 @@
 package rhizome.core.ledger;
 
+import static rhizome.core.common.Utils.bytesToHex;
+import static rhizome.core.common.Utils.hexStringToByteArray;
+
 import java.util.Arrays;
 
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import io.activej.bytebuf.ByteBuf;
 import rhizome.core.common.SimpleHashType;
+import rhizome.core.crypto.PublicKey;
 
 public record PublicAddress(ByteBuf address) implements SimpleHashType {
     public PublicAddress {
@@ -21,8 +24,8 @@ public record PublicAddress(ByteBuf address) implements SimpleHashType {
         return new PublicAddress(SimpleHashType.random(SIZE));
     }
 
-    public static PublicAddress of(Ed25519PublicKeyParameters publicKey){
-        byte[] publicKeyBytes = publicKey.getEncoded();
+    public static PublicAddress of(PublicKey publicKey){
+        byte[] publicKeyBytes = publicKey.key().getEncoded();
 
         SHA256Digest sha256 = new SHA256Digest();
         byte[] hash1 = new byte[32];
@@ -56,28 +59,19 @@ public record PublicAddress(ByteBuf address) implements SimpleHashType {
         return new PublicAddress(ByteBuf.wrapForReading(address));
     }
 
-    public static PublicAddress of(String address) {
-        if (address.length() != 50) {
+    public static PublicAddress of(String hexString) {
+        if (hexString.length() != 50) {
             throw new IllegalArgumentException("Invalid wallet address string");
         }
-
-        ByteBuf buf = ByteBuf.wrapForWriting(new byte[25]);
-
-        for (int i = 0; i < address.length(); i += 2) {
-            byte b = (byte) ((Character.digit(address.charAt(i), 16) << 4) + Character.digit(address.charAt(i + 1), 16));
-            buf.writeByte(b);
-        }
-
-        return new PublicAddress(buf);
+        return PublicAddress.of(hexStringToByteArray(hexString));
     }
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        while (address.canRead()) {
-            sb.append(String.format("%02x", address.readByte()));
-		}
-        address.head(0);
-        return sb.toString();
+    public String toHexString() {
+        return bytesToHex(address.getArray());
+    }
+
+    public byte[] toBytes() {
+        return address.getArray();
     }
 
     @Override

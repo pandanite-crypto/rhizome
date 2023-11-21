@@ -1,21 +1,13 @@
 package rhizome.core.transaction;
 
-import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONObject;
 
-import rhizome.core.common.Utils.PublicWalletAddress;
-import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.crypto.PrivateKey;
+import rhizome.core.crypto.PublicKey;
+import rhizome.core.crypto.SHA256Hash;
+import rhizome.core.ledger.PublicAddress;
 import rhizome.core.net.Serializable;
 import rhizome.core.transaction.dto.TransactionDto;
-
-import static rhizome.core.common.Utils.SHA256toString;
-import static rhizome.core.common.Utils.publicKeyToString;
-import static rhizome.core.common.Utils.walletAddressToString;
-import static rhizome.core.common.Utils.signatureToString;
-import static rhizome.core.common.Utils.stringToPublicKey;
-import static rhizome.core.common.Utils.stringToSignature;
-import static rhizome.core.common.Utils.stringToWalletAddress;
 
 public sealed interface Transaction permits TransactionImpl {
 
@@ -45,7 +37,7 @@ public sealed interface Transaction permits TransactionImpl {
         return serializer().deserialize(transactionDto);
     }
 
-    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, Ed25519PublicKeyParameters signingKey, TransactionAmount fee) {
+    public static Transaction of(PublicAddress from, PublicAddress to, TransactionAmount amount, PublicKey signingKey, TransactionAmount fee) {
         return TransactionImpl.builder()
                 .from(from)
                 .to(to)
@@ -57,7 +49,7 @@ public sealed interface Transaction permits TransactionImpl {
                 .build();
     }
 
-    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, Ed25519PublicKeyParameters signingKey, TransactionAmount fee, long timestamp) {
+    public static Transaction of(PublicAddress from, PublicAddress to, TransactionAmount amount, PublicKey signingKey, TransactionAmount fee, long timestamp) {
         return TransactionImpl.builder()
                 .from(from)
                 .to(to)
@@ -69,7 +61,7 @@ public sealed interface Transaction permits TransactionImpl {
                 .build();
     }
 
-    public static Transaction of(PublicWalletAddress from, PublicWalletAddress to, TransactionAmount amount, Ed25519PublicKeyParameters signingKey) {
+    public static Transaction of(PublicAddress from, PublicAddress to, TransactionAmount amount, PublicKey signingKey) {
         return TransactionImpl.builder()
                 .from(from)
                 .to(to)
@@ -80,7 +72,7 @@ public sealed interface Transaction permits TransactionImpl {
                 .build();
     }
 
-    public static Transaction of(PublicWalletAddress to, TransactionAmount amount) {
+    public static Transaction of(PublicAddress to, TransactionAmount amount) {
         return TransactionImpl.builder()
                 .to(to)
                 .amount(amount)
@@ -99,12 +91,12 @@ public sealed interface Transaction permits TransactionImpl {
         return serializer().toJson(transaction);
     }
 
-    public Transaction sign(Ed25519PublicKeyParameters publicKey, Ed25519PrivateKeyParameters privateKey);
+    public Transaction sign(PrivateKey privateKey);
     public boolean signatureValid();
     public SHA256Hash hashContents();
     public SHA256Hash getHash();
-    public PublicWalletAddress getFrom();
-    public PublicWalletAddress getTo();
+    public PublicAddress getFrom();
+    public PublicAddress getTo();
 
     /**
      * Get instance of the serializer
@@ -134,11 +126,10 @@ public sealed interface Transaction permits TransactionImpl {
         public TransactionDto serialize(Transaction transaction) {
             var transactionImpl = (TransactionImpl) transaction;
             return new TransactionDto(
-                signatureToString(transactionImpl.getSignature().signature),
-                publicKeyToString(transactionImpl.getSigningKey()),
+                transactionImpl.getSignature(),
+                transactionImpl.getSigningKey(),
                 transactionImpl.getTimestamp(),
-                transactionImpl.getTo().address().asArray(),
-                transactionImpl.getFrom().address().asArray(),
+                transactionImpl.getTo(),
                 transactionImpl.getAmount().amount(),
                 transactionImpl.getFee().amount(),
                 transactionImpl.isTransactionFee()
@@ -148,14 +139,14 @@ public sealed interface Transaction permits TransactionImpl {
         @Override
         public Transaction deserialize(TransactionDto transactionDto) {
             return TransactionImpl.builder()
-                .from(PublicWalletAddress.fromBuffer(transactionDto.getFrom()))
-                .to(PublicWalletAddress.fromBuffer(transactionDto.getTo()))
-                .amount(new TransactionAmount(transactionDto.getAmount()))
-                .isTransactionFee(transactionDto.isTransactionFee())
-                .timestamp(transactionDto.getTimestamp())
-                .fee(new TransactionAmount(transactionDto.getFee()))
-                .signingKey(stringToPublicKey(transactionDto.getSigningKey()))
-                .signature(stringToSignature(transactionDto.getSignature()))
+                .from(PublicAddress.of(transactionDto.signingKey))
+                .to(transactionDto.to)
+                .amount(new TransactionAmount(transactionDto.amount))
+                .isTransactionFee(transactionDto.isTransactionFee)
+                .timestamp(transactionDto.timestamp)
+                .fee(new TransactionAmount(transactionDto.fee))
+                .signingKey(transactionDto.signingKey)
+                .signature(transactionDto.signature)
                 .build();
         }
     
@@ -163,18 +154,18 @@ public sealed interface Transaction permits TransactionImpl {
         public JSONObject toJson(Transaction transaction) {
             var transactionImpl = (TransactionImpl) transaction;    
             JSONObject result = new JSONObject();
-            result.put(TO, walletAddressToString(transactionImpl.getTo().address()));
+            result.put(TO, transactionImpl.getTo().toHexString());
             result.put(AMOUNT, transactionImpl.getAmount().amount());
             result.put(TIMESTAMP, Long.toString(transactionImpl.getTimestamp()));
             result.put(FEE, transactionImpl.getFee().amount());
             
             if (!transactionImpl.isTransactionFee()) {
-                result.put(TXID, SHA256toString(transactionImpl.hashContents()));
-                result.put(FROM, walletAddressToString(transactionImpl.getFrom().address()));
-                result.put(SIGNING_KEY, publicKeyToString(transactionImpl.getSigningKey()));
-                result.put(SIGNATURE, signatureToString(transactionImpl.getSignature().signature));
+                result.put(TXID, transactionImpl.hashContents().toHexString());
+                result.put(FROM, transactionImpl.getFrom().toHexString());
+                result.put(SIGNING_KEY, transactionImpl.getSigningKey().toHexString());
+                result.put(SIGNATURE, transactionImpl.getSignature().toHexString());
             } else {
-                result.put(TXID, SHA256toString(transactionImpl.hashContents()));
+                result.put(TXID, transactionImpl.hashContents().toHexString());
                 result.put(FROM, "");
             }
             
@@ -185,18 +176,18 @@ public sealed interface Transaction permits TransactionImpl {
             var builder = TransactionImpl.builder()
                 .timestamp(json.getLong(TIMESTAMP))
                 .fee(new TransactionAmount(json.getInt(FEE)))
-                .to(stringToWalletAddress(json.getString(TO)));
+                .to(PublicAddress.of(json.getString(TO)));
 
         
             if (json.getString("from").isEmpty()) {
                 builder.amount(new TransactionAmount(json.getInt(AMOUNT)))
                     .isTransactionFee(true);
             } else {
-                builder.from(stringToWalletAddress(json.getString(FROM)))
-                    .signature(stringToSignature(json.getString(SIGNATURE)))
+                builder.from(PublicAddress.of(json.getString(FROM)))
+                    .signature(TransactionSignature.of(json.getString(SIGNATURE)))
                     .amount(new TransactionAmount(json.getInt(AMOUNT)))
                     .isTransactionFee(false)
-                    .signingKey(stringToPublicKey(json.getString(SIGNING_KEY)));
+                    .signingKey(PublicKey.of(json.getString(SIGNING_KEY)));
             }   
             
             return builder.build();

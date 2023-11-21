@@ -2,7 +2,7 @@ package rhizome;
 
 import org.junit.jupiter.api.Test;
 
-import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.merkletree.MerkleTree;
 import rhizome.core.merkletree.MerkleTree.HashTree;
 import rhizome.core.transaction.Transaction;

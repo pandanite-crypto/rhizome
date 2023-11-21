@@ -5,8 +5,8 @@ import java.util.List;
 
 import rhizome.core.block.Block;
 import rhizome.core.block.dto.BlockDto;
-import rhizome.core.common.Utils.PublicWalletAddress;
-import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.crypto.SHA256Hash;
+import rhizome.core.ledger.PublicAddress;
 import rhizome.core.transaction.dto.TransactionDto;
 
 public interface BlockPersistence {
@@ -22,7 +22,7 @@ public interface BlockPersistence {
 
     Block getBlock(int blockId);
 
-    List<SHA256Hash> getTransactionsForWallet(PublicWalletAddress wallet);
+    List<SHA256Hash> getTransactionsForWallet(PublicAddress wallet);
 
     void removeBlockWalletTransactions(Block block);
     
