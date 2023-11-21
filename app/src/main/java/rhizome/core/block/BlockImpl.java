@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import lombok.Builder;
 import lombok.Data;
 import rhizome.core.block.dto.BlockDto;
-import rhizome.core.common.Utils.SHA256Hash;
+import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.transaction.Transaction;
 
 @Data
@@ -38,13 +38,13 @@ public final class BlockImpl implements Block {
     private List<Transaction> transactions = new ArrayList<>();
 
     @Builder.Default
-    private SHA256Hash merkleRoot = NULL_SHA256_HASH;
+    private SHA256Hash merkleRoot = SHA256Hash.empty();
 
     @Builder.Default
-    private SHA256Hash lastBlockHash = NULL_SHA256_HASH;
+    private SHA256Hash lastBlockHash = SHA256Hash.empty();
 
     @Builder.Default
-    private SHA256Hash nonce = NULL_SHA256_HASH;
+    private SHA256Hash nonce = SHA256Hash.empty();
 
     /**
      * Serialization
@@ -66,8 +66,8 @@ public final class BlockImpl implements Block {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
 
-            sha256.update(merkleRoot.hash);
-            sha256.update(lastBlockHash.hash);
+            sha256.update(merkleRoot.hash().getArray());
+            sha256.update(lastBlockHash.hash().getArray());
             
             // Convert int and long to byte arrays and update hash
             ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + Long.BYTES);
@@ -75,9 +75,7 @@ public final class BlockImpl implements Block {
             buffer.putLong(timestamp);
             sha256.update(buffer.array());
 
-            SHA256Hash hash = new SHA256Hash();
-            hash.hash = sha256.digest();
-            return hash;
+            return SHA256Hash.of(sha256.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new BlockException("SHA-256 algorithm not found", e);
         }
@@ -96,8 +94,8 @@ public final class BlockImpl implements Block {
         if (o == null || getClass() != o.getClass()) return false;
         BlockImpl block = (BlockImpl) o;
         return id == block.id && difficulty == block.difficulty && timestamp == block.timestamp &&
-            Arrays.equals(nonce.hash, block.nonce.hash) && Arrays.equals(merkleRoot.hash, block.merkleRoot.hash) &&
-            Arrays.equals(lastBlockHash.hash, block.lastBlockHash.hash) && transactions.equals(block.transactions);
+            nonce.equals(block.nonce) && merkleRoot.equals(block.merkleRoot) &&
+            lastBlockHash.equals(block.lastBlockHash) && transactions.equals(block.transactions);
     }
 
     @Override
