@@ -11,20 +11,20 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.ledger.Ledger;
+import rhizome.core.ledger.PublicAddress;
 
 class LedgerTest {
 
     private static final String TEST_DB_PATH = "./test-data/tmpdb";
     private Ledger ledger;
-    private PublicWalletAddress wallet;
+    private PublicAddress wallet;
 
     @BeforeEach
     void setUp() throws IOException {
         // Simulate the generateKeyPair and walletAddressFromPublicKey functions
         var pair = generateKeyPair();
-        wallet = PublicWalletAddress.fromPublicKey((Ed25519PublicKeyParameters) pair.getPublic());
+        wallet = PublicAddress.of((Ed25519PublicKeyParameters) pair.getPublic());
 
         ledger = new Ledger(TEST_DB_PATH);
     }

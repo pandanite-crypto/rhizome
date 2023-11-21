@@ -3,7 +3,6 @@ package rhizome.core.ledger;
 import lombok.SneakyThrows;
 import org.iq80.leveldb.DBException;
 
-import rhizome.core.common.Utils.PublicWalletAddress;
 import rhizome.core.transaction.TransactionAmount;
 import rhizome.persistence.leveldb.DataStore;
 
@@ -21,18 +20,18 @@ public class Ledger extends DataStore {
         super.init(path);
     }
 
-    public boolean hasWallet(PublicWalletAddress wallet) {
+    public boolean hasWallet(PublicAddress wallet) {
         return getWalletValueInternal(wallet) != null;
     }
 
-    public void createWallet(PublicWalletAddress wallet) {
+    public void createWallet(PublicAddress wallet) {
         if (this.hasWallet(wallet)) {
             throw new LedgerException("Wallet already exists");
         }
         this.setWalletValue(wallet, new TransactionAmount(0L));
     }
 
-    private void setWalletValue(PublicWalletAddress wallet, TransactionAmount amount) {
+    private void setWalletValue(PublicAddress wallet, TransactionAmount amount) {
         try {
             getDb().put(wallet.address().asArray(), longToBytes(amount.amount()));
         } catch (DBException e) {
@@ -40,7 +39,7 @@ public class Ledger extends DataStore {
         }
     }
 
-    public TransactionAmount getWalletValue(PublicWalletAddress wallet) {
+    public TransactionAmount getWalletValue(PublicAddress wallet) {
         TransactionAmount amount = getWalletValueInternal(wallet);
         if (amount == null) {
             throw new IllegalArgumentException("Tried fetching wallet value for non-existent wallet");
@@ -49,7 +48,7 @@ public class Ledger extends DataStore {
     }
 
     @SneakyThrows
-    private TransactionAmount getWalletValueInternal(PublicWalletAddress wallet) {
+    private TransactionAmount getWalletValueInternal(PublicAddress wallet) {
         byte[] value = getDb().get(wallet.address().asArray());
         if (value == null) {
             return null;
@@ -63,7 +62,7 @@ public class Ledger extends DataStore {
         return new TransactionAmount(amount);
     }
 
-    public void withdraw(PublicWalletAddress wallet, TransactionAmount amt) {
+    public void withdraw(PublicAddress wallet, TransactionAmount amt) {
         TransactionAmount currentAmount = getWalletValue(wallet);
         long newValue = currentAmount.amount() - amt.amount();
         if (newValue < 0) {
@@ -72,19 +71,19 @@ public class Ledger extends DataStore {
         this.setWalletValue(wallet, new TransactionAmount(newValue));
     }
 
-    public void revertSend(PublicWalletAddress wallet, TransactionAmount amt) {
+    public void revertSend(PublicAddress wallet, TransactionAmount amt) {
         adjustWalletBalance(wallet, amt.amount(), true);
     }
 
-    public void deposit(PublicWalletAddress wallet, TransactionAmount amt) {
+    public void deposit(PublicAddress wallet, TransactionAmount amt) {
         adjustWalletBalance(wallet, amt.amount(), true);
     }
 
-    public void revertDeposit(PublicWalletAddress wallet, TransactionAmount amt) {
+    public void revertDeposit(PublicAddress wallet, TransactionAmount amt) {
         adjustWalletBalance(wallet, -amt.amount(), false);
     }
 
-    private void adjustWalletBalance(PublicWalletAddress wallet, long amount, boolean isAdding) {
+    private void adjustWalletBalance(PublicAddress wallet, long amount, boolean isAdding) {
         TransactionAmount currentAmount = getWalletValue(wallet);
         AtomicLong newAmount = new AtomicLong(currentAmount.amount());
         if (isAdding) {
