@@ -4,20 +4,22 @@ import org.jetbrains.annotations.NotNull;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
+import io.activej.serializer.annotations.SerializeFixedSize;
 import lombok.Getter;
+import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.net.BinarySerializable;
 
 @Getter
 public class BlockDto implements BinarySerializable {
-    @Serialize public final int id;
-    @Serialize public final long timestamp;
-    @Serialize public final int difficulty;
-    @Serialize public final int numTranactions;
-    @Serialize public final byte[] lastBlockHash;
-    @Serialize public final byte[] merkleRoot;
-    @Serialize public final byte[] nonce;
+    @Serialize(order = 1) public final int id;
+    @Serialize(order = 2) public final long timestamp;
+    @Serialize(order = 3) public final int difficulty;
+    @Serialize(order = 4) public final int numTranactions;
+    @Serialize(order = 5) public final byte @SerializeFixedSize(SHA256Hash.SIZE) [] lastBlockHash;
+    @Serialize(order = 6) public final byte @SerializeFixedSize(SHA256Hash.SIZE) [] merkleRoot;
+    @Serialize(order = 7) public final byte @SerializeFixedSize(SHA256Hash.SIZE) [] nonce;
 
-    public static final int BUFFER_SIZE = 256;
+    public static final int BUFFER_SIZE = 116;
 
     public BlockDto(
         @Deserialize("id") int id, 
