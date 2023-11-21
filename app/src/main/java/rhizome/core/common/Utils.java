@@ -1,14 +1,10 @@
 package rhizome.core.common;
 
-import rhizome.core.transaction.TransactionAmount;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HexFormat;
-import java.util.Map;
-
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
