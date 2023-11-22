@@ -43,7 +43,7 @@ public class Crypto {
     
     public static boolean checkSignature(byte[] bytes, byte[] signature, PublicKey publicKey) {
         Ed25519Signer signer = new Ed25519Signer();
-        signer.init(false, publicKey.key());
+        signer.init(false, publicKey.get());
         signer.update(bytes, 0, bytes.length);
         return signer.verifySignature(signature);
     }
