@@ -20,7 +20,7 @@ public interface User {
     public static User create() {
         var kp = generateKeyPair();
         return UserImpl.builder()
-                .publicKey(new PublicKey((Ed25519PublicKeyParameters) kp.getPublic()))
+                .publicKey(PublicKey.of((Ed25519PublicKeyParameters) kp.getPublic()))
                 .privateKey(new PrivateKey((Ed25519PrivateKeyParameters) kp.getPrivate()))
                 .build();
     }

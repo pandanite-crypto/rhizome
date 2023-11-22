@@ -26,7 +26,7 @@ public class UserImpl implements User {
         if (o == this) return true;
         if (!(o instanceof User)) return false;
         User user = (User) o;
-        return Arrays.equals(getPublicKey().key().getEncoded(), user.getPublicKey().key().getEncoded()) &&
+        return Arrays.equals(getPublicKey().key().get().getEncoded(), user.getPublicKey().key().get().getEncoded()) &&
             Arrays.equals(getPrivateKey().key().getEncoded(), user.getPrivateKey().key().getEncoded());
     }
 
