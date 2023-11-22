@@ -25,7 +25,11 @@ public record PublicAddress(ByteBuf address) implements SimpleHashType {
     }
 
     public static PublicAddress of(PublicKey publicKey){
-        byte[] publicKeyBytes = publicKey.key().getEncoded();
+        if (!publicKey.key().isPresent()) {
+            return PublicAddress.empty();
+        }
+
+        byte[] publicKeyBytes = publicKey.get().getEncoded();
 
         SHA256Digest sha256 = new SHA256Digest();
         byte[] hash1 = new byte[32];
