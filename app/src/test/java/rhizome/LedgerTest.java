@@ -6,7 +6,6 @@ import static rhizome.core.common.Helpers.PDN;
 
 import java.io.IOException;
 
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,7 @@ class LedgerTest {
     @BeforeEach
     void setUp() throws IOException {
         var pair = generateKeyPair();
-        wallet = PublicAddress.of(new PublicKey((Ed25519PublicKeyParameters) pair.getPublic()));
+        wallet = PublicAddress.of(PublicKey.of(pair.getPublic()));
 
         ledger = new Ledger(TEST_DB_PATH);
     }

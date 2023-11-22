@@ -27,12 +27,12 @@ class CryptoTests {
     @Test
     void testKeyStringConversion() {
         var keys = generateKeyPair();
-        var publicKey = new PublicKey((Ed25519PublicKeyParameters) keys.getPublic());
-        var publicKeyData = publicKey.key().getEncoded();
+        var publicKey = PublicKey.of(keys.getPublic());
+        var publicKeyData = publicKey.get().getEncoded();
 
         var publicKeyString = publicKey.toHexString();
         var convertedPublicKey = PublicKey.of(publicKeyString);
-        var convertedPublicKeyData = convertedPublicKey.key().getEncoded();
+        var convertedPublicKeyData = convertedPublicKey.get().getEncoded();
 
         assertArrayEquals(publicKeyData, convertedPublicKeyData);
     }
@@ -54,7 +54,7 @@ class CryptoTests {
     void testSignatureVerifications() {
         var keys = generateKeyPair();
         var privateKey = new PrivateKey((Ed25519PrivateKeyParameters) keys.getPrivate());
-        var publicKey = new PublicKey((Ed25519PublicKeyParameters) keys.getPublic());
+        var publicKey = PublicKey.of(keys.getPublic());
 
         var message = "FOOBAR";
         var signature = signWithPrivateKey(message.getBytes(StandardCharsets.UTF_8), privateKey);
