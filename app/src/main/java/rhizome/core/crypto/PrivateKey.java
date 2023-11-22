@@ -1,5 +1,6 @@
 package rhizome.core.crypto;
 
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters;
 
 import rhizome.core.common.SimpleHashType;
@@ -11,6 +12,16 @@ public record PrivateKey(Ed25519PrivateKeyParameters key) implements SimpleHashT
 
     public static PrivateKey of(byte[] bytes) {
         return new PrivateKey(new Ed25519PrivateKeyParameters(bytes, 0));
+    }
+
+    public static PrivateKey of(AsymmetricKeyParameter keyParameter) {
+        if (keyParameter == null) {
+            return null;
+        }
+        if (keyParameter instanceof Ed25519PrivateKeyParameters) {
+            return new PrivateKey((Ed25519PrivateKeyParameters) keyParameter);
+        }
+        return null;
     }
 
     public static PrivateKey of(String hexString) {
