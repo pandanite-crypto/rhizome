@@ -40,7 +40,8 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
     @Builder.Default
     private TransactionAmount fee = new TransactionAmount(0);
 
-    private PublicKey signingKey;
+    @Builder.Default
+    private PublicKey signingKey = PublicKey.empty();
 
     @Builder.Default
     private TransactionSignature signature = TransactionSignature.empty();
@@ -108,7 +109,7 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
         TransactionImpl that = (TransactionImpl) obj;
         boolean isSigningKeyEqual = (signingKey == null && that.signingKey == null) ||
                                     (signingKey != null && that.signingKey != null &&
-                                     Arrays.equals(signingKey.key().getEncoded(), that.signingKey.key().getEncoded()));
+                                     Arrays.equals(signingKey.get().getEncoded(), that.signingKey.get().getEncoded()));
         
         return timestamp == that.timestamp &&
                isTransactionFee == that.isTransactionFee &&

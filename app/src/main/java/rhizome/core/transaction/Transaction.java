@@ -139,7 +139,7 @@ public sealed interface Transaction permits TransactionImpl {
         @Override
         public Transaction deserialize(TransactionDto transactionDto) {
             return TransactionImpl.builder()
-                .from(PublicAddress.of(transactionDto.signingKey))
+                .from(transactionDto.isTransactionFee ? PublicAddress.empty() : PublicAddress.of(transactionDto.signingKey))
                 .to(transactionDto.to)
                 .amount(new TransactionAmount(transactionDto.amount))
                 .isTransactionFee(transactionDto.isTransactionFee)
