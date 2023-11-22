@@ -14,7 +14,7 @@ public class SerializerDefPublicAddress extends SimpleSerializerDef<PublicAddres
         return new BinarySerializer<PublicAddress>() {
             @Override
             public void encode(BinaryOutput out, PublicAddress address) {
-                out.write(address.address().getArray());
+                out.write(address.toBytes());
             }
 
             @Override

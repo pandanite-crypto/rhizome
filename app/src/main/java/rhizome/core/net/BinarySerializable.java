@@ -7,8 +7,10 @@ import org.jetbrains.annotations.NotNull;
 
 import io.activej.serializer.BinarySerializer;
 import io.activej.serializer.SerializerBuilder;
+import rhizome.core.crypto.PublicKey;
 import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.ledger.PublicAddress;
+import rhizome.core.transaction.TransactionSignature;
 
 public interface BinarySerializable {
     static Map<Class<? extends BinarySerializable>, BinarySerializer<? extends BinarySerializable>> serializerCache = new ConcurrentHashMap<>();
@@ -33,6 +35,8 @@ public interface BinarySerializable {
             SerializerBuilder.create()
             .with(SHA256Hash.class, ctx -> new SerializerDefSHA256Hash())
             .with(PublicAddress.class, ctx -> new SerializerDefPublicAddress())
+            .with(PublicKey.class, ctx -> new SerializerDefPublicKey())
+            .with(TransactionSignature.class, ctx -> new SerializerDefTransactionSignature())
             .build(k));
     }
 }

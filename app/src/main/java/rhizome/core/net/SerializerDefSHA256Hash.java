@@ -15,7 +15,7 @@ public final class SerializerDefSHA256Hash extends SimpleSerializerDef<SHA256Has
         return new BinarySerializer<SHA256Hash>() {
             @Override
             public void encode(BinaryOutput out, SHA256Hash hash) {
-                out.write(hash.hash().getArray());
+                out.write(hash.toBytes());
             }
 
             @Override
