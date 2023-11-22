@@ -7,9 +7,7 @@ import lombok.Setter;
 import io.activej.async.service.EventloopService;
 import io.activej.eventloop.Eventloop;
 import io.activej.promise.Promise;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Getter
 @Setter
 public class BlockchainService extends AbstractBlockchain implements EventloopService {
