@@ -28,7 +28,7 @@ public record PublicKey(Optional<Ed25519PublicKeyParameters> key) implements Sim
     }
 
     public static PublicKey of(byte[] bytes) {
-        if (bytes == null || bytes.length != SIZE) {
+        if (bytes == null || bytes.length != SIZE || isZeroFilled(bytes)) {
             return empty();
         }
         return new PublicKey(Optional.of(new Ed25519PublicKeyParameters(bytes, 0)));
@@ -59,5 +59,14 @@ public record PublicKey(Optional<Ed25519PublicKeyParameters> key) implements Sim
     @Override
     public int getSize() {
         return SIZE;
+    }
+
+    private static boolean isZeroFilled(byte[] bytes) {
+        for (byte b : bytes) {
+            if (b != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }

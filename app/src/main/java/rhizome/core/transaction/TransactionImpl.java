@@ -1,13 +1,12 @@
 package rhizome.core.transaction;
 
-import static rhizome.core.common.Utils.longToBytes;
-
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONObject;
-
 import lombok.Builder;
 import lombok.Data;
 import rhizome.core.crypto.PrivateKey;
@@ -18,6 +17,7 @@ import rhizome.core.transaction.dto.TransactionDto;
 
 import static rhizome.core.common.Crypto.signWithPrivateKey;
 import static rhizome.core.common.Crypto.checkSignature;
+import static rhizome.core.common.Utils.longToBytes;
 
 @Data
 @Builder
@@ -100,25 +100,30 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
     public int compareTo(Transaction other) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         
         TransactionImpl that = (TransactionImpl) obj;
-        boolean isSigningKeyEqual = (signingKey == null && that.signingKey == null) ||
-                                    (signingKey != null && that.signingKey != null &&
-                                     Arrays.equals(signingKey.get().getEncoded(), that.signingKey.get().getEncoded()));
-        
+
+        boolean isSigningKeyEqual = compareSigningKeys(this.signingKey.key(), that.signingKey.key());
+
         return timestamp == that.timestamp &&
-               isTransactionFee == that.isTransactionFee &&
-               Objects.equals(from, that.from) &&
-               Objects.equals(to, that.to) &&
-               Objects.equals(amount, that.amount) &&
-               Objects.equals(fee, that.fee) &&
-               isSigningKeyEqual &&
-               Objects.equals(signature, that.signature);
+            isTransactionFee == that.isTransactionFee &&
+            Objects.equals(from, that.from) &&
+            Objects.equals(to, that.to) &&
+            Objects.equals(amount, that.amount) &&
+            Objects.equals(fee, that.fee) &&
+            isSigningKeyEqual &&
+            Objects.equals(signature, that.signature);
+    }
+
+    private boolean compareSigningKeys(Optional<Ed25519PublicKeyParameters> key1, Optional<Ed25519PublicKeyParameters> key2) {
+        if (key1.isPresent() && key2.isPresent()) {
+            return Arrays.equals(key1.get().getEncoded(), key2.get().getEncoded());
+        }
+        return key1.equals(key2); // Handles both empty
     }
 
     @Override
