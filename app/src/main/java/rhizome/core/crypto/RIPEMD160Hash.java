@@ -25,4 +25,10 @@ public record RIPEMD160Hash(ByteBuf hash) implements SimpleHashType {
     public int getSize() {
         return SIZE;
     }
+
+    @Override
+    public byte[] toBytes() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'toBytes'");
+    }
 }

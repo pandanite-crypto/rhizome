@@ -4,10 +4,12 @@ import io.activej.bytebuf.ByteBuf;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
 
 public interface SimpleHashType {
 
     int getSize();
+    byte[] toBytes();
 
     default void checkSize(ByteBuf object){
         if (object.limit() != getSize()) {
@@ -25,5 +27,14 @@ public interface SimpleHashType {
         var random = new byte[size];
         new SecureRandom().nextBytes(random);
         return ByteBuf.wrapForReading(random);
+    }
+
+    public static <T> T fromByte(Class<T> clazz, byte[] data) {
+        try {
+            return (T) clazz.getDeclaredMethod("of", byte[].class).invoke(null, data);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

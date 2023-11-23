@@ -27,11 +27,11 @@ class CryptoTests {
     void testKeyStringConversion() {
         var keys = generateKeyPair();
         var publicKey = PublicKey.of(keys.getPublic());
-        var publicKeyData = publicKey.get().getEncoded();
+        var publicKeyData = publicKey.toBytes();
 
         var publicKeyString = publicKey.toHexString();
         var convertedPublicKey = PublicKey.of(publicKeyString);
-        var convertedPublicKeyData = convertedPublicKey.get().getEncoded();
+        var convertedPublicKeyData = convertedPublicKey.toBytes();
 
         assertArrayEquals(publicKeyData, convertedPublicKeyData);
     }

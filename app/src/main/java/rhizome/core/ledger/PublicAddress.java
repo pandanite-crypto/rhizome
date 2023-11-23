@@ -29,7 +29,7 @@ public record PublicAddress(ByteBuf address) implements SimpleHashType {
             return PublicAddress.empty();
         }
 
-        byte[] publicKeyBytes = publicKey.get().getEncoded();
+        byte[] publicKeyBytes = publicKey.toBytes();
 
         SHA256Digest sha256 = new SHA256Digest();
         byte[] hash1 = new byte[32];

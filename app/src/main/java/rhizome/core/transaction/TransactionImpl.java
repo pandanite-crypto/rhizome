@@ -2,10 +2,8 @@ package rhizome.core.transaction;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.json.JSONObject;
 import lombok.Builder;
 import lombok.Data;
@@ -107,23 +105,14 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
         
         TransactionImpl that = (TransactionImpl) obj;
 
-        boolean isSigningKeyEqual = compareSigningKeys(this.signingKey.key(), that.signingKey.key());
-
         return timestamp == that.timestamp &&
             isTransactionFee == that.isTransactionFee &&
             Objects.equals(from, that.from) &&
             Objects.equals(to, that.to) &&
             Objects.equals(amount, that.amount) &&
             Objects.equals(fee, that.fee) &&
-            isSigningKeyEqual &&
+            Arrays.equals(this.signingKey.toBytes(), that.signingKey.toBytes()) &&
             Objects.equals(signature, that.signature);
-    }
-
-    private boolean compareSigningKeys(Optional<Ed25519PublicKeyParameters> key1, Optional<Ed25519PublicKeyParameters> key2) {
-        if (key1.isPresent() && key2.isPresent()) {
-            return Arrays.equals(key1.get().getEncoded(), key2.get().getEncoded());
-        }
-        return key1.equals(key2); // Handles both empty
     }
 
     @Override

@@ -1,6 +1,5 @@
 package rhizome.services.network;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,7 +7,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.Getter;
 import lombok.Setter;
-import org.json.JSONObject;
 
 import rhizome.core.blockchain.HeaderChain;
 import rhizome.persistence.BlockPersistence;
