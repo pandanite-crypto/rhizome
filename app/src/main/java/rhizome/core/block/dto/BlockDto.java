@@ -13,7 +13,7 @@ public class BlockDto implements BinarySerializable {
     @Serialize(order = 1) public final int id;
     @Serialize(order = 2) public final long timestamp;
     @Serialize(order = 3) public final int difficulty;
-    @Serialize(order = 4) public final int numTranactions;
+    @Serialize(order = 4) public final int numTransactions;
     @Serialize(order = 5) public final SHA256Hash lastBlockHash;
     @Serialize(order = 6) public final SHA256Hash merkleRoot;
     @Serialize(order = 7) public final SHA256Hash nonce;
@@ -24,7 +24,7 @@ public class BlockDto implements BinarySerializable {
         @Deserialize("id") int id, 
         @Deserialize("timestamp") long timestamp, 
         @Deserialize("difficulty") int difficulty, 
-        @Deserialize("numTranactions") int numTranactions, 
+        @Deserialize("numTranactions") int numTransactions, 
         @Deserialize("lastBlockHash") SHA256Hash lastBlockHash, 
         @Deserialize("merkleRoot") SHA256Hash merkleRoot, 
         @Deserialize("nonce") SHA256Hash nonce) {
@@ -32,7 +32,7 @@ public class BlockDto implements BinarySerializable {
         this.id = id;
         this.timestamp = timestamp;
         this.difficulty = difficulty;
-        this.numTranactions = numTranactions;
+        this.numTransactions = numTransactions;
         this.lastBlockHash = lastBlockHash;
         this.merkleRoot = merkleRoot;
         this.nonce = nonce;

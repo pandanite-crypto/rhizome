@@ -65,7 +65,7 @@ public class LevelDBBlockPersistence extends DataStore implements BlockPersisten
 
     public List<TransactionDto> getBlockTransactions(BlockDto block) {
         var transactions = new ArrayList<TransactionDto>();
-        for (int i = 0; i < block.getNumTranactions(); i++) {            
+        for (int i = 0; i < block.getNumTransactions(); i++) {            
             var value = (byte[]) get(composeKey(block.getId(), i), byte[].class);
             transactions.add(BinarySerializable.fromBuffer(value, TransactionDto.class));
         }
@@ -74,7 +74,7 @@ public class LevelDBBlockPersistence extends DataStore implements BlockPersisten
 
     public ByteBuf getRawData(int blockId) {
         var blockHeader = getBlockHeader(blockId);
-        var bufferSize = MemSize.of((long) BlockDto.BUFFER_SIZE + (TransactionDto.BUFFER_SIZE * blockHeader.getNumTranactions()));
+        var bufferSize = MemSize.of((long) BlockDto.BUFFER_SIZE + (TransactionDto.BUFFER_SIZE * blockHeader.getNumTransactions()));
         var buffer = ByteBufPool.allocateExact(bufferSize);
         buffer.put(blockHeader.toBuffer());
 
@@ -91,7 +91,7 @@ public class LevelDBBlockPersistence extends DataStore implements BlockPersisten
     
         var block = Block.of(blockHeader, new ArrayList<>());
     
-        for (var i = 0; i < blockHeader.getNumTranactions(); i++) {
+        for (var i = 0; i < blockHeader.getNumTransactions(); i++) {
             var transactionData = new byte[TransactionDto.BUFFER_SIZE];
             buffer.read(transactionData);
             TransactionDto transactionDto = BinarySerializable.fromBuffer(transactionData, TransactionDto.class);
