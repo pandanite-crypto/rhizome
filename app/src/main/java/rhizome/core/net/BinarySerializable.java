@@ -16,8 +16,12 @@ public interface BinarySerializable {
     static Map<Class<? extends BinarySerializable>, BinarySerializer<? extends BinarySerializable>> serializerCache = new ConcurrentHashMap<>();
 
     public static <T extends BinarySerializable> T fromBuffer(byte[] buffer, Class<T> clazz) {
+        return fromBuffer(buffer, 0, clazz);
+    }
+
+    public static <T extends BinarySerializable> T fromBuffer(byte[] buffer, int pos, Class<T> clazz) {
         var serializer = getSerializer(clazz);
-        return serializer.decode(buffer, 0);
+        return serializer.decode(buffer, pos);
     }
 
     public default <T extends BinarySerializable> byte[] toBuffer() {
