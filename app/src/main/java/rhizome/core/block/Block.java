@@ -11,7 +11,6 @@ import rhizome.core.transaction.Transaction;
 
 import static rhizome.core.common.Helpers.longToString;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -65,6 +64,10 @@ public sealed interface Block permits BlockImpl {
     public void setId(int id);
     public void addTransaction(Transaction t);
     public List<Transaction> getTransactions();
+    public boolean verifyNonce();
+    public SHA256Hash getHash();
+    public SHA256Hash getLastBlockHash();
+    public int getDifficulty();
 
     /**
      * Get instance of the serializer
@@ -116,7 +119,7 @@ public sealed interface Block permits BlockImpl {
             result.put(ID, blockImpl.getId());
             try {
                 result.put(HASH, blockImpl.getHash().toHexString());
-            } catch (JSONException | NoSuchAlgorithmException e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
             result.put(DIFFICULTY, blockImpl.getDifficulty());

@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static rhizome.core.common.Crypto.SHA256;
+import static rhizome.core.common.Crypto.addWork;
 import static rhizome.core.common.Crypto.generateKeyPair;
 import static rhizome.core.common.Crypto.signWithPrivateKey;
 import static rhizome.core.common.Utils.bytesToHex;
@@ -112,10 +113,5 @@ class CryptoTests {
         var convertedHash = SHA256Hash.of(hashString);
 
         assertTrue(hash.hash().isContentEqual(convertedHash.hash()));
-    }
-
-    private BigInteger addWork(BigInteger work, int exponent) {
-        BigInteger base = BigInteger.valueOf(2);
-        return work.add(base.pow(exponent));
     }
 }

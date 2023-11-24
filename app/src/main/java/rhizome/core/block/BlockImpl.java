@@ -1,6 +1,7 @@
 package rhizome.core.block;
 
 import static rhizome.core.common.Constants.*;
+import static rhizome.core.common.Crypto.verifyHash;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -14,6 +15,7 @@ import org.json.JSONObject;
 import lombok.Builder;
 import lombok.Data;
 import rhizome.core.block.dto.BlockDto;
+import rhizome.core.common.Constants;
 import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.transaction.Transaction;
 
@@ -61,7 +63,7 @@ public final class BlockImpl implements Block {
      * @return
      * @throws NoSuchAlgorithmException
      */
-    public SHA256Hash getHash() throws NoSuchAlgorithmException {
+    public SHA256Hash getHash() {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
 
@@ -78,6 +80,11 @@ public final class BlockImpl implements Block {
         } catch (NoSuchAlgorithmException e) {
             throw new BlockException("SHA-256 algorithm not found", e);
         }
+    }
+
+    public boolean verifyNonce() {
+        boolean usePufferfish = this.getId() > Constants.PUFFERFISH_START_BLOCK;
+        return verifyHash(getHash(), nonce, difficulty, usePufferfish, true);
     }
 
     /**

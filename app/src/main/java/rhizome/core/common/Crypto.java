@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.math.BigInteger;
 
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.Signer;
@@ -141,6 +142,11 @@ public class Crypto {
         return solution;
     }
 
+    public static boolean verifyHash(SHA256Hash target, SHA256Hash nonce, int challengeSize, boolean usePufferFish, boolean useCache) {
+        SHA256Hash fullHash = concatHashes(target, nonce, usePufferFish, useCache);
+        return checkLeadingZeroBits(fullHash, challengeSize);
+    }
+
     private void incrementByteArrayByOne(byte[] array, int offset) {
         for (int i = offset; i < array.length; i++) {
             if (++array[i] != 0) {
@@ -176,6 +182,11 @@ public class Crypto {
         } else {
             return true;
         }
+    }
+
+    public static BigInteger addWork(BigInteger work, int exponent) {
+        BigInteger base = BigInteger.valueOf(2);
+        return work.add(base.pow(exponent));
     }
 
 }
