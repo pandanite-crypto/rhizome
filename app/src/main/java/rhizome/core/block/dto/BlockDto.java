@@ -24,7 +24,7 @@ public class BlockDto implements BinarySerializable {
         @Deserialize("id") int id, 
         @Deserialize("timestamp") long timestamp, 
         @Deserialize("difficulty") int difficulty, 
-        @Deserialize("numTranactions") int numTransactions, 
+        @Deserialize("numTransactions") int numTransactions, 
         @Deserialize("lastBlockHash") SHA256Hash lastBlockHash, 
         @Deserialize("merkleRoot") SHA256Hash merkleRoot, 
         @Deserialize("nonce") SHA256Hash nonce) {
