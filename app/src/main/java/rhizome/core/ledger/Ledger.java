@@ -1,6 +1,5 @@
 package rhizome.core.ledger;
 
-import lombok.SneakyThrows;
 import org.iq80.leveldb.DBException;
 
 import rhizome.core.transaction.TransactionAmount;
@@ -47,7 +46,6 @@ public class Ledger extends DataStore {
         return amount;
     }
 
-    @SneakyThrows
     private TransactionAmount getWalletValueInternal(PublicAddress wallet) {
         byte[] value = getDb().get(wallet.address().asArray());
         if (value == null) {
