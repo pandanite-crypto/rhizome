@@ -18,7 +18,8 @@ import rhizome.core.net.BinarySerializable;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.dto.TransactionDto;
 
-public class BlockchainNode {
+// TODO: basic translation from C++ , need refactor
+public class ApiNodeInterface {
 
     private static final int TIMEOUT_MS = 10000;
     private static final int TIMEOUT_BLOCKHEADERS_MS = 15000;
@@ -28,8 +29,8 @@ public class BlockchainNode {
     private static final int TIMEOUT_SUBMIT_MS = 10000; 
 
 
-    public static Optional<JSONObject> getCurrentBlockCount(String hostUrl) {
-        return tryGetJson(hostUrl + "/block_count");
+    public static Optional<Long> getCurrentBlockCount(String hostUrl) {
+        return tryGetLong(hostUrl + "/block_count");
     }
 
     public static Optional<JSONObject> getTotalWork(String hostUrl) {
@@ -230,6 +231,24 @@ public class BlockchainNode {
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 String responseBody = new String(connection.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
                 return Optional.of(new JSONObject(responseBody));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<Long> tryGetLong(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(TIMEOUT_MS);
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                String responseBody = new String(connection.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                return Optional.of(Long.valueOf(responseBody));
             }
         } catch (IOException e) {
             e.printStackTrace();
