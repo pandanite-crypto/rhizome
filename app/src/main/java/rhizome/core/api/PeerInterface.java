@@ -1,4 +1,4 @@
-package rhizome.core.blockchain;
+package rhizome.core.api;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,7 +19,7 @@ import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.dto.TransactionDto;
 
 // TODO: basic translation from C++ , need refactor
-public class ApiNodeInterface {
+public class PeerInterface {
 
     private static final int TIMEOUT_MS = 10000;
     private static final int TIMEOUT_BLOCKHEADERS_MS = 15000;
