@@ -66,7 +66,7 @@ public class HeaderChain {
     }
 
     public void load() {
-        Optional<Long> opt = ApiNodeInterface.getCurrentBlockCount(this.host);
+        Optional<Long> opt = PeerInterface.getCurrentBlockCount(this.host);
         if (!opt.isPresent()) {
             this.failed = true;
             return;
@@ -86,7 +86,7 @@ public class HeaderChain {
                 long end = Math.min(targetBlockCount, i + Constants.BLOCK_HEADERS_PER_FETCH - 1);
                 boolean failure = false;
                 ArrayList<BlockDto> blockHeaders = new ArrayList<>();
-                ApiNodeInterface.readRawHeaders(this.host, i, end, blockHeaders); // Adaptez cette méthode
+                PeerInterface.readRawHeaders(this.host, i, end, blockHeaders); // Adaptez cette méthode
 
                 for (BlockDto b : blockHeaders) {
                     ArrayList<Transaction> empty = new ArrayList<>();
