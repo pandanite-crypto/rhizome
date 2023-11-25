@@ -18,6 +18,7 @@ import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.transaction.Transaction;
 import rhizome.persistence.BlockPersistence;
 
+// TODO: basic translation from C++ , need refactor
 @Data
 @Builder
 @Slf4j
@@ -65,7 +66,7 @@ public class HeaderChain {
     }
 
     public void load() {
-        Optional<Long> opt = getCurrentBlockCount(this.host);
+        Optional<Long> opt = ApiNodeInterface.getCurrentBlockCount(this.host);
         if (!opt.isPresent()) {
             this.failed = true;
             return;
@@ -85,7 +86,7 @@ public class HeaderChain {
                 long end = Math.min(targetBlockCount, i + Constants.BLOCK_HEADERS_PER_FETCH - 1);
                 boolean failure = false;
                 ArrayList<BlockDto> blockHeaders = new ArrayList<>();
-                BlockchainNode.readRawHeaders(this.host, i, end, blockHeaders); // Adaptez cette méthode
+                ApiNodeInterface.readRawHeaders(this.host, i, end, blockHeaders); // Adaptez cette méthode
 
                 for (BlockDto b : blockHeaders) {
                     ArrayList<Transaction> empty = new ArrayList<>();
@@ -137,9 +138,5 @@ public class HeaderChain {
         if (numBlocks != startBlocks) {
             log.info("Chain for {} updated to length= {}  total_work= {}", this.host, this.chainLength, this.totalWork);
         }
-    }
-
-    private Optional<Long> getCurrentBlockCount(String host2) {
-        return null;
     }
 }
