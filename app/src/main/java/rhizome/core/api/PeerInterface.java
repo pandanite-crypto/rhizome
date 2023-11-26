@@ -37,8 +37,8 @@ public class PeerInterface {
         return tryGetJson(hostUrl + "/total_work");
     }
 
-    public static Optional<JSONObject> getName(String hostUrl) {
-        return tryGetJson(hostUrl + "/name");
+    public static Optional<String> getName(String hostUrl) {
+        return tryGetString(hostUrl + "/name");
     }
 
     public static Optional<JSONObject> getBlockData(String hostUrl, int idx) {
@@ -231,6 +231,24 @@ public class PeerInterface {
             if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 String responseBody = new String(connection.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
                 return Optional.of(new JSONObject(responseBody));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> tryGetString(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(TIMEOUT_MS);
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                String responseBody = new String(connection.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                return Optional.of(responseBody);
             }
         } catch (IOException e) {
             e.printStackTrace();
