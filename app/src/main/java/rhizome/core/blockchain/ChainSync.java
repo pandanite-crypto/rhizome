@@ -2,9 +2,9 @@ package rhizome.core.blockchain;
 
 // TODO: basic translation from C++ , need refactor
 public class ChainSync implements Runnable {
-    private final HeaderChain chain;
+    private final Peer chain;
 
-    public ChainSync(HeaderChain chain) {
+    public ChainSync(Peer chain) {
         this.chain = chain;
     }
 
