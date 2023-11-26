@@ -6,19 +6,19 @@ import java.util.Map;
 import java.util.Set;
 
 import rhizome.core.common.Pair;
+import rhizome.core.crypto.SHA256Hash;
 import rhizome.persistence.BlockPersistence;
 
 public interface PeerManager {
-        int size();
+    int size();
     String computeAddress();
     void refreshHostList();
     void startPingingPeers();
     String getGoodHost();
     long getBlockCount();
     BigInteger getTotalWork();
-    byte[] getBlockHash(String host, long blockId);
+    SHA256Hash getBlockHash(String host, long blockId);
     Map<String, Pair<Long, String>> getHeaderChainStats();
-    Pair<String, Long> getRandomHost();
     List<String> getHosts(boolean includeSelf);
     Set<String> sampleFreshHosts(int count);
     Set<String> sampleAllHosts(int count);
