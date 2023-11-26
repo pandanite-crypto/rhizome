@@ -11,6 +11,7 @@ import java.util.Optional;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import rhizome.core.api.PeerInterface;
 import rhizome.core.block.Block;
 import rhizome.core.block.dto.BlockDto;
 import rhizome.core.common.Constants;
@@ -22,7 +23,7 @@ import rhizome.persistence.BlockPersistence;
 @Data
 @Builder
 @Slf4j
-public class HeaderChain {
+public class Peer {
 
     private String host;
     private boolean failed;
@@ -47,21 +48,28 @@ public class HeaderChain {
         return !failed && totalWork.compareTo(BigInteger.ZERO) > 0;
     }
 
-    BigInteger getTotalWork() {
+    public BigInteger getTotalWork() {
         if(failed) {
             return BigInteger.ZERO;
         }
         return totalWork;
     }
 
-    long getChainLength() {
+    public SHA256Hash getHash(long blockId) {
+        if (blockId >= blockHashes.size()) {
+            return SHA256Hash.empty();
+        }
+        return blockHashes.get((int) blockId - 1);
+    }
+
+    public long getChainLength() {
         if(failed) {
             return 0;
         }
         return chainLength;
     }
 
-    long getCurrentDownloaded() {
+    public long getCurrentDownloaded() {
         return blockHashes.size();
     }
 
