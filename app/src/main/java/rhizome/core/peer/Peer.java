@@ -1,4 +1,4 @@
-package rhizome.core.blockchain;
+package rhizome.core.peer;
 
 import static rhizome.core.common.Crypto.addWork;
 
