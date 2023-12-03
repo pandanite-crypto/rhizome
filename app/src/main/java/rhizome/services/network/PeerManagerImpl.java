@@ -35,10 +35,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import rhizome.core.api.PeerInterface;
-import rhizome.core.blockchain.Peer;
 import rhizome.core.common.Constants;
 import rhizome.core.common.Pair;
 import rhizome.core.crypto.SHA256Hash;
+import rhizome.core.peer.Peer;
 import rhizome.persistence.BlockPersistence;
 
 @Slf4j
