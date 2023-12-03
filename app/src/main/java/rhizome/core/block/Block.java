@@ -9,8 +9,6 @@ import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.net.Serializable;
 import rhizome.core.transaction.Transaction;
 
-import static rhizome.core.common.Helpers.longToString;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -124,7 +122,7 @@ public sealed interface Block permits BlockImpl {
             }
             result.put(DIFFICULTY, blockImpl.getDifficulty());
             result.put(NONCE, blockImpl.getNonce().toHexString());
-            result.put(TIMESTAMP, longToString(blockImpl.getTimestamp()));
+            result.put(TIMESTAMP, Long.toString(blockImpl.getTimestamp()));
             result.put(MERKLE_ROOT, blockImpl.getMerkleRoot().toHexString());
             result.put(LAST_BLOCK_HASH, blockImpl.getLastBlockHash().toHexString());
             JSONArray transactionsArray = new JSONArray();
