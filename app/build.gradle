@@ -44,6 +44,8 @@ dependencies {
 
     // TODO: TBD
     implementation 'org.json:json:20231013'
+    // https://mvnrepository.com/artifact/com.dslplatform/dsl-json
+    implementation 'com.dslplatform:dsl-json:2.0.2'
 
     // CQEngine
     implementation 'com.googlecode.cqengine:cqengine:3.6.0'
