@@ -10,11 +10,13 @@ import io.activej.promise.Promise;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import rhizome.services.network.discovery.PeerDiscoveryListener;
+import rhizome.services.network.discovery.PeerDiscoveryService.DiscoveryPeer;
 
 @Slf4j
 @Getter
 @Setter
-public class PeerManagerService implements EventloopService {
+public class PeerManagerService implements EventloopService, PeerDiscoveryListener {
 
     private Eventloop eventloop;
     private final AsyncRunnable refresh;
@@ -43,5 +45,11 @@ public class PeerManagerService implements EventloopService {
     private Promise<Void> doRefresh(PeerManager manager) {
         // TODO Auto-generated method stub
         return Promise.complete();
+    }
+
+    @Override
+    public void onNewPeerDiscovered(DiscoveryPeer peer) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'onNewPeerDiscovered'");
     }
 }
