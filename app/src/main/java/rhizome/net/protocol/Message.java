@@ -1,4 +1,4 @@
-package rhizome.core.net.protocol;
+package rhizome.net.protocol;
 
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;

@@ -17,7 +17,7 @@ import io.activej.http.HttpRequest;
 import io.activej.promise.Promise;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import rhizome.core.net.NetworkUtils;
+import rhizome.net.NetworkUtils;
 import rhizome.core.common.SchedulerUtil;
 
 import static io.activej.config.converter.ConfigConverters.ofBoolean;

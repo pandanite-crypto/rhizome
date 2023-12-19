@@ -1,15 +1,16 @@
-package rhizome.core.net.protocol;
+package rhizome.net.protocol;
 
 import java.util.Map;
 import com.google.common.collect.Maps;
 
-import static rhizome.core.net.protocol.ProtocolVersion.V01;
+import static rhizome.net.protocol.ProtocolVersion.V01;
 
 public enum MessageCodes {
     BLOCKS_REQUEST(0x00),
     BLOCKS_RESPONSE(0x01),
     SYNC_BLOCK(0x02),
-    SYNCBLOCK_REQUEST(0x03);
+    SYNCBLOCK_REQUEST(0x03),
+    CLOSE(0x04);
 
     private static final Map<ProtocolVersion, Map<Integer, MessageCodes>> intToTypeMap = Maps.newHashMap();
     private static final Map<ProtocolVersion, MessageCodes[]> versionToValuesMap = Maps.newHashMap();

@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import rhizome.core.block.dto.BlockDto;
 import rhizome.core.crypto.SHA256Hash;
-import rhizome.core.net.Serializable;
+import rhizome.net.Serializable;
 import rhizome.core.transaction.Transaction;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package rhizome.core.net;
+package rhizome.net;
 
 import java.util.Arrays;
 import java.util.List;

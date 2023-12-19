@@ -1,4 +1,4 @@
-package rhizome.core.net;
+package rhizome.net;
 
 import io.activej.bytebuf.ByteBuf;
 import io.activej.serializer.BinaryInput;

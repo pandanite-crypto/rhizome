@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import rhizome.core.crypto.PrivateKey;
 import rhizome.core.crypto.PublicKey;
 import rhizome.core.ledger.PublicAddress;
-import rhizome.core.net.Serializable;
+import rhizome.net.Serializable;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.TransactionAmount;
 

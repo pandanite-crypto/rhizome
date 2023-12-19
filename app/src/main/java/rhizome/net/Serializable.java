@@ -1,4 +1,4 @@
-package rhizome.core.net;
+package rhizome.net;
 
 import org.json.JSONObject;
 import java.util.function.Function;

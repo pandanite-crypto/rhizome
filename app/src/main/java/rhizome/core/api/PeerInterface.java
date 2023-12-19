@@ -14,7 +14,7 @@ import org.json.JSONObject;
 import io.activej.bytebuf.ByteBuf;
 import rhizome.core.block.Block;
 import rhizome.core.block.dto.BlockDto;
-import rhizome.core.net.BinarySerializable;
+import rhizome.net.BinarySerializable;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.dto.TransactionDto;
 

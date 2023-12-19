@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import rhizome.core.block.Block;
 import rhizome.core.block.dto.BlockDto;
-import rhizome.core.net.BinarySerializable;
+import rhizome.net.BinarySerializable;
 import rhizome.core.user.User;
 
 import static org.junit.jupiter.api.Assertions.*;

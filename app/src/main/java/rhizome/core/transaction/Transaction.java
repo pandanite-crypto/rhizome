@@ -6,7 +6,7 @@ import rhizome.core.crypto.PrivateKey;
 import rhizome.core.crypto.PublicKey;
 import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.ledger.PublicAddress;
-import rhizome.core.net.Serializable;
+import rhizome.net.Serializable;
 import rhizome.core.transaction.dto.TransactionDto;
 
 public sealed interface Transaction permits TransactionImpl {

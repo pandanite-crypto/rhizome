@@ -1,5 +1,7 @@
 package rhizome.core.blockchain;
 
+import rhizome.core.peer.Peer;
+
 // TODO: basic translation from C++ , need refactor
 public class ChainSync implements Runnable {
     private final Peer chain;

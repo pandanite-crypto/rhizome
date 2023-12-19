@@ -1,4 +1,4 @@
-package rhizome.core.net.protocol;
+package rhizome.net.protocol;
 
 import org.jetbrains.annotations.NotNull;
 

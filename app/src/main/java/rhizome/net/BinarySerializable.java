@@ -1,4 +1,4 @@
-package rhizome.core.net;
+package rhizome.net;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
