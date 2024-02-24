@@ -31,26 +31,22 @@ import java.time.Duration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import rhizome.core.api.PeerInterface;
 import rhizome.core.common.Constants;
 import rhizome.core.common.Pair;
 import rhizome.core.crypto.SHA256Hash;
-import rhizome.core.peer.Peer;
+import rhizome.net.p2p.peer.PeerOLD;
 import rhizome.persistence.BlockPersistence;
 
 @Slf4j
-@Getter
-@Setter
-public class PeerManagerImpl implements PeerManager {
+public class PeerManagerImpl {
 
     private static final long HOST_MIN_FRESHNESS = 180l * 60; // 3 hours
     private static final int RANDOM_GOOD_HOST_COUNT = 0;
     private static final int ADD_PEER_BRANCH_FACTOR = 0;
     private static final long TIMEOUT_MS = 0;
-    protected List<Peer> currPeers;
+    protected List<PeerOLD> currPeers;
     protected BlockPersistence blockStore;
     protected final Lock lock = new ReentrantLock();
     protected boolean disabled;
@@ -149,7 +145,6 @@ public class PeerManagerImpl implements PeerManager {
         }
     }
 
-    @Override
     public String computeAddress() {
         if (firewall) {
             return "http://undiscoverable";
@@ -269,7 +264,7 @@ public class PeerManagerImpl implements PeerManager {
         String bestHost = currPeers.get(0).getHost();
         lock.lock();
         try {
-            for (Peer h : currPeers) {
+            for (PeerOLD h : currPeers) {
                 if (h.getTotalWork().compareTo(bestWork) > 0) {
                     bestWork = h.getTotalWork();
                     bestHost = h.getHost();
@@ -284,7 +279,7 @@ public class PeerManagerImpl implements PeerManager {
     // Returns number of block headers downloaded by peer host
     public Map<String, Pair<Long, String>> getHeaderChainStats() {
         Map<String, Pair<Long, String>> ret = new HashMap<>();
-        for (Peer h : currPeers) {
+        for (PeerOLD h : currPeers) {
             ret.put(h.getHost(), new Pair<>(h.getCurrentDownloaded(), version)); // Remplacez 'version' par la variable/le champ approprié
         }
         return ret;
@@ -297,7 +292,7 @@ public class PeerManagerImpl implements PeerManager {
         BigInteger bestWork = BigInteger.ZERO;
         lock.lock();
         try {
-            for (Peer h : currPeers) {
+            for (PeerOLD h : currPeers) {
                 if (h.getTotalWork().compareTo(bestWork) > 0) {
                     bestWork = h.getTotalWork();
                     bestLength = h.getChainLength();
@@ -316,7 +311,7 @@ public class PeerManagerImpl implements PeerManager {
             if (currPeers.isEmpty()) {
                 return bestWork;
             }
-            for (Peer h : currPeers) {
+            for (PeerOLD h : currPeers) {
                 BigInteger peerWork = h.getTotalWork();
                 if (peerWork.compareTo(bestWork) > 0) {
                     bestWork = peerWork;
@@ -332,7 +327,7 @@ public class PeerManagerImpl implements PeerManager {
         SHA256Hash ret = SHA256Hash.empty(); // Assuming NULL_SHA256_HASH is a constant
         lock.lock();
         try {
-            for (Peer h : currPeers) {
+            for (PeerOLD h : currPeers) {
                 if (h.getHost().equals(host)) {
                     ret = h.getHash(blockId);
                     break;
@@ -379,7 +374,6 @@ public class PeerManagerImpl implements PeerManager {
         return sampledHosts;
     }
 
-    @Override
     public Set<String> sampleAllHosts(int count) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'sampleAllHosts'");
@@ -419,7 +413,7 @@ public class PeerManagerImpl implements PeerManager {
         if (this.currPeers.size() < RANDOM_GOOD_HOST_COUNT) {
             try {
                 lock.lock();
-                this.currPeers.add(Peer.builder()
+                this.currPeers.add(PeerOLD.builder()
                                         .host(addr)
                                         .checkPoints(checkpoints)
                                         .bannedHashes(bannedHashes)
@@ -546,7 +540,6 @@ public class PeerManagerImpl implements PeerManager {
         }
     }
 
-    @Override
     public void setBlockstore(BlockPersistence blockStore) {
         this.blockStore = blockStore;
     }
@@ -580,13 +573,18 @@ public class PeerManagerImpl implements PeerManager {
     
         for (String h : hosts) {
             currPeers.add(
-                Peer.builder()
+                PeerOLD.builder()
                 .host(h)
                 .checkPoints(checkpoints)
                 .bannedHashes(bannedHashes)
                 .blockStore(blockStore)
                 .build());
         }
+    }
+
+    public void onNewPeerDiscovered(Object peer) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'onNewPeerDiscovered'");
     }
     
     

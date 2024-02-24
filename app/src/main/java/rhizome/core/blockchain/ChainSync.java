@@ -1,12 +1,12 @@
 package rhizome.core.blockchain;
 
-import rhizome.core.peer.Peer;
+import rhizome.net.p2p.peer.PeerOLD;
 
 // TODO: basic translation from C++ , need refactor
 public class ChainSync implements Runnable {
-    private final Peer chain;
+    private final PeerOLD chain;
 
-    public ChainSync(Peer chain) {
+    public ChainSync(PeerOLD chain) {
         this.chain = chain;
     }
 

@@ -6,7 +6,7 @@ import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import lombok.Getter;
 import rhizome.core.crypto.SHA256Hash;
-import rhizome.net.BinarySerializable;
+import rhizome.core.serialization.BinarySerializable;
 
 @Getter
 public class BlockDto implements BinarySerializable {

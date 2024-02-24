@@ -2,7 +2,10 @@ package rhizome.net;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import io.activej.eventloop.Eventloop;
 import io.activej.http.AsyncHttpClient;
@@ -65,5 +68,29 @@ public class NetworkUtils {
         // String ipPattern = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
         var ipPattern = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$";
         return ip.matches(ipPattern);
+    }
+
+    /**
+     * Get the IP addresses for a given domain name
+     * @param domainName
+     * @return
+     * @throws UnknownHostException
+     */
+    public static List<String> getIPAddresses(String domainName) {
+        List<String> ipAddresses = new ArrayList<>();
+
+        try {
+            InetAddress[] inetAddresses = InetAddress.getAllByName(domainName);
+            
+            for (InetAddress inetAddress : inetAddresses) {
+                ipAddresses.add(inetAddress.getHostAddress());
+            }
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+
+        return ipAddresses;
     }
 }

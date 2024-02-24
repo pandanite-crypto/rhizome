@@ -1,121 +1,203 @@
 package rhizome.services.network.discovery;
 
-import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import com.dslplatform.json.DslJson;
-
+import io.activej.async.function.AsyncRunnable;
+import io.activej.async.function.AsyncRunnables;
 import io.activej.async.service.EventloopService;
-import io.activej.config.Config;
 import io.activej.eventloop.Eventloop;
-import io.activej.http.AsyncHttpClient;
-import io.activej.http.HttpRequest;
 import io.activej.promise.Promise;
+import io.activej.promise.Promises;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import rhizome.net.NetworkUtils;
-import rhizome.core.common.SchedulerUtil;
-
-import static io.activej.config.converter.ConfigConverters.ofBoolean;
-import static io.activej.config.converter.ConfigConverters.ofInteger;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import rhizome.net.p2p.PeerSystem;
+import rhizome.net.p2p.peer.Peer;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Map.Entry;
+import static io.activej.async.util.LogUtils.toLogger;
 
 @Slf4j
 @Getter
 public class PeerDiscoveryService implements EventloopService {
 
-    private static final int PING_INTERVAL = 60;
+    private static final int PING_INTERVAL = 10;
 
-    private Eventloop eventloop;
-    private AsyncHttpClient httpClient;
-    private PeerDiscoveryListener peerManagerService;
-    private Map<String, DiscoveryPeer> discoveredAddressList = new HashMap<>();
-    private String hostIp;
-    private DslJson<Object> dslJson = new DslJson<>();
-    protected Set<String> blacklist;
-    protected Set<String> whitelist;
+    private final Eventloop eventloop;
+    private final DiscoveryService discoveryService;
+    private final PeerSystem peerSystem;
 
-    PeerDiscoveryService(Eventloop eventloop, Config config, PeerDiscoveryListener peerManagerService) {
-        this.httpClient = AsyncHttpClient.create(eventloop);
+    private final AsyncRunnable checkAllPeers = AsyncRunnables.reuse(this::doCheckAllPeers);
+    private final AsyncRunnable checkDeadPeers = AsyncRunnables.reuse(this::doCheckDeadPeers);
+
+    private final Map<Object, Peer> peers = new HashMap<>();
+    private final Map<Object, Peer> peersView = unmodifiableMap(peers);
+
+    private final Map<Object, Peer> alivePeers = new HashMap<>();
+    private final Map<Object, Peer> alivePeersView = unmodifiableMap(alivePeers);
+
+    private final Map<Object, Peer> deadPeers = new HashMap<>();
+    private final Map<Object, Peer> deadPeersView = unmodifiableMap(deadPeers);
+
+    private PeerDiscoveryService(Eventloop eventloop, DiscoveryService discoveryService, PeerSystem peerSystem) {
         this.eventloop = eventloop;
-        this.peerManagerService = peerManagerService;
-        this.hostIp = NetworkUtils.computeAddress(config.get("ip"), config.get(ofInteger(), "port"), config.get(ofBoolean(), "firewall"));
+        this.discoveryService = discoveryService;
+        this.peerSystem = peerSystem;
+    }
+
+    public static PeerDiscoveryService create(Eventloop eventloop, DiscoveryService discoveryService, PeerSystem peerSystem) {
+        return new PeerDiscoveryService(eventloop, discoveryService, peerSystem);
     }
 
     @Override
     public @NotNull Promise<?> start() {
         log.info("|PEER DISCOVERY SERVICE CLIENT STARTING|");
-        // TODO: INITALIZE DISCOVERED ADDRESS LIST AND VAIRABLES
-        String nodeId = "localhost"; 
-        return Promise.ofBlocking(eventloop, () -> SchedulerUtil.scheduleEveryMinute(eventloop,  () -> Promise.ofBlocking(eventloop, this::handshake)).start())
-            .whenResult(() -> log.info("|PEER DISCOVERY SERVICE CLIENT STARTED|"));
+        return Promise.ofCallback(cb -> discoveryService.discover(null, (result, e) -> {
+            if (e == null) {
+                this.peers.putAll(result);
+                this.alivePeers.putAll(result);
+                checkAllPeers().run(cb);
+            } else {
+                cb.setException(e);
+            }
+        }))
+                .whenResult(this::rediscover);
     }
 
     @Override
-    public @NotNull Promise<?>stop() {
-        return Promise.complete()
-            .whenResult(() -> log.info("|PEER DISCOVERY SERVICE CLIENT STOPPED|"));
+    public @NotNull Promise<?> stop() {
+        return Promise.complete().whenResult(() -> log.info("|PEER DISCOVERY SERVICE CLIENT STOPPED|"));
     }
 
     /**
-     * Shaking hand
+     * Starts a check process, which pings all peers and marks them as dead or alive
+     * accordingly
+     *
+     * @return promise of the check
      */
-    private void handshake() {
-        log.debug("Sending handshake...");
-        discoveredAddressList.forEach((key, value) -> {
+    public Promise<Void> checkAllPeers() {
+        return checkAllPeers.run().whenComplete(toLogger(log, "checkAllPeers"));
+    }
 
-            if(value.lastPingTime > System.currentTimeMillis() / 1000 - PING_INTERVAL) {
-                return;
+    /**
+     * Relanches the discovery process
+     */
+    private void rediscover() {
+        discoveryService.discover(peers, (result, e) -> {
+            if (e == null) {
+                updatePeers(result);
+                checkAllPeers().whenResult(this::rediscover);
+            } else {
+                log.warn("Could not discover peers", e);
+                eventloop.delayBackground(Duration.ofSeconds(PING_INTERVAL), this::rediscover);
             }
-
-            log.debug("Sending handshake to {}", key);
-
-            // benchmarking
-            var startRequestTime = System.currentTimeMillis() / 1000;
-
-            httpClient.request(HttpRequest.get(key + "/peers"))
-                .then(response -> response.loadBody())
-                .map(body -> {
-                    var peerBytes = body.getString(UTF_8).getBytes();
-                    return dslJson.deserializeList(String.class, peerBytes, peerBytes.length);
-                })
-                .getResult()
-                .forEach(discoveredIp -> {
-                    if (this.blacklist.contains(discoveredIp)) return;
-
-                    discoveredAddressList.compute(discoveredIp, (ip, peer) -> {
-                            if (peer != null) {
-                                peer.lastPingTime = System.currentTimeMillis() / 1000;
-                                peer.clockDelta = System.currentTimeMillis() / 1000 - startRequestTime;
-                                return peer;
-                            }
-
-                            DiscoveryPeer newPeer = new DiscoveryPeer(new InetSocketAddress(discoveredIp, 8080), System.currentTimeMillis(), 0L);
-                            notifyPeerAdded(newPeer);
-                            return newPeer;
-                        });
-                    }
-                );
         });
     }
 
-    private void notifyPeerAdded(DiscoveryPeer newPeer) {
-        peerManagerService.onNewPeerDiscovered(newPeer);
+    /**
+     * Starts a check process, which pings all dead peers and marks them as alive if
+     * they respond
+     *
+     * @return promise of the check
+     */
+    private void updatePeers(Map<Object, Peer> newPeers) {
+        peers.clear();
+        peers.putAll(newPeers);
+
+        alivePeers.keySet().retainAll(peers.keySet());
+        deadPeers.keySet().retainAll(peers.keySet());
+
+        for (Entry<Object, Peer> entry : peers.entrySet()) {
+            Object peerId = entry.getKey();
+            Peer peer = entry.getValue();
+
+            Peer deadPeer = deadPeers.get(peerId);
+            if (deadPeer != null) {
+                if (deadPeer == peer)
+                    continue;
+
+                deadPeers.remove(peerId);
+            }
+            alivePeers.put(peerId, peer);
+        }
+
+        alivePeers.clear();
+        deadPeers.clear();
     }
 
-    public static class DiscoveryPeer {
-        InetSocketAddress address;
-        long lastPingTime; 
-        long clockDelta;
-    
-        public DiscoveryPeer(InetSocketAddress address, long lastPingTime, long clockDelta) {
-            this.address = address;
-            this.lastPingTime = lastPingTime;
-            this.clockDelta = clockDelta;
+    /**
+     * Starts a check process, which pings all peers and marks them as alive if they
+     * respond
+     * 
+     * @return
+     */
+    private Promise<Void> doCheckAllPeers() {
+        return Promises.all(
+                peers.entrySet().stream()
+                        .map(entry -> {
+                            Object id = entry.getKey();
+                            return entry.getValue()
+                                    .ping(peerSystem.ping())
+                                    .map((o, e) -> {
+                                        if (e == null) {
+                                            markAlive(id);
+                                        } else {
+                                            markDead(id, e);
+                                        }
+                                        return null;
+                                    });
+                        }));
+    }
+
+    /**
+     * Starts a check process, which pings all dead peers and marks them as alive if
+     * they respond
+     * 
+     * @return
+     */
+    private Promise<Void> doCheckDeadPeers() {
+        return Promises.all(
+                deadPeers.entrySet().stream()
+                        .map(entry -> entry.getValue()
+                                .ping(peerSystem.ping())
+                                .map((o, e) -> {
+                                    if (e == null) {
+                                        markAlive(entry.getKey());
+                                    }
+                                    return null;
+                                })));
+    }
+
+    /**
+     * Mark a peer as dead. It means that no operations will use it, and it would
+     * not be given to the server selector.
+     * Next call to {@link #checkDeadPeers()} or {@link #checkAllPeers()} will ping
+     * this peer and possibly
+     * mark it as alive again.
+     *
+     * @param peerId id of the peer to be marked
+     * @param e      optional exception for logging
+     * @return <code>true</code> if peer was alive and <code>false</code> otherwise
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public boolean markDead(Object peerId, @Nullable Exception e) {
+        Peer peer = alivePeers.remove(peerId);
+        if (peer != null) {
+            log.warn("marking {} as dead ", peerId, e);
+            deadPeers.put(peerId, peer);
+            return true;
         }
-     }
+        return false;
+    }
+
+    public void markAlive(Object peerId) {
+        Peer peer = deadPeers.remove(peerId);
+        if (peer != null) {
+            log.info("Peer {} is alive again!", peerId);
+            alivePeers.put(peerId, peer);
+        }
+    }
 }

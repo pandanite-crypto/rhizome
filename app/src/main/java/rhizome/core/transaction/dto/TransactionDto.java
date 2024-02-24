@@ -7,7 +7,7 @@ import io.activej.serializer.annotations.Serialize;
 import lombok.Getter;
 import rhizome.core.crypto.PublicKey;
 import rhizome.core.ledger.PublicAddress;
-import rhizome.net.BinarySerializable;
+import rhizome.core.serialization.BinarySerializable;
 import rhizome.core.transaction.TransactionSignature;
 
 @Getter

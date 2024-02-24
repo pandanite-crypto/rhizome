@@ -12,7 +12,7 @@ import rhizome.core.block.Block;
 import rhizome.core.block.dto.BlockDto;
 import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.ledger.PublicAddress;
-import rhizome.net.BinarySerializable;
+import rhizome.core.serialization.BinarySerializable;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.dto.TransactionDto;
 import rhizome.persistence.BlockPersistence;

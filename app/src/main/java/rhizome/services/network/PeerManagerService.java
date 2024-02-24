@@ -7,49 +7,43 @@ import io.activej.async.function.AsyncRunnables;
 import io.activej.async.service.EventloopService;
 import io.activej.eventloop.Eventloop;
 import io.activej.promise.Promise;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import rhizome.services.network.discovery.PeerDiscoveryListener;
-import rhizome.services.network.discovery.PeerDiscoveryService.DiscoveryPeer;
+import rhizome.net.p2p.PeerSystem;
 
 @Slf4j
-@Getter
-@Setter
-public class PeerManagerService implements EventloopService, PeerDiscoveryListener {
+public class PeerManagerService implements EventloopService {
 
     private Eventloop eventloop;
     private final AsyncRunnable refresh;
 
-    public PeerManagerService(Eventloop eventloop, PeerManager manager) {
+    public PeerManagerService(Eventloop eventloop, PeerSystem peerSystem) {
         this.eventloop = eventloop;
-        this.refresh = AsyncRunnables.reuse(() -> doRefresh(manager));
+        this.refresh = AsyncRunnables.reuse(() -> doRefresh(peerSystem));
     }
 
-	public Promise<Void> refresh() {
-		return refresh.run();
-	}
+    public Promise<Void> refresh() {
+        return refresh.run();
+    }
 
     @Override
     public @NotNull Promise<?> start() {
-        log.info("|PEER MANAGER STARTING|");
-        return refresh();    
+        log.info("|PEER MANAGER SERVICE STARTING|");
+        return refresh();
     }
 
     @Override
     public @NotNull Promise<?> stop() {
-        log.info("|PEER MANAGER STARTING|");
-        return Promise.complete().whenResult(() -> log.info("|PEER MANAGER STOPPED|"));    
+        log.info("|PEER MANAGER SERVICE STOPPING|");
+        return Promise.complete().whenResult(() -> log.info("|PEER MANAGER SERVICE STOPPED|"));
     }
 
-    private Promise<Void> doRefresh(PeerManager manager) {
-        // TODO Auto-generated method stub
+    private Promise<Void> doRefresh(PeerSystem peerSystem) {
+        // var peerSystem = new GossipSystem(manager);
         return Promise.complete();
     }
 
     @Override
-    public void onNewPeerDiscovered(DiscoveryPeer peer) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'onNewPeerDiscovered'");
+    public @NotNull Eventloop getEventloop() {
+        return eventloop;
     }
 }
