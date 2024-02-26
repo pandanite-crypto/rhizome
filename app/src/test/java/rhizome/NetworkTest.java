@@ -2,7 +2,6 @@ package rhizome;
 
 import org.junit.jupiter.api.Test;
 
-import io.activej.bytebuf.ByteBuf;
 import io.activej.csp.ChannelConsumer;
 import io.activej.csp.ChannelSupplier;
 import io.activej.csp.binary.BinaryChannelSupplier;

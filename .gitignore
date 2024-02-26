@@ -5,3 +5,5 @@
 build
 .metals
 .fake
+
+*.class
