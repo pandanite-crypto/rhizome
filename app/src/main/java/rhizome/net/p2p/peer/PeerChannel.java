@@ -38,8 +38,18 @@ public class PeerChannel {
     // Stats of current peer connection
     protected PeerStats stats;
 
-    public static Promise<PeerChannel> connect(Peer peer) {
-        return Promise.of(builder().peer(peer).build());
+    public static Promise<PeerChannel> connect(Peer peer, PeerOutput output) {
+        return Promise.of(builder()
+            .peer(peer)
+            .output(output)
+            .build());
+    }
+
+    public static Promise<PeerChannel> connect(Peer peer, PeerInput input) {
+        return Promise.of(builder()
+            .peer(peer)
+            .input(input)
+            .build());
     }
 
     public static class PeerOutput {
