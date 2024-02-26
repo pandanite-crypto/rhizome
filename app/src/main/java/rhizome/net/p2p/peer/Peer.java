@@ -1,9 +1,11 @@
 package rhizome.net.p2p.peer;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.UUID;
 
 import io.activej.async.function.AsyncConsumer;
+import io.activej.async.function.AsyncFunction;
 import io.activej.promise.Promise;
 
 public record Peer(String cluster, UUID id, InetSocketAddress address, PeerState state, long lastPingTime, long clockDelta, long version) {
@@ -45,4 +47,12 @@ public record Peer(String cluster, UUID id, InetSocketAddress address, PeerState
     public Promise<Void> ping(AsyncConsumer<Peer> consumer) {
 		return consumer.accept(this);
 	}
+
+    public Promise<List<Peer>> discover(AsyncFunction<Peer, List<Peer>> function) {
+        return function.apply(this);
+    }
+
+    public Promise<PeerChannel> connect() {
+        return PeerChannel.connect(this);
+    }
 }
