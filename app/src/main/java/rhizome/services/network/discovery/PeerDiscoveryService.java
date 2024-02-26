@@ -42,6 +42,9 @@ public class PeerDiscoveryService implements EventloopService {
     private final Map<Object, Peer> deadPeers = new HashMap<>();
     private final Map<Object, Peer> deadPeersView = unmodifiableMap(deadPeers);
 
+    private final Map<Object, Peer> candidatePeers = new HashMap<>();
+    private final Map<Object, Peer> candidatePeersView = unmodifiableMap(candidatePeers);
+
     private PeerDiscoveryService(Eventloop eventloop, DiscoveryService discoveryService, PeerSystem peerSystem) {
         this.eventloop = eventloop;
         this.discoveryService = discoveryService;

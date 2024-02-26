@@ -1,14 +1,16 @@
 package rhizome.net.p2p.peer;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.List;
 import java.util.UUID;
 
 import io.activej.async.function.AsyncConsumer;
 import io.activej.async.function.AsyncFunction;
 import io.activej.promise.Promise;
+import rhizome.net.p2p.gossip.DiscoveryPeer;
 
-public record Peer(String cluster, UUID id, InetSocketAddress address, PeerState state, long lastPingTime, long clockDelta, long version) {
+public interface Peer {
     
     /**
      * 
@@ -17,7 +19,7 @@ public record Peer(String cluster, UUID id, InetSocketAddress address, PeerState
      * @return
      */
     public static Peer initLocalPeer(String cluster, InetSocketAddress address) {
-        return new Peer(cluster, UUID.randomUUID(), address, PeerState.JOIN, System.currentTimeMillis() / 1000, 0, 0);
+        return new DiscoveryPeer(cluster, UUID.randomUUID(), address, PeerState.JOIN, System.currentTimeMillis() / 1000, 0, 0);
     }
 
     /**
@@ -27,7 +29,7 @@ public record Peer(String cluster, UUID id, InetSocketAddress address, PeerState
      * @return
      */
     public static Peer fromAddress(String cluster, InetSocketAddress address) {
-        return new Peer(cluster, UUID.randomUUID(), address, PeerState.DISCONNECTED, System.currentTimeMillis() / 1000, 0, 0);
+        return new DiscoveryPeer(cluster, UUID.randomUUID(), address, PeerState.DISCONNECTED, System.currentTimeMillis() / 1000, 0, 0);
     }
 
     /**
@@ -35,24 +37,26 @@ public record Peer(String cluster, UUID id, InetSocketAddress address, PeerState
      * @param startRequestTime
      * @return
      */
-    public Peer refresh(long startRequestTime) {
-        return new Peer(cluster, id, address, state, System.currentTimeMillis() / 1000, System.currentTimeMillis() / 1000 - startRequestTime, version);
-    }
+    public Peer refresh(long startRequestTime);
 
     /**
      * 
      * @param consumer
      * @return
      */
-    public Promise<Void> ping(AsyncConsumer<Peer> consumer) {
+    public default Promise<Void> ping(AsyncConsumer<Peer> consumer) {
 		return consumer.accept(this);
 	}
 
-    public Promise<List<Peer>> discover(AsyncFunction<Peer, List<Peer>> function) {
+    public default Promise<List<Peer>> discover(AsyncFunction<Peer, List<Peer>> function) {
         return function.apply(this);
     }
 
-    public Promise<PeerChannel> connect() {
+    public default Promise<PeerChannel> connect() {
         return PeerChannel.connect(this);
     }
+
+    InetSocketAddress address();
+    String cluster();
+    UUID id();
 }

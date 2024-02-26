@@ -52,9 +52,7 @@ public class PeerChannel {
             .build());
     }
 
-    public static class PeerOutput {
-    }
+    public interface PeerOutput {}
 
-    public static class PeerInput {
-    }
+    public interface PeerInput {}
 }
