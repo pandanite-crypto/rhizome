@@ -1,4 +1,4 @@
-package rhizome.server;
+package rhizome.config;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -22,38 +22,29 @@ import rhizome.services.network.discovery.PeerDiscoveryService;
 import static io.activej.config.converter.ConfigConverters.ofList;
 import static io.activej.config.converter.ConfigConverters.ofString;
 
-public class NetworkModule extends AbstractModule {
+public final class NetworkModule extends AbstractModule {
 
     public static NetworkModule create() {
         return new NetworkModule();
     }
 
-    @Provides
-    @Eager
-    public PeerManager peerManager() {
+    @Provides @Eager PeerManager peerManager() {
         return new PeerManager();
     }
 
-    @Provides
-    @Eager
-    public PeerManagerService peerManagerService(Eventloop eventloop, PeerSystem peerSystem) {
+    @Provides @Eager PeerManagerService peerManagerService(Eventloop eventloop, PeerSystem peerSystem) {
         return new PeerManagerService(eventloop, peerSystem);
     }
 
-    @Provides
-    @Eager
-    public PeerDiscoveryService peerDiscoveryService(Eventloop eventloop, Map<Object, Peer> seeders, PeerSystem peerSystem) {
-        return PeerDiscoveryService.create(eventloop, DiscoveryService.initialize(seeders), peerSystem);
+    @Provides @Eager PeerDiscoveryService peerDiscoveryService(Eventloop eventloop, Map<Object, Peer> seeders, PeerSystem peerSystem) {
+        return PeerDiscoveryService.create(eventloop, DiscoveryService.randomized(seeders), peerSystem);
     }
 
-    @Provides
-    @Eager
-    public PeerSystem peerSystem() {
+    @Provides PeerSystem peerSystem() {
         return GossipSystem.builder().build();
     }
     
-    @Provides
-    Map<Object, Peer> seeders(Config config) {
+    @Provides Map<Object, Peer> seeders(Config config) {
         Map<Object, Peer> peers = new HashMap<>();
         config.get(ofList(ConfigConverters.ofString(), ";"), "seeders").stream()
                 .map(ipAddress -> Peer.fromAddress(config.get(ofString(), "cluster"), new InetSocketAddress(ipAddress, 8080)))

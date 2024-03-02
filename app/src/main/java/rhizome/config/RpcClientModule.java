@@ -1,4 +1,5 @@
-package rhizome.server;
+package rhizome.config;
+
 import io.activej.config.Config;
 import io.activej.config.converter.ConfigConverters;
 import io.activej.eventloop.Eventloop;
@@ -15,7 +16,7 @@ import java.util.List;
 import static io.activej.common.Checks.checkState;
 import static io.activej.rpc.client.sender.RpcStrategies.*;
 
-public class RpcClientModule extends AbstractModule {
+public final class RpcClientModule extends AbstractModule {
 	private RpcClientModule() {
 	}
 
@@ -23,8 +24,7 @@ public class RpcClientModule extends AbstractModule {
 		return new RpcClientModule();
 	}
 
-	@Provides
-	RpcClient rpcClient(Eventloop eventloop, RpcStrategy strategy) {
+	@Provides RpcClient rpcClient(Eventloop eventloop, RpcStrategy strategy) {
 		return RpcClient.create(eventloop)
 				.withConnectTimeout(Duration.ofSeconds(1))
 				.withSerializerBuilder(SerializerBuilder.create())
@@ -32,8 +32,7 @@ public class RpcClientModule extends AbstractModule {
 				.withStrategy(strategy);
 	}
 
-	@Provides
-	RpcStrategy rpcStrategy(Config config) {
+	@Provides RpcStrategy rpcStrategy(Config config) {
 		List<InetSocketAddress> inetAddresses = config.get(ConfigConverters.ofList(
 				ConfigConverters.ofInetSocketAddress(), ","), "client.addresses");
 		checkState(inetAddresses.size() == 4);
@@ -48,13 +47,11 @@ public class RpcClientModule extends AbstractModule {
 		);
 	}
 
-	@Provides
-	Eventloop eventloop() {
+	@Provides Eventloop eventloop() {
 		return Eventloop.create();
 	}
 
-	@Provides
-	Config config() {
+	@Provides Config config() {
 		return Config.create()
 				.with("protocol.compression", "false")
 				.with("client.addresses", "localhost:9000, localhost:9001, localhost:9002, localhost:9003")
