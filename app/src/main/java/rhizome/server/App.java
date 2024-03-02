@@ -3,11 +3,13 @@ package rhizome.server;
 import java.util.concurrent.Executor;
 
 import io.activej.eventloop.Eventloop;
+import io.activej.inject.Injector;
 import io.activej.inject.annotation.Provides;
 import io.activej.inject.module.Module;
 import io.activej.inject.module.ModuleBuilder;
 import io.activej.launcher.Launcher;
 import io.activej.service.ServiceGraphModule;
+import rhizome.config.NetworkModule;
 
 import static java.util.concurrent.Executors.newCachedThreadPool;
 
@@ -38,6 +40,7 @@ public final class App extends Launcher {
     }
 
     public static void main(String[] args) throws Exception {
+        Injector.useSpecializer();
         Launcher launcher = new App();
         launcher.launch(args);
     }
