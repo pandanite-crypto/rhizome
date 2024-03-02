@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/java
 {
-	"name": "Java",
+	"name": "Rhizome",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/java:21-bookworm",
 
@@ -11,7 +11,8 @@
 			"installMaven": "false",
 			"installGradle": "true"
 		},
-		"ghcr.io/devcontainers-contrib/features/graalvm-asdf:2": {}
+		"ghcr.io/devcontainers-contrib/features/graalvm-asdf:2": {},
+		"ghcr.io/devcontainers/features/node:1": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -24,6 +25,12 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"vscjava.vscode-gradle",
+				"dgileadi.java-decompiler",
+				"mwpb.java-prettier-formatter",
+				"oracle-labs-graalvm.graalvm",
+				"redhat.fabric8-analytics",
+				"SonarSource.sonarlint-vscode",
 				"GitHub.copilot",
 				"GitHub.copilot-chat"
 			]
