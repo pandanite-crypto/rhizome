@@ -143,7 +143,7 @@ public class PeerDiscoveryService implements EventloopService {
                         .map(entry -> {
                             Object id = entry.getKey();
                             return entry.getValue()
-                                    .ping(peerSystem.ping())
+                                    .ping()
                                     .map((o, e) -> {
                                         if (e == null) {
                                             markAlive(id);
@@ -165,7 +165,7 @@ public class PeerDiscoveryService implements EventloopService {
         return Promises.all(
                 deadPeers.entrySet().stream()
                         .map(entry -> entry.getValue()
-                                .ping(peerSystem.ping())
+                                .ping()
                                 .map((o, e) -> {
                                     if (e == null) {
                                         markAlive(entry.getKey());

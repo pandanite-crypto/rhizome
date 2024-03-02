@@ -25,9 +25,11 @@ import io.activej.rpc.protocol.RpcException;
 import io.activej.rpc.protocol.RpcMandatoryData;
 import io.activej.rpc.protocol.RpcOverloadException;
 import io.activej.rpc.protocol.RpcRemoteException;
+import rhizome.net.p2p.peer.PeerChannel.PeerOutput;
 import rhizome.net.p2p.rpc.Listener;
 import rhizome.net.p2p.rpc.PeerStream;
 import rhizome.net.protocol.Message;
+import rhizome.net.protocol.MessageCode;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 import static io.activej.common.Checks.checkState;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class RpcClientConnection implements Listener, RpcSender, JmxRefreshable {
+public final class RpcClientConnection implements PeerOutput, Listener, RpcSender, JmxRefreshable {
 	private static final Logger logger = getLogger(RpcClientConnection.class);
 	private static final boolean CHECK = Checks.isEnabled(RpcClientConnection.class);
 
@@ -248,12 +250,11 @@ public final class RpcClientConnection implements Listener, RpcSender, JmxRefres
 		}
 	}
 
-	private void ping() {
+	public void ping() {
 		if (isClosed()) return;
 		if (keepAliveMillis == 0) return;
 		pongReceived = false;
-		//TODO
-		// downstreamDataAcceptor.accept(Message.of(-1, RpcControlMessage.PING));
+		downstreamDataAcceptor.accept(Message.of(MessageCode.SYNC, RpcControlMessage.PING));
 		eventloop.delayBackground(keepAliveMillis, () -> {
 			if (isClosed()) return;
 			if (!pongReceived) {

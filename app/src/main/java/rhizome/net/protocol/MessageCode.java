@@ -20,7 +20,8 @@ public enum MessageCode {
     TRANSACTION_NEW(0x08),
     PEER_LIST_REQUEST(0x09),
     PEER_LIST_RESPONSE(0x0A),
-    CLOSE(0x0B);
+    CLOSE(0x0B), 
+    SYNC(0x0C);
 
     private static final Map<ProtocolVersion, Map<Integer, MessageCode>> byteToMessageCodeMap = unmodifiableMap(
         of(
@@ -36,7 +37,8 @@ public enum MessageCode {
                 entry(0x08, TRANSACTION_NEW),
                 entry(0x09, PEER_LIST_REQUEST),
                 entry(0x0A, PEER_LIST_RESPONSE),
-                entry(0x0B, CLOSE)
+                entry(0x0B, CLOSE),
+                entry(0x0C, SYNC)
             )
         )
     );

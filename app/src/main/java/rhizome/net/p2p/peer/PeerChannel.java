@@ -52,7 +52,9 @@ public class PeerChannel {
             .build());
     }
 
-    public interface PeerOutput {}
+    public interface PeerOutput {
+        void ping();
+    }
 
     public interface PeerInput {}
 }

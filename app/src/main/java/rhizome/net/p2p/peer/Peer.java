@@ -39,22 +39,31 @@ public interface Peer {
      */
     public Peer refresh(long startRequestTime);
 
-    /**
-     * 
-     * @param consumer
-     * @return
-     */
-    public default Promise<Void> ping(AsyncConsumer<Peer> consumer) {
-		return consumer.accept(this);
-	}
+    // /**
+    //  * 
+    //  * @param consumer
+    //  * @return
+    //  */
+    // public default Promise<Void> ping(AsyncConsumer<Peer> consumer) {
+	// 	return consumer.accept(this);
+	// }
+
+    public default Promise<Void> ping() {
+        return getPeerChannel().then(channel -> {
+            channel.getOutput().ping();
+            return Promise.complete();
+        });
+    }
+
+    public Promise<PeerChannel> getPeerChannel();
 
     public default Promise<List<Peer>> discover(AsyncFunction<Peer, List<Peer>> function) {
         return function.apply(this);
     }
 
-    public default Promise<PeerChannel> connect() {
-        return PeerChannel.connect(this);
-    }
+    // public default Promise<PeerChannel> connect() {
+    //     return PeerChannel.connect(this);
+    // }
 
     InetSocketAddress address();
     String cluster();
