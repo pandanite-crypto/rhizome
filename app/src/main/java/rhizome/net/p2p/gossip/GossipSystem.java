@@ -1,5 +1,7 @@
 package rhizome.net.p2p.gossip;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,8 +11,13 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.net.InetSocketAddress;
+
+import com.dslplatform.json.DslJson;
 
 import io.activej.async.function.AsyncConsumer;
+import io.activej.http.AsyncHttpClient;
+import io.activej.http.HttpRequest;
 import io.activej.promise.Promise;
 import io.activej.rpc.server.RpcRequestHandler;
 import lombok.Builder;
@@ -33,6 +40,11 @@ public class GossipSystem implements PeerSystem {
 
     private PeerManager peerManager;
     private Peer localhostPeer;
+
+
+    private AsyncHttpClient httpClient;
+    private DslJson<Object> dslJson = new DslJson<>();
+
     // private RpcServer peerServer;
 
     // private final Set<Peer> alivePeers = new HashSet<>();
@@ -66,10 +78,24 @@ public class GossipSystem implements PeerSystem {
         }
     }
 
-    @Override
-    public AsyncConsumer<Peer> ping() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'ping'");
-    }
+    // @Override
+    // public AsyncConsumer<Peer> ping() {
+    //     // TODO Auto-generated method stub
+    //     throw new UnsupportedOperationException("Unimplemented method 'ping'");
+    // }
 
+    @Override
+    public Promise<List<InetSocketAddress>> getPeers(Peer peer) {
+        return httpClient.request(HttpRequest.get(peer.address() + "/peers"))
+                .then(response -> response.loadBody())
+                .map(body -> {
+                    var peerBytes = body.getString(UTF_8).getBytes();
+                    return dslJson.deserializeList(String.class, peerBytes, peerBytes.length).stream()
+                            .map(address -> {
+                                var ip = address.split(":")[0];
+                                int port = Integer.parseInt(address.split(":")[1]);
+                                return new InetSocketAddress(ip, port);
+                            }).toList();
+                });
+    }
 }

@@ -1,4 +1,4 @@
-package rhizome.net.p2p.rpc;
+package rhizome.net.p2p.gossip;
 
 import io.activej.async.callback.Callback;
 import io.activej.rpc.client.RpcClientConnectionPool;

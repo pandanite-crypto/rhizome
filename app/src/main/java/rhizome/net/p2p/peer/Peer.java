@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.UUID;
 
+import ch.qos.logback.core.model.PropertyModel;
 import io.activej.async.function.AsyncConsumer;
 import io.activej.async.function.AsyncFunction;
 import io.activej.promise.Promise;
@@ -49,17 +50,14 @@ public interface Peer {
 	// }
 
     public default Promise<Void> ping() {
-        return getPeerChannel().then(channel -> {
-            channel.getOutput().ping();
-            return Promise.complete();
-        });
+        return Promise.ofCallback(cb -> getPeerChannel().getOutput().ping());
     }
 
-    public Promise<PeerChannel> getPeerChannel();
+    public PeerChannel getPeerChannel();
 
-    public default Promise<List<Peer>> discover(AsyncFunction<Peer, List<Peer>> function) {
-        return function.apply(this);
-    }
+    // public default Promise<List<Peer>> discover(AsyncFunction<Peer, List<Peer>> function) {
+    //     return function.apply(this);
+    // }
 
     // public default Promise<PeerChannel> connect() {
     //     return PeerChannel.connect(this);

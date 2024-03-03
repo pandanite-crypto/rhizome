@@ -14,12 +14,17 @@ import io.activej.promise.Promise;
 import io.activej.promise.Promises;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import rhizome.net.p2p.DiscoveryService;
 import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Map.Entry;
 import static io.activej.async.util.LogUtils.toLogger;
 
+/**
+ * This service execute the service discovery process. It pings all peers and marks them as dead or alive accordingly.
+ * It also relaunches the discovery process.
+ */
 @Slf4j
 @Getter
 public class PeerDiscoveryService implements EventloopService {
@@ -45,6 +50,12 @@ public class PeerDiscoveryService implements EventloopService {
     private final Map<Object, Peer> candidatePeers = new HashMap<>();
     private final Map<Object, Peer> candidatePeersView = unmodifiableMap(candidatePeers);
 
+    /**
+     * 
+     * @param eventloop
+     * @param discoveryService
+     * @param peerSystem
+     */
     private PeerDiscoveryService(Eventloop eventloop, DiscoveryService discoveryService, PeerSystem peerSystem) {
         this.eventloop = eventloop;
         this.discoveryService = discoveryService;

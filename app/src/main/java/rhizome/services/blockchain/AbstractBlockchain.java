@@ -36,3 +36,4 @@ public abstract class AbstractBlockchain implements Blockchain {
     protected List<Thread> syncThread;
     protected Map<Integer, SHA256Hash> checkpoints;
 }
+ 

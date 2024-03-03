@@ -11,12 +11,12 @@ import io.activej.inject.annotation.Eager;
 import io.activej.inject.annotation.Provides;
 import io.activej.inject.module.AbstractModule;
 import rhizome.net.NetworkUtils;
+import rhizome.net.p2p.DiscoveryService;
 import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.gossip.GossipSystem;
 import rhizome.net.p2p.peer.Peer;
 import rhizome.services.network.PeerManager;
 import rhizome.services.network.PeerManagerService;
-import rhizome.services.network.discovery.DiscoveryService;
 import rhizome.services.network.discovery.PeerDiscoveryService;
 
 import static io.activej.config.converter.ConfigConverters.ofList;
@@ -37,7 +37,7 @@ public final class NetworkModule extends AbstractModule {
     }
 
     @Provides @Eager PeerDiscoveryService peerDiscoveryService(Eventloop eventloop, Map<Object, Peer> seeders, PeerSystem peerSystem) {
-        return PeerDiscoveryService.create(eventloop, DiscoveryService.randomized(seeders), peerSystem);
+        return PeerDiscoveryService.create(eventloop, DiscoveryService.randomized(seeders, peerSystem), peerSystem);
     }
 
     @Provides PeerSystem peerSystem() {
