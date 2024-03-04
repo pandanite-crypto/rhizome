@@ -40,7 +40,7 @@ import rhizome.net.p2p.peer.PeerOLD;
 import rhizome.persistence.BlockPersistence;
 
 @Slf4j
-public class PeerManagerImpl {
+public class PeerManagerImplOLD {
 
     private static final long HOST_MIN_FRESHNESS = 180l * 60; // 3 hours
     private static final int RANDOM_GOOD_HOST_COUNT = 0;
@@ -69,7 +69,7 @@ public class PeerManagerImpl {
     protected List<Thread> syncThread;
     protected List<Thread> headerStatsThread;
 
-    public PeerManagerImpl(JSONObject config) {
+    public PeerManagerImplOLD(JSONObject config) {
         this.name = config.getString("name");
         this.port = config.getInt("port");
         this.ip = config.getString("ip");

@@ -20,14 +20,12 @@ import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
 import rhizome.net.p2p.peer.EventListener;
 import rhizome.net.p2p.peer.PeerState;
-import rhizome.services.network.PeerManager;
 
 import static io.activej.common.Checks.checkState;
 
 @Builder @Getter @Setter @Slf4j
 public class GossipSystem implements PeerSystem {
 
-    private PeerManager peerManager;
     private Peer localhostPeer;
 
 
