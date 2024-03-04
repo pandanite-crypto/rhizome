@@ -1,5 +1,6 @@
 package rhizome.net.p2p.peer;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,13 +21,13 @@ import rhizome.net.protocol.MessageHandler;
 public class PeerChannel {
 
     // Reference to the peer
-    final protected Peer peer;
+    private Peer peer;
 
     // Message queue for the peer
-    final protected ChannelBuffer<Message> messageQueue = new ChannelBuffer<>(5, 10);
+    private final ChannelBuffer<Message> messageQueue = new ChannelBuffer<>(5, 10);
 
     // Handlers for messages
-    final static Map<MessageCode, MessageHandler> messageHandlers = new HashMap<>();
+    static final Map<MessageCode, MessageHandler> messageHandlers = new HashMap<>();
 
     // Current state of the peer connection
     private PeerOutput output;
@@ -38,18 +39,18 @@ public class PeerChannel {
     // Stats of current peer connection
     protected PeerStats stats;
 
-    public static Promise<PeerChannel> connect(Peer peer, PeerOutput output) {
-        return Promise.of(builder()
+    public static PeerChannel init(Peer peer, PeerOutput output) {
+        return builder()
             .peer(peer)
             .output(output)
-            .build());
+            .build();
     }
 
-    public static Promise<PeerChannel> connect(Peer peer, PeerInput input) {
-        return Promise.of(builder()
+    public static PeerChannel init(Peer peer, PeerInput input) {
+        return builder()
             .peer(peer)
             .input(input)
-            .build());
+            .build();
     }
 
     public interface PeerOutput {
