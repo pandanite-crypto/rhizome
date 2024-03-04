@@ -24,10 +24,7 @@ import rhizome.services.network.PeerManager;
 
 import static io.activej.common.Checks.checkState;
 
-@Builder
-@Getter
-@Setter
-@Slf4j
+@Builder @Getter @Setter @Slf4j
 public class GossipSystem implements PeerSystem {
 
     private PeerManager peerManager;
@@ -89,7 +86,7 @@ public class GossipSystem implements PeerSystem {
     }
 
     @Override
-    public DiscoveryService create(Map<Object, Peer> peers, PeerSystem peerSystem) {
+    public DiscoveryService getDiscoveryService(Map<Object, Peer> peers, PeerSystem peerSystem) {
         return GossipDiscovery.builder()
                 .peerSystem(peerSystem)
                 .build();

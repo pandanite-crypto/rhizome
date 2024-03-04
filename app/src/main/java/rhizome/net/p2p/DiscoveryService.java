@@ -21,7 +21,6 @@ public interface DiscoveryService {
 
 	// 	return (newPeers, cb) -> {
 
-
 			
 	// 		if (!initialPeers.equals(newPeers)) {
 	// 			cb.accept(newPeers, null);
@@ -30,6 +29,6 @@ public interface DiscoveryService {
 	// }
 
 	static DiscoveryService create(Map<Object, Peer> peers, PeerSystem peerSystem) {
-		return peerSystem.create(peers, peerSystem);
+		return peerSystem.getDiscoveryService(peers, peerSystem);
 	}
 }

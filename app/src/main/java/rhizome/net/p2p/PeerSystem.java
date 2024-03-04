@@ -17,7 +17,7 @@ public interface PeerSystem {
     // AsyncConsumer<Peer> ping();
 
     // List<Peer> random();
-    DiscoveryService create(Map<Object, Peer> peers, PeerSystem peerSystem);
+    DiscoveryService getDiscoveryService(Map<Object, Peer> peers, PeerSystem peerSystem);
 
     Promise<List<InetSocketAddress>> getPeers(Peer peer);
 }
