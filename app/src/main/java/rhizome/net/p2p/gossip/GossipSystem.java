@@ -2,28 +2,20 @@ package rhizome.net.p2p.gossip;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.net.InetSocketAddress;
 
 import com.dslplatform.json.DslJson;
 
-import io.activej.async.function.AsyncConsumer;
 import io.activej.http.AsyncHttpClient;
 import io.activej.http.HttpRequest;
 import io.activej.promise.Promise;
-import io.activej.rpc.server.RpcRequestHandler;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import rhizome.net.p2p.DiscoveryService;
 import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
 import rhizome.net.p2p.peer.EventListener;
@@ -91,11 +83,15 @@ public class GossipSystem implements PeerSystem {
                 .map(body -> {
                     var peerBytes = body.getString(UTF_8).getBytes();
                     return dslJson.deserializeList(String.class, peerBytes, peerBytes.length).stream()
-                            .map(address -> {
-                                var ip = address.split(":")[0];
-                                int port = Integer.parseInt(address.split(":")[1]);
-                                return new InetSocketAddress(ip, port);
-                            }).toList();
+                            .map(address -> new InetSocketAddress(address.split(":")[0], Integer.parseInt(address.split(":")[1])))
+                            .toList();
                 });
+    }
+
+    @Override
+    public DiscoveryService create(Map<Object, Peer> peers, PeerSystem peerSystem) {
+        return GossipDiscovery.builder()
+                .peerSystem(peerSystem)
+                .build();
     }
 }

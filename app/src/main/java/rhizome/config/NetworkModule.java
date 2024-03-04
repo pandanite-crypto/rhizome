@@ -37,7 +37,7 @@ public final class NetworkModule extends AbstractModule {
     }
 
     @Provides @Eager PeerDiscoveryService peerDiscoveryService(Eventloop eventloop, Map<Object, Peer> seeders, PeerSystem peerSystem) {
-        return PeerDiscoveryService.create(eventloop, DiscoveryService.randomized(seeders, peerSystem), peerSystem);
+        return PeerDiscoveryService.create(eventloop, DiscoveryService.create(seeders, peerSystem), peerSystem);
     }
 
     @Provides PeerSystem peerSystem() {

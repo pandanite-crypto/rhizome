@@ -1,6 +1,7 @@
 package rhizome.net.p2p.gossip;
 
 import io.activej.async.callback.Callback;
+import lombok.Builder;
 import rhizome.net.p2p.DiscoveryService;
 import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
@@ -10,13 +11,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+@Builder
 public class GossipDiscovery implements DiscoveryService {
 	private final PeerSystem peerSystem;
 	private Exception error;
-
-	public GossipDiscovery(PeerSystem peerSystem) {
-		this.peerSystem = peerSystem;
-	}
 
 	@Override
 	public void discover(@Nullable Map<Object, Peer> previous, Callback<Map<Object, Peer>> cb) {

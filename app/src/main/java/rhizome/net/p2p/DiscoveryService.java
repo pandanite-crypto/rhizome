@@ -29,7 +29,7 @@ public interface DiscoveryService {
 	// 	};
 	// }
 
-	static DiscoveryService gossip(Map<Object, Peer> peers, PeerSystem peerSystem) {
-		return new GossipDiscovery(peerSystem);
+	static DiscoveryService create(Map<Object, Peer> peers, PeerSystem peerSystem) {
+		return peerSystem.create(peers, peerSystem);
 	}
 }

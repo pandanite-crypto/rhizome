@@ -1,5 +1,6 @@
 package rhizome.net.p2p;
 import java.util.List;
+import java.util.Map;
 import java.net.InetSocketAddress;
 
 import io.activej.async.function.AsyncConsumer;
@@ -16,7 +17,7 @@ public interface PeerSystem {
     // AsyncConsumer<Peer> ping();
 
     // List<Peer> random();
-
+    DiscoveryService create(Map<Object, Peer> peers, PeerSystem peerSystem);
 
     Promise<List<InetSocketAddress>> getPeers(Peer peer);
 }

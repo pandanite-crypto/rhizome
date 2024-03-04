@@ -4,5 +4,26 @@
     "files.watcherExclude": {
         "**/target": true
     },
-    "java.format.settings.url": "eclipse-formatter.xml"
+    "java.format.settings.url": "eclipse-formatter.xml",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "/home/vscode/graalvm-jdk-21.0.2+13.1",
+            "default": true
+        }
+    ],
+    "graalvm.home": "/home/vscode/graalvm-jdk-21.0.2+13.1",
+    "graalvm.installations": [
+        "/home/vscode/graalvm-jdk-21.0.2+13.1"
+    ],
+    "terminal.integrated.env.linux": {
+        "GRAALVM_HOME": "/home/vscode/graalvm-jdk-21.0.2+13.1"
+    },
+    "java.jdt.ls.java.home": "/home/vscode/graalvm-jdk-21.0.2+13.1",
+    "maven.terminal.customEnv": [
+        {
+            "environmentVariable": "JAVA_HOME",
+            "value": "/home/vscode/graalvm-jdk-21.0.2+13.1"
+        }
+    ]
 }
