@@ -15,6 +15,7 @@ plugins {
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -50,7 +51,8 @@ dependencies {
     implementation 'com.dslplatform:dsl-json:2.0.2'
 
     // CQEngine
-    implementation 'com.googlecode.cqengine:cqengine:3.6.0'
+    implementation 'com.github.npgall:cqengine:3.6.0'
+    // implementation 'com.googlecode.cqengine:cqengine:3.6.0'
     
     // https://mvnrepository.com/artifact/org.iq80.leveldb/leveldb
     implementation 'org.iq80.leveldb:leveldb:0.12'
@@ -66,9 +68,6 @@ dependencies {
 
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
-
-    // https://mvnrepository.com/artifact/com.google.guava/guava
-    implementation 'com.google.guava:guava:31.1-jre'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.22'

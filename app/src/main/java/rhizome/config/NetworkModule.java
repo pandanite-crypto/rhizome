@@ -16,7 +16,6 @@ import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.gossip.GossipSystem;
 import rhizome.net.p2p.peer.Peer;
 import rhizome.services.network.PeerDiscoveryService;
-import rhizome.services.network.PeerManager;
 import rhizome.services.network.PeerManagerService;
 
 import static io.activej.config.converter.ConfigConverters.ofList;
@@ -26,10 +25,6 @@ public final class NetworkModule extends AbstractModule {
 
     public static NetworkModule create() {
         return new NetworkModule();
-    }
-
-    @Provides @Eager PeerManager peerManager() {
-        return new PeerManager();
     }
 
     @Provides @Eager PeerManagerService peerManagerService(Eventloop eventloop, PeerSystem peerSystem) {
