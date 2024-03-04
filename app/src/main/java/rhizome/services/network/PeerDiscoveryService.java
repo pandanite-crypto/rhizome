@@ -1,4 +1,4 @@
-package rhizome.services.network.discovery;
+package rhizome.services.network;
 
 import java.time.Duration;
 import java.util.HashMap;
