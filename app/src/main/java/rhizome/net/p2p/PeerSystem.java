@@ -3,10 +3,8 @@ import java.util.List;
 import java.util.Map;
 import java.net.InetSocketAddress;
 
-import io.activej.async.function.AsyncConsumer;
 import io.activej.promise.Promise;
 import rhizome.net.p2p.peer.Peer;
-import rhizome.net.p2p.peer.PeerState;
 
 public interface PeerSystem {
 
@@ -20,4 +18,6 @@ public interface PeerSystem {
     DiscoveryService getDiscoveryService(Map<Object, Peer> peers, PeerSystem peerSystem);
 
     Promise<List<InetSocketAddress>> getPeers(Peer peer);
+
+    String cluster();
 }

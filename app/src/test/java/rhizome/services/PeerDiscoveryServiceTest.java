@@ -2,7 +2,7 @@ package rhizome.services;
 
 import org.junit.jupiter.api.Test;
 
-import rhizome.services.network.PeerDiscoveryService;
+import rhizome.services.network.PeerManagerService;
 
 import static org.junit.jupiter.api.Assertions.*;
 // import static org.mockito.Mockito.*;

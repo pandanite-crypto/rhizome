@@ -14,13 +14,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * This class implements the DiscoveryService interface and provides a method to discover peers using the PeerSystem protocol.
+ */
 @Builder
 public class GossipDiscovery implements DiscoveryService {
 	private final PeerSystem peerSystem;
 	private Exception error;
-	private Map<Object, List<InetSocketAddress>> discovered;
+	private List<InetSocketAddress> discovered;
 	private Map<Object, Peer> totalDiscovered;
 
+	/**
+	 * Main call of the interface. It discovers peers using the PeerSystem provided.
+	 */
 	@Override
 	public void discover(@Nullable Map<Object, Peer> previous, Callback<Map<Object, Peer>> cb) {
 
@@ -45,8 +51,26 @@ public class GossipDiscovery implements DiscoveryService {
 		}
 	}
 
-	private Promise<Map<Object, Peer>> doDiscover(Peer peer) {
+	/**
+	 * Call the PeerSystem getPeers method
+	 * @param peer
+	 * @return
+	 */
+	private Promise<List<InetSocketAddress>> doDiscover(Peer peer) {
 		return peerSystem.getPeers(peer);
+	}
+
+	
+	private void onDiscover(List<InetSocketAddress> discovered) {
+		List<InetSocketAddress> old = new ArrayList<>(this.discovered);
+		this.discovered.addAll(discovered);
+
+		Map<Object, Peer> newTotalDiscovered = new HashMap<>(totalDiscovered);
+		if (old != null) {
+			newTotalDiscovered.keySet().removeAll(old);
+		}
+		discovered.forEach(address -> newTotalDiscovered.put(address, Peer.fromAddress(peerSystem.cluster(), address)));
+		this.totalDiscovered = Collections.unmodifiableMap(newTotalDiscovered);
 	}
 
 	private void onError(@NotNull Exception e, Callback<Map<Object, Peer>> cb) {
@@ -55,21 +79,6 @@ public class GossipDiscovery implements DiscoveryService {
 			cb.accept(null, error);
 		} else {
 			cb.accept(discovered, error);
-		}
-	}
-
-	private void onDiscover(Map<Object, Peer> discovered) {
-		Map<Object, Peer> old = this.discovered.put(discovered);
-
-		Map<Object, Peer> newTotalDiscovered = new HashMap<>(totalDiscovered);
-		if (old != null) {
-			newTotalDiscovered.keySet().removeAll(old.keySet());
-		}
-		newTotalDiscovered.putAll(discovered);
-		this.totalDiscovered = Collections.unmodifiableMap(newTotalDiscovered);
-
-		if (discovered.size() == discoveryServicesSize) {
-			completeCallbacks();
 		}
 	}
 }
