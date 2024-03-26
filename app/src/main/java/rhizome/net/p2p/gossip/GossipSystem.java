@@ -89,4 +89,10 @@ public class GossipSystem implements PeerSystem {
                 .peerSystem(peerSystem)
                 .build();
     }
+
+    @Override
+    public String cluster() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'cluster'");
+    }
 }

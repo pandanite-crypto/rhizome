@@ -24,8 +24,10 @@ import static java.util.Map.Entry;
 import static io.activej.async.util.LogUtils.toLogger;
 
 /**
- * This service execute the service discovery process. It pings all peers and marks them as dead or alive accordingly.
- * It also relaunches the discovery process.
+ * This service execute the service manager process.
+ * It pings all peers and marks them as dead or alive accordingly.
+ * It also pings all dead peers and marks them as alive if they respond.
+ * It also rediscover the peers.
  */
 @Slf4j
 @Getter
@@ -53,7 +55,7 @@ public class PeerManagerService implements EventloopService {
     private final Map<Object, Peer> candidatePeersView = unmodifiableMap(candidatePeers);
 
     /**
-     * 
+     * Private constructor
      * @param eventloop
      * @param discoveryService
      * @param peerSystem
@@ -64,13 +66,25 @@ public class PeerManagerService implements EventloopService {
         this.peerSystem = peerSystem;
     }
 
+    /**
+     * Factory method
+     * @param eventloop
+     * @param discoveryService
+     * @param peerSystem
+     * @return new instance of PeerManagerService
+     */
     public static PeerManagerService create(Eventloop eventloop, DiscoveryService discoveryService, PeerSystem peerSystem) {
         return new PeerManagerService(eventloop, discoveryService, peerSystem);
     }
 
+    /**
+     * Starts the service
+     * 
+     * @return promise of the start
+     */
     @Override
     public @NotNull Promise<?> start() {
-        log.info("|PEER DISCOVERY SERVICE CLIENT STARTING|");
+        log.info("|PEER MANAGER SERVICE CLIENT STARTING|");
         return Promise.ofCallback(cb -> discoveryService.discover(null, (result, e) -> {
             if (e == null) {
                 this.peers.putAll(result);
@@ -85,7 +99,7 @@ public class PeerManagerService implements EventloopService {
 
     @Override
     public @NotNull Promise<?> stop() {
-        return Promise.complete().whenResult(() -> log.info("|PEER DISCOVERY SERVICE CLIENT STOPPED|"));
+        return Promise.complete().whenResult(() -> log.info("|PEER MANAGER SERVICE CLIENT STOPPED|"));
     }
 
     /**
