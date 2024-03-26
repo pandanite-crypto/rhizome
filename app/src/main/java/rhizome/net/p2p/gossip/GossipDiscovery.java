@@ -85,7 +85,7 @@ public class GossipDiscovery implements DiscoveryService {
 		}
 
 		// Add the new discovered addresses to the new total discovered peers
-		discovered.forEach(address -> newTotalDiscovered.put(address, Peer.fromAddress(peerSystem.cluster(), address)));
+		discovered.forEach(address -> newTotalDiscovered.put(address, Peer.fromAddress(address)));
 		
 		// Update the total discovered peers
 		this.totalDiscovered = Collections.unmodifiableMap(newTotalDiscovered);

@@ -1,11 +1,8 @@
 package rhizome.net.p2p.peer;
 
-import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-
 import io.activej.csp.queue.ChannelBuffer;
-import io.activej.promise.Promise;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +35,8 @@ public class PeerChannel {
 
     // Stats of current peer connection
     protected PeerStats stats;
-
+    
+    // Initialize the peer channel
     public static PeerChannel init(Peer peer, PeerOutput output) {
         return builder()
             .peer(peer)

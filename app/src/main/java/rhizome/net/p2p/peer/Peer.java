@@ -10,23 +10,21 @@ public interface Peer {
     
     /**
      * 
-     * @param cluster
      * @param address
      * @return
      */
-    public static Peer initLocalPeer(String cluster, InetSocketAddress address) {
-        return new DiscoveryPeer(cluster, UUID.randomUUID(), address, PeerState.JOIN, System.currentTimeMillis() / 1000, 0, 0, null);
+    public static Peer initLocalPeer(InetSocketAddress address) {
+        return new DiscoveryPeer(UUID.randomUUID(), address, PeerState.JOIN, System.currentTimeMillis() / 1000, 0, 0);
     }
 
     /**
      * 
-     * @param cluster
      * @param address
      * @return
      */
-    public static Peer fromAddress(String cluster, InetSocketAddress address) {
+    public static Peer fromAddress(InetSocketAddress address) {
         var peerChannel = PeerChannel.init(address);
-        return new DiscoveryPeer(cluster, UUID.randomUUID(), address, PeerState.DISCONNECTED, System.currentTimeMillis() / 1000, 0, 0);
+        return new DiscoveryPeer(UUID.randomUUID(), address, PeerState.DISCONNECTED, System.currentTimeMillis() / 1000, 0, 0);
     }
 
     /**
@@ -40,7 +38,7 @@ public interface Peer {
         return Promise.ofCallback(cb -> getPeerChannel().getOutput().ping());
     }
 
+    PeerChannel getPeerChannel();
     InetSocketAddress address();
-    String cluster();
     UUID id();
 }
