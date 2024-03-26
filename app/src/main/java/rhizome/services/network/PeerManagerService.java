@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import rhizome.net.p2p.DiscoveryService;
 import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
+import rhizome.net.protocol.Message;
 
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Map.Entry;
@@ -50,8 +51,8 @@ public class PeerManagerService implements EventloopService {
     private final Map<Object, Peer> deadPeers = new HashMap<>();
     private final Map<Object, Peer> deadPeersView = unmodifiableMap(deadPeers);
 
-    private final Map<Object, Peer> candidatePeers = new HashMap<>();
-    private final Map<Object, Peer> candidatePeersView = unmodifiableMap(candidatePeers);
+    private final Map<Object, Peer> connectedPeers = new HashMap<>();
+    private final Map<Object, Peer> connectedPeersView = unmodifiableMap(connectedPeers);
 
     /**
      * Private constructor
@@ -231,5 +232,14 @@ public class PeerManagerService implements EventloopService {
             log.info("Peer {} is alive again!", peerId);
             alivePeers.put(peerId, peer);
         }
+    }
+
+    /**
+     * Publishes a message to connected peers following the strategy of the peer system
+     * 
+     * @param message
+     */
+    public void broadcast(Message message) {
+        peerSystem.broadcast(connectedPeersView, message);
     }
 }

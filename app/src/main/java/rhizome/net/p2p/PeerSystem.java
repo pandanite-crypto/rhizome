@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 
 import io.activej.promise.Promise;
 import rhizome.net.p2p.peer.Peer;
+import rhizome.net.protocol.Message;
 
 public interface PeerSystem {
 
@@ -20,4 +21,6 @@ public interface PeerSystem {
     Promise<List<InetSocketAddress>> getPeers(Peer peer);
 
     String cluster();
+
+    void broadcast(Map<Object, Peer> alivePeers, Message message);
 }
