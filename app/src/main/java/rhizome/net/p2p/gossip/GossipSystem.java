@@ -20,6 +20,7 @@ import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
 import rhizome.net.p2p.peer.EventListener;
 import rhizome.net.p2p.peer.PeerState;
+import rhizome.net.protocol.Message;
 
 import static io.activej.common.Checks.checkState;
 
@@ -46,7 +47,7 @@ public class GossipSystem implements PeerSystem {
         // checkState(handlers != null && !handlers.isEmpty(), "Handlers must be set before starting the gossip system");
         checkState(listener != null, "Listener must be set before starting the gossip system");
         log.debug("|Gossip system starting for cluster[%s] ip[%s] port[%d] id[%s]|",
-                localhostPeer.cluster(), localhostPeer.address().getHostName(), localhostPeer.address().getPort(),
+                localhostPeer.address().getHostName(), localhostPeer.address().getPort(),
                 localhostPeer.id());
 
         notify(localhostPeer, PeerState.JOIN, null);
@@ -94,5 +95,11 @@ public class GossipSystem implements PeerSystem {
     public String cluster() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'cluster'");
+    }
+
+    @Override
+    public void broadcast(Map<Object, Peer> alivePeers, Message message) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'broadcast'");
     }
 }
