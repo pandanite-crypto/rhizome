@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import rhizome.net.p2p.DiscoveryService;
 import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
-import rhizome.net.p2p.peer.PeerChannel;
 
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Map.Entry;
@@ -45,8 +44,8 @@ public class PeerManagerService implements EventloopService {
     private final Map<Object, Peer> peers = new HashMap<>();
     private final Map<Object, Peer> peersView = unmodifiableMap(peers);
 
-    private final Map<Object, PeerChannel> alivePeers = new HashMap<>();
-    private final Map<Object, PeerChannel> alivePeersView = unmodifiableMap(alivePeers);
+    private final Map<Object, Peer> alivePeers = new HashMap<>();
+    private final Map<Object, Peer> alivePeersView = unmodifiableMap(alivePeers);
 
     private final Map<Object, Peer> deadPeers = new HashMap<>();
     private final Map<Object, Peer> deadPeersView = unmodifiableMap(deadPeers);
@@ -56,6 +55,7 @@ public class PeerManagerService implements EventloopService {
 
     /**
      * Private constructor
+     * 
      * @param eventloop
      * @param discoveryService
      * @param peerSystem
@@ -68,12 +68,14 @@ public class PeerManagerService implements EventloopService {
 
     /**
      * Factory method
+     * 
      * @param eventloop
      * @param discoveryService
      * @param peerSystem
      * @return new instance of PeerManagerService
      */
-    public static PeerManagerService create(Eventloop eventloop, DiscoveryService discoveryService, PeerSystem peerSystem) {
+    public static PeerManagerService create(Eventloop eventloop, DiscoveryService discoveryService,
+            PeerSystem peerSystem) {
         return new PeerManagerService(eventloop, discoveryService, peerSystem);
     }
 

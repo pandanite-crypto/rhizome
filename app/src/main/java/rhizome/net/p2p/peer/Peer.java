@@ -23,7 +23,6 @@ public interface Peer {
      * @return
      */
     public static Peer fromAddress(InetSocketAddress address) {
-        var peerChannel = PeerChannel.init(address);
         return new DiscoveryPeer(UUID.randomUUID(), address, PeerState.DISCONNECTED, System.currentTimeMillis() / 1000, 0, 0);
     }
 

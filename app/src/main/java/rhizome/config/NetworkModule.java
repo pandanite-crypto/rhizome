@@ -18,7 +18,7 @@ import rhizome.net.p2p.peer.Peer;
 import rhizome.services.network.PeerManagerService;
 
 import static io.activej.config.converter.ConfigConverters.ofList;
-import static io.activej.config.converter.ConfigConverters.ofString;
+// import static io.activej.config.converter.ConfigConverters.ofString;
 
 public final class NetworkModule extends AbstractModule {
 
@@ -26,24 +26,24 @@ public final class NetworkModule extends AbstractModule {
         return new NetworkModule();
     }
 
-
     @Provides @Eager PeerManagerService peerManagerService(Eventloop eventloop, Map<Object, Peer> seeders, PeerSystem peerSystem) {
         return PeerManagerService.create(eventloop, DiscoveryService.create(seeders, peerSystem), peerSystem);
     }
 
     @Provides PeerSystem peerSystem() {
+        //config.get(ofString(), "cluster"), 
         return GossipSystem.builder().build();
     }
     
     @Provides Map<Object, Peer> seeders(Config config) {
         Map<Object, Peer> peers = new HashMap<>();
         config.get(ofList(ConfigConverters.ofString(), ";"), "seeders").stream()
-                .map(ipAddress -> Peer.fromAddress(config.get(ofString(), "cluster"), new InetSocketAddress(ipAddress, 8080)))
+                .map(ipAddress -> Peer.fromAddress(new InetSocketAddress(ipAddress, 8080)))
                 .forEach(peer -> peers.put(peer.address(), peer));
 
         config.get(ofList(ConfigConverters.ofString(), ";"), "dns").stream()
                 .flatMap(hostname -> NetworkUtils.getIPAddresses(hostname).stream())
-                .map(ipAddress -> Peer.fromAddress(config.get(ofString(), "cluster"), new InetSocketAddress(ipAddress, 8080))) 
+                .map(ipAddress -> Peer.fromAddress(new InetSocketAddress(ipAddress, 8080))) 
                 .forEach(peer -> peers.put(peer.address(), peer));
         return peers;
     }

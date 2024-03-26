@@ -13,18 +13,17 @@ public record DiscoveryPeer(
         PeerState state,
         long lastPingTime,
         long clockDelta,
-        long version,
-        PeerChannel peerChannel)
+        long version)
     implements Peer {
 
     @Override
     public Peer refresh(long startRequestTime) {
         return new DiscoveryPeer(id, address, state, System.currentTimeMillis() / 1000,
-                System.currentTimeMillis() / 1000 - startRequestTime, version, peerChannel);
+                System.currentTimeMillis() / 1000 - startRequestTime, version);
     }
 
     @Override
     public PeerChannel getPeerChannel() {
-        return peerChannel;
+        return null;
     }
 }
