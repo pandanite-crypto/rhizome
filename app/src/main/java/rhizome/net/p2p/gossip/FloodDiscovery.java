@@ -15,9 +15,10 @@ import java.util.*;
 
 /**
  * This class implements the DiscoveryService interface and provides a method to discover peers using the PeerSystem protocol.
+ * It implement a flood discovery algorithm, gathering all the peers from each peer discovered.
  */
 @Builder
-public class GossipDiscovery implements DiscoveryService {
+public class FloodDiscovery implements DiscoveryService {
 	private final PeerSystem peerSystem;
 	private Exception error;
 	private List<InetSocketAddress> discovered;

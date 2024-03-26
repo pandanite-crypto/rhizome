@@ -88,6 +88,8 @@ public class PeerManagerService implements EventloopService {
     @Override
     public @NotNull Promise<?> start() {
         log.info("|PEER MANAGER SERVICE CLIENT STARTING|");
+
+        // Start the discovery process
         return Promise.ofCallback(cb -> discoveryService.discover(null, (result, e) -> {
             if (e == null) {
                 this.peers.putAll(result);
@@ -97,7 +99,7 @@ public class PeerManagerService implements EventloopService {
                 cb.setException(e);
             }
         }))
-                .whenResult(this::rediscover);
+        .whenResult(this::rediscover);
     }
 
     @Override

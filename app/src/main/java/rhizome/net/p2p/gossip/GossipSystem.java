@@ -86,7 +86,7 @@ public class GossipSystem implements PeerSystem {
 
     @Override
     public DiscoveryService getDiscoveryService(Map<Object, Peer> peers, PeerSystem peerSystem) {
-        return GossipDiscovery.builder()
+        return FloodDiscovery.builder()
                 .peerSystem(peerSystem)
                 .build();
     }
