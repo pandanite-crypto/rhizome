@@ -15,7 +15,6 @@ import io.activej.promise.Promises;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import rhizome.net.p2p.DiscoveryService;
-import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
 import rhizome.net.protocol.Message;
 
@@ -37,7 +36,6 @@ public class PeerManagerService implements EventloopService {
 
     private final Eventloop eventloop;
     private final DiscoveryService discoveryService;
-    private final PeerSystem peerSystem;
 
     private final AsyncRunnable checkAllPeers = AsyncRunnables.reuse(this::doCheckAllPeers);
     private final AsyncRunnable checkDeadPeers = AsyncRunnables.reuse(this::doCheckDeadPeers);
@@ -59,12 +57,10 @@ public class PeerManagerService implements EventloopService {
      * 
      * @param eventloop
      * @param discoveryService
-     * @param peerSystem
      */
-    private PeerManagerService(Eventloop eventloop, DiscoveryService discoveryService, PeerSystem peerSystem) {
+    private PeerManagerService(Eventloop eventloop, DiscoveryService discoveryService) {
         this.eventloop = eventloop;
         this.discoveryService = discoveryService;
-        this.peerSystem = peerSystem;
     }
 
     /**
@@ -72,12 +68,10 @@ public class PeerManagerService implements EventloopService {
      * 
      * @param eventloop
      * @param discoveryService
-     * @param peerSystem
      * @return new instance of PeerManagerService
      */
-    public static PeerManagerService create(Eventloop eventloop, DiscoveryService discoveryService,
-            PeerSystem peerSystem) {
-        return new PeerManagerService(eventloop, discoveryService, peerSystem);
+    public static PeerManagerService create(Eventloop eventloop, DiscoveryService discoveryService) {
+        return new PeerManagerService(eventloop, discoveryService);
     }
 
     /**
@@ -99,7 +93,7 @@ public class PeerManagerService implements EventloopService {
                 cb.setException(e);
             }
         }))
-        .whenResult(this::rediscover);
+                .whenResult(this::rediscover);
     }
 
     @Override
@@ -221,7 +215,7 @@ public class PeerManagerService implements EventloopService {
     public boolean markDead(Object peerId, @Nullable Exception e) {
         Peer peer = alivePeers.remove(peerId);
         if (peer != null) {
-            log.warn("marking {} as dead ", peerId, e);
+            log.warn("Marking peer {} as dead ", peerId, e);
             deadPeers.put(peerId, peer);
             return true;
         }
@@ -237,11 +231,12 @@ public class PeerManagerService implements EventloopService {
     }
 
     /**
-     * Publishes a message to connected peers following the strategy of the peer system
+     * Publishes a message to connected peers following the strategy of the peer
+     * system
      * 
      * @param message
      */
     public void broadcast(Message message) {
-        peerSystem.broadcast(connectedPeersView, message);
+        // peerSystem.broadcast(connectedPeersView, message);
     }
 }

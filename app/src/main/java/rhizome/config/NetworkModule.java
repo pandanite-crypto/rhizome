@@ -27,7 +27,7 @@ public final class NetworkModule extends AbstractModule {
     }
 
     @Provides @Eager PeerManagerService peerManagerService(Eventloop eventloop, Map<Object, Peer> seeders, PeerSystem peerSystem) {
-        return PeerManagerService.create(eventloop, DiscoveryService.create(seeders, peerSystem), peerSystem);
+        return PeerManagerService.create(eventloop, DiscoveryService.create(seeders, peerSystem));
     }
 
     @Provides PeerSystem peerSystem() {
