@@ -1,5 +1,8 @@
 package rhizome.services.network;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 
 import io.activej.async.function.AsyncRunnable;
@@ -11,18 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 import rhizome.net.p2p.PeerSystem;
 
 @Slf4j
-public class BaseService implements EventloopService {
+public abstract class BaseService implements EventloopService {
 
     private Eventloop eventloop;
-    private final AsyncRunnable refresh;
+    private final List<AsyncRunnable> routines;
 
-    public BaseService(Eventloop eventloop, PeerSystem peerSystem) {
+    protected BaseService(Eventloop eventloop, PeerSystem peerSystem) {
         this.eventloop = eventloop;
-        this.refresh = AsyncRunnables.reuse(() -> doRefresh(peerSystem));
+        this.routines = Collections.singletonList(AsyncRunnables.reuse(() -> doRefresh(peerSystem)));
     }
 
-    public Promise<Void> refresh() {
-        return refresh.run();
+    protected Promise<Void> refresh() {
+        return routines.get(0).run();
     }
 
     @Override
