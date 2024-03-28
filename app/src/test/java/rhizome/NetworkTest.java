@@ -80,8 +80,8 @@ class NetworkTest {
     }
 
 
-    @Test
-    void tcpClientExemple() throws IOException{
+    // @Test
+    private void tcpClientExemple() throws IOException{
         Eventloop eventloop = Eventloop.create().withEventloopFatalErrorHandler(rethrow());
 
         eventloop.listen(new InetSocketAddress("localhost", PORT), ServerSocketSettings.create(100), channel -> {

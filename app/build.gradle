@@ -9,7 +9,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
-    id 'io.freefair.lombok' version '6.3.0'
+    id 'io.freefair.lombok' version '8.6'
 }
 
 repositories {
@@ -64,14 +64,10 @@ dependencies {
     implementation 'commons-io:commons-io:2.15.0'
 
     // JNI support for crypto libs PUFFERFISH2
-    implementation 'org.bytedeco:javacpp:1.5.9'
+    // implementation 'org.bytedeco:javacpp:1.5.9'
 
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
-
-    // Lombok
-    compileOnly 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
 
 application {
