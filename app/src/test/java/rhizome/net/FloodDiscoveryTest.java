@@ -6,7 +6,6 @@ import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.gossip.FloodDiscovery;
 import rhizome.net.p2p.peer.Peer;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +18,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
-public class FloodDiscoveryTest {
+class FloodDiscoveryTest {
 
     private FloodDiscovery floodDiscovery;
     private PeerSystem peerSystem;
@@ -33,7 +32,7 @@ public class FloodDiscoveryTest {
     }
 
     @Test
-    public void testDiscover_Success() {
+    void testDiscover_Success() {
         // Prepare test data
         Map<Object, Peer> previous = new HashMap<>();
         Callback<Map<Object, Peer>> callback = mock(Callback.class);
@@ -55,7 +54,7 @@ public class FloodDiscoveryTest {
     }
 
     @Test
-    public void testDiscover_Error() {
+    void testDiscover_Error() {
         // Prepare test data
         Map<Object, Peer> previous = new HashMap<>();
         Callback<Map<Object, Peer>> callback = mock(Callback.class);

@@ -36,6 +36,30 @@ public class PeerChannel {
     // Stats of current peer connection
     protected PeerStats stats;
     
+    public static PeerChannel connect(Peer peer) {
+        log.info("Connecting to peer: {}", peer);
+
+        // Create a new peer channel
+        var peerChannel = PeerChannel.builder()
+            .peer(peer)
+            .output(new PeerOutput() {
+                @Override
+                public void ping() {
+                    log.info("Pinging peer: {}", peer);
+                }
+
+                @Override
+                public boolean isClosed() {
+                    return true;
+                }
+            
+            })
+            .build();
+
+        // Return a new connected peer
+        return peerChannel;
+    }
+
     // Initialize the peer channel
     public static PeerChannel init(Peer peer, PeerOutput output) {
         return builder()
@@ -53,6 +77,7 @@ public class PeerChannel {
 
     public interface PeerOutput {
         void ping();
+        boolean isClosed();
     }
 
     public interface PeerInput {}

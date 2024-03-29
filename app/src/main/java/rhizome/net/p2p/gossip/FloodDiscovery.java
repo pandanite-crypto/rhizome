@@ -6,6 +6,8 @@ import lombok.Builder;
 import rhizome.net.p2p.DiscoveryService;
 import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
+import rhizome.net.p2p.peer.PeerInitializer;
+
 import java.net.InetSocketAddress;
 
 import org.jetbrains.annotations.NotNull;
@@ -86,7 +88,7 @@ public class FloodDiscovery implements DiscoveryService {
 		}
 
 		// Add the new discovered addresses to the new total discovered peers
-		discovered.forEach(address -> newTotalDiscovered.put(address, Peer.fromAddress(address)));
+		discovered.forEach(address -> newTotalDiscovered.put(address, PeerInitializer.fromAddress(address)));
 		
 		// Update the total discovered peers
 		this.totalDiscovered = Collections.unmodifiableMap(newTotalDiscovered);

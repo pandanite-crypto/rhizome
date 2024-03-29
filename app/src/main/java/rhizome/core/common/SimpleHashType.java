@@ -29,6 +29,7 @@ public interface SimpleHashType {
         return ByteBuf.wrapForReading(random);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T fromByte(Class<T> clazz, byte[] data) {
         try {
             return (T) clazz.getDeclaredMethod("of", byte[].class).invoke(null, data);

@@ -4,40 +4,38 @@ import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import io.activej.promise.Promise;
-import rhizome.net.p2p.gossip.DiscoveryPeer;
+import lombok.Builder;
+import lombok.Getter;
 
-public interface Peer {
+@Builder @Getter
+public class Peer {
     
-    /**
-     * 
-     * @param address
-     * @return
-     */
-    public static Peer initLocalPeer(InetSocketAddress address) {
-        return new DiscoveryPeer(UUID.randomUUID(), address, PeerState.JOIN, System.currentTimeMillis() / 1000, 0, 0);
-    }
-
-    /**
-     * 
-     * @param address
-     * @return
-     */
-    public static Peer fromAddress(InetSocketAddress address) {
-        return new DiscoveryPeer(UUID.randomUUID(), address, PeerState.DISCONNECTED, System.currentTimeMillis() / 1000, 0, 0);
-    }
+    private final UUID id;
+    private final InetSocketAddress address;
+    private final PeerState state;
+    private final long lastPingTime;
+    private final long clockDelta;
+    private final long version;
+    private final PeerChannel channel;
 
     /**
      * 
      * @param startRequestTime
      * @return
      */
-    public Peer refresh(long startRequestTime);
-
-    public default Promise<Void> ping() {
-        return Promise.ofCallback(cb -> getPeerChannel().getOutput().ping());
+    public Peer refresh(long startRequestTime){
+        return new Peer(
+            id, 
+            address, 
+            state, 
+            lastPingTime, 
+            System.currentTimeMillis() / 1000 - startRequestTime, 
+            version, 
+            channel
+        );
     }
 
-    PeerChannel getPeerChannel();
-    InetSocketAddress address();
-    UUID id();
+    public Promise<Void> ping() {
+        return Promise.ofCallback(cb -> channel.getOutput().ping());
+    }
 }

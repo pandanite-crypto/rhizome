@@ -300,18 +300,16 @@ public final class RpcClientConnection implements PeerOutput, Listener, RpcSende
 
 	@Override
 	public void onSenderReady(@NotNull StreamDataAcceptor<Message> acceptor) {
-
-		// TODO
-		// if (isClosed()) return;
-		// downstreamDataAcceptor = acceptor;
-		// overloaded = false;
-		// if (initialBuffer != null) {
-		// 	for (Message message : initialBuffer) {
-		// 		acceptor.accept(message);
-		// 	}
-		// 	initialBuffer = null;
-		// 	ping();
-		// }
+		if (isClosed()) return;
+		downstreamDataAcceptor = acceptor;
+		overloaded = false;
+		if (initialBuffer != null) {
+			for (Message message : initialBuffer) {
+				acceptor.accept(message);
+			}
+			initialBuffer = null;
+			ping();
+		}
 	}
 
 	@Override
