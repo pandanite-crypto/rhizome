@@ -40,13 +40,13 @@ dependencies {
     implementation 'io.activej:activej-net:5.5'
 
     // Logback
-    implementation 'ch.qos.logback:logback-classic:1.4.11'
+    implementation 'ch.qos.logback:logback-classic:1.5.3'
 
     // Logging
-    implementation 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'org.slf4j:slf4j-api:2.0.12'
 
     // TODO: TBD
-    implementation 'org.json:json:20231013'
+    implementation 'org.json:json:20240303'
     // https://mvnrepository.com/artifact/com.dslplatform/dsl-json
     implementation 'com.dslplatform:dsl-json:2.0.2'
 
