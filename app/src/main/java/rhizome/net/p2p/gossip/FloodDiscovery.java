@@ -23,8 +23,9 @@ import java.util.*;
 public class FloodDiscovery implements DiscoveryService {
 	private final PeerSystem peerSystem;
 	private Exception error;
-	private List<InetSocketAddress> discovered;
-	private Map<Object, Peer> totalDiscovered;
+	private final List<InetSocketAddress> discovered = new ArrayList<>();
+	@Builder.Default
+	private Map<Object, Peer> totalDiscovered = new HashMap<>();
 
 	/**
 	 * Main call of the interface. It discovers peers using the PeerSystem provided.
@@ -33,19 +34,21 @@ public class FloodDiscovery implements DiscoveryService {
 	public void discover(@Nullable Map<Object, Peer> previous, Callback<Map<Object, Peer>> cb) {
 
 		// Initialize the discovered addresses list
-		previous.values().stream()
-			// Call the PeerSystem getPeers method
-			.map(this::doDiscover)
-			// Merge logic for the discovered address of each peer
-			.forEach(
-				p -> p.whenComplete((result, e) -> {
-					if (e == null) {
-						onDiscover(result);
-					} else {
-						onError(e, cb);
-					}
-				})
-			);
+		if (previous != null) {
+			previous.values().stream()
+					// Call the PeerSystem getPeers method
+					.map(this::doDiscover)
+					// Merge logic for the discovered address of each peer
+					.forEach(
+							p -> p.whenComplete((result, e) -> {
+								if (e == null) {
+									onDiscover(result);
+								} else {
+									onError(e, cb);
+								}
+							})
+					);
+		}
 
 		// Error handling
 		if (error != null) {
@@ -60,6 +63,7 @@ public class FloodDiscovery implements DiscoveryService {
 
 	/**
 	 * Call the PeerSystem getPeers method
+	 *
 	 * @param peer
 	 * @return
 	 */
@@ -69,6 +73,7 @@ public class FloodDiscovery implements DiscoveryService {
 
 	/**
 	 * Merge logic for the discovered address of each peer
+	 *
 	 * @param discovered
 	 */
 	private void onDiscover(List<InetSocketAddress> discovered) {
@@ -83,13 +88,11 @@ public class FloodDiscovery implements DiscoveryService {
 		Map<Object, Peer> newTotalDiscovered = new HashMap<>(totalDiscovered);
 
 		// Remove the old discovered addresses from the new total discovered peers
-		if (old != null) {
-			newTotalDiscovered.keySet().removeAll(old);
-		}
+		newTotalDiscovered.keySet().removeAll(old);
 
 		// Add the new discovered addresses to the new total discovered peers
 		discovered.forEach(address -> newTotalDiscovered.put(address, PeerInitializer.fromAddress(address)));
-		
+
 		// Update the total discovered peers
 		this.totalDiscovered = Collections.unmodifiableMap(newTotalDiscovered);
 	}
