@@ -239,4 +239,8 @@ public class PeerManagerService implements EventloopService {
     public void broadcast(Message message) {
         // peerSystem.broadcast(connectedPeersView, message);
     }
+
+    public void sync() {
+        // peerSystem.broadcast(connectedPeersView, message);
+    }
 }
