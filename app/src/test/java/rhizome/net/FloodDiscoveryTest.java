@@ -5,6 +5,7 @@ import io.activej.promise.Promise;
 import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.gossip.FloodDiscovery;
 import rhizome.net.p2p.peer.Peer;
+import rhizome.net.p2p.peer.PeerInitializer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ class FloodDiscoveryTest {
     void testDiscover_Success() {
         // Prepare test data
         Map<Object, Peer> previous = new HashMap<>();
+        previous.put("localhost:8001", PeerInitializer.initLocalPeer(new InetSocketAddress("localhost", 8001)));
         Callback<Map<Object, Peer>> callback = mock(Callback.class);
         List<InetSocketAddress> discoveredAddresses = Arrays.asList(
                 new InetSocketAddress("localhost", 8001),
@@ -57,6 +59,7 @@ class FloodDiscoveryTest {
     void testDiscover_Error() {
         // Prepare test data
         Map<Object, Peer> previous = new HashMap<>();
+        previous.put("localhost:8001", PeerInitializer.initLocalPeer(new InetSocketAddress("localhost", 8001)));
         Callback<Map<Object, Peer>> callback = mock(Callback.class);
         Exception error = new Exception("Test error");
         Promise<List<InetSocketAddress>> promise = Promise.ofException(error);
