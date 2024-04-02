@@ -16,17 +16,35 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.json.JSONArray;
 
+import lombok.extern.slf4j.Slf4j;
 import rhizome.core.api.PeerInterface;
 import rhizome.core.common.Pair;
-import rhizome.net.p2p.PeerSystem;
+import rhizome.core.crypto.SHA256Hash;
 import rhizome.net.p2p.peer.PeerOLD;
+import rhizome.persistence.BlockPersistence;
 
-
-public class GossipSystemOLD implements PeerSystem {
+@Slf4j
+public class GossipSystemOLD {
+    private static final int RANDOM_GOOD_HOST_COUNT = 0;
+    private static final int TIMEOUT_MS = 0;
+    private static final int ADD_PEER_BRANCH_FACTOR = 0;
+    private static final int HOST_MIN_FRESHNESS = 0;
     private List<PeerOLD> peers;
+    private String networkName;
+    private String minHostVersion;
+    private List<String> blacklist;
+    private List<String> hosts;
+    private Map<String, Long> hostPingTimes;
+    private Map<String, Long>  peerClockDeltas;
+    private List<PeerOLD> currPeers;
+    private List<String> whitelist;
+    private ReentrantLock lock;
+    private List<String> hostSources;
+    private String version;
 
     public GossipSystemOLD() {
         peers = new ArrayList<>();
@@ -124,6 +142,8 @@ public class GossipSystemOLD implements PeerSystem {
         if (this.currPeers.size() < RANDOM_GOOD_HOST_COUNT) {
             try {
                 lock.lock();
+                Map<Long, SHA256Hash> checkpoints = null;
+                Map<Long, SHA256Hash> bannedHashes = null;
                 this.currPeers.add(PeerOLD.builder()
                                         .host(addr)
                                         .checkPoints(checkpoints)
@@ -153,6 +173,11 @@ public class GossipSystemOLD implements PeerSystem {
         }
 
         CompletableFuture.allOf(reqs.toArray(new CompletableFuture[0])).join();
+    }
+
+    private boolean isJsHost(String addr) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isJsHost'");
     }
 
     public Set<String> sampleFreshHosts(int count) {
@@ -259,6 +284,9 @@ public class GossipSystemOLD implements PeerSystem {
         Set<String> hosts = this.sampleFreshHosts(RANDOM_GOOD_HOST_COUNT);
     
         for (String h : hosts) {
+            Map<Long, SHA256Hash> checkpoints = null;
+            Map<Long, SHA256Hash> bannedHashes = null;
+            BlockPersistence blockStore = null;
             currPeers.add(
                 PeerOLD.builder()
                 .host(h)
