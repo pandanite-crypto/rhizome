@@ -29,9 +29,8 @@ public class GossipSystem implements PeerSystem {
 
     private Peer localhostPeer;
 
-
     private AsyncHttpClient httpClient;
-    private DslJson<Object> dslJson = new DslJson<>();
+    @Builder.Default private DslJson<Object> dslJson = new DslJson<>();
 
     // private RpcServer peerServer;
 
@@ -65,12 +64,6 @@ public class GossipSystem implements PeerSystem {
             listener.fire(member, state, payload);
         }
     }
-
-    // @Override
-    // public AsyncConsumer<Peer> ping() {
-    //     // TODO Auto-generated method stub
-    //     throw new UnsupportedOperationException("Unimplemented method 'ping'");
-    // }
 
     @Override
     public Promise<List<InetSocketAddress>> getPeers(Peer peer) {
