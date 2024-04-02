@@ -21,11 +21,11 @@ import java.util.*;
  */
 @Builder
 public class FloodDiscovery implements DiscoveryService {
-	private final PeerSystem peerSystem;
+
 	private Exception error;
+	private final PeerSystem peerSystem;
 	private final List<InetSocketAddress> discovered = new ArrayList<>();
-	@Builder.Default
-	private Map<Object, Peer> totalDiscovered = new HashMap<>();
+	@Builder.Default private Map<Object, Peer> totalDiscovered = new HashMap<>();
 
 	/**
 	 * Main call of the interface. It discovers peers using the PeerSystem provided.
