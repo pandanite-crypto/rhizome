@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import rhizome.net.p2p.peer.Peer;
-import rhizome.net.p2p.peer.PeerStats;
 import rhizome.net.p2p.peer.Protocol;
 import rhizome.net.protocol.Message;
 import rhizome.net.protocol.MessageCode;
@@ -19,9 +18,6 @@ import rhizome.net.protocol.MessageHandler;
 @Builder
 @Slf4j
 public class TransportChannel {
-
-    // Reference to the peer
-    private Peer peer;
 
     // Message queue for the peer
     private final ChannelBuffer<Message> messageQueue = new ChannelBuffer<>(5, 10);
@@ -37,14 +33,13 @@ public class TransportChannel {
     protected Protocol protocol;
 
     // Stats of current peer connection
-    protected PeerStats stats;
+    protected ChannelStats stats;
     
     public static TransportChannel connect(Peer peer) {
         log.info("Connecting to peer: {}", peer);
 
         // Create a new peer channel
-        var peerChannel = TransportChannel.builder()
-            .peer(peer)
+        return TransportChannel.builder()
             .output(new ChannelOutput() {
                 @Override
                 public void ping() {
@@ -58,22 +53,17 @@ public class TransportChannel {
             
             })
             .build();
-
-        // Return a new connected peer
-        return peerChannel;
     }
 
     // Initialize the peer channel
-    public static TransportChannel init(Peer peer, ChannelOutput output) {
+    public static TransportChannel init(ChannelOutput output) {
         return builder()
-            .peer(peer)
             .output(output)
             .build();
     }
 
-    public static TransportChannel init(Peer peer, ChannelInput input) {
+    public static TransportChannel init(ChannelInput input) {
         return builder()
-            .peer(peer)
             .input(input)
             .build();
     }

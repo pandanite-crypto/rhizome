@@ -5,8 +5,7 @@ import io.activej.serializer.annotations.Serialize;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Getter @Setter
 public class Message {
   public static final String MESSAGE_TYPES = "messageTypes";
 

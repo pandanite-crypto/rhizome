@@ -1,4 +1,4 @@
-package rhizome.net.p2p.peer;
+package rhizome.net.transport;
 
 public enum PeerState {
     CONNECTED("connected"),
