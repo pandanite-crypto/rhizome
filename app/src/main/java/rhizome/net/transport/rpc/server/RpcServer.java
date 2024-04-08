@@ -4,7 +4,7 @@
  */
 
 
-package rhizome.net.p2p.rpc.server;
+package rhizome.net.transport.rpc.server;
 
 import java.net.InetAddress;
 import java.time.Duration;
@@ -37,8 +37,8 @@ import io.activej.serializer.BinarySerializer;
 import io.activej.serializer.SerializerBuilder;
 import lombok.Getter;
 import lombok.Setter;
-import rhizome.net.p2p.rpc.PeerStream;
 import rhizome.net.protocol.Message;
+import rhizome.net.transport.rpc.PeerStream;
 
 import static io.activej.common.Checks.checkArgument;
 import static io.activej.common.Checks.checkState;

@@ -3,7 +3,7 @@
  * Reimplementation of ActiveJ RPC Client
  */
 
-package rhizome.net.p2p.rpc.client;
+package rhizome.net.transport.rpc.client;
 
 import io.activej.async.callback.Callback;
 import io.activej.async.exception.AsyncTimeoutException;
@@ -39,8 +39,8 @@ import io.activej.rpc.client.sender.RpcStrategy;
 import io.activej.rpc.protocol.RpcException;
 import io.activej.serializer.BinarySerializer;
 import io.activej.serializer.SerializerBuilder;
-import rhizome.net.p2p.rpc.PeerStream;
 import rhizome.net.protocol.Message;
+import rhizome.net.transport.rpc.PeerStream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

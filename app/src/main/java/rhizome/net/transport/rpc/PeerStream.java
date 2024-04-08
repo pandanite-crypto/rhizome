@@ -3,7 +3,7 @@
  * Reimplementation of ActiveJ RPC Stream
  */
 
-package rhizome.net.p2p.rpc;
+package rhizome.net.transport.rpc;
 
 import java.time.Duration;
 

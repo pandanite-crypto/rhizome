@@ -1,4 +1,4 @@
-package rhizome.net.p2p.rpc;
+package rhizome.net.transport.rpc;
 
 import org.jetbrains.annotations.NotNull;
 

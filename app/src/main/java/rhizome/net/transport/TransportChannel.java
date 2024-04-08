@@ -1,4 +1,4 @@
-package rhizome.net.p2p.peer;
+package rhizome.net.transport;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import rhizome.net.p2p.peer.Peer;
+import rhizome.net.p2p.peer.PeerStats;
+import rhizome.net.p2p.peer.Protocol;
 import rhizome.net.protocol.Message;
 import rhizome.net.protocol.MessageCode;
 import rhizome.net.protocol.MessageHandler;
@@ -15,7 +18,7 @@ import rhizome.net.protocol.MessageHandler;
 @Setter
 @Builder
 @Slf4j
-public class PeerChannel {
+public class TransportChannel {
 
     // Reference to the peer
     private Peer peer;
@@ -27,8 +30,8 @@ public class PeerChannel {
     static final Map<MessageCode, MessageHandler> messageHandlers = new HashMap<>();
 
     // Current state of the peer connection
-    private PeerOutput output;
-	private PeerInput input;
+    private ChannelOutput output;
+	private ChannelInput input;
 
     // Protocol used to communicate with the peer
     protected Protocol protocol;
@@ -36,13 +39,13 @@ public class PeerChannel {
     // Stats of current peer connection
     protected PeerStats stats;
     
-    public static PeerChannel connect(Peer peer) {
+    public static TransportChannel connect(Peer peer) {
         log.info("Connecting to peer: {}", peer);
 
         // Create a new peer channel
-        var peerChannel = PeerChannel.builder()
+        var peerChannel = TransportChannel.builder()
             .peer(peer)
-            .output(new PeerOutput() {
+            .output(new ChannelOutput() {
                 @Override
                 public void ping() {
                     log.info("Pinging peer: {}", peer);
@@ -61,24 +64,24 @@ public class PeerChannel {
     }
 
     // Initialize the peer channel
-    public static PeerChannel init(Peer peer, PeerOutput output) {
+    public static TransportChannel init(Peer peer, ChannelOutput output) {
         return builder()
             .peer(peer)
             .output(output)
             .build();
     }
 
-    public static PeerChannel init(Peer peer, PeerInput input) {
+    public static TransportChannel init(Peer peer, ChannelInput input) {
         return builder()
             .peer(peer)
             .input(input)
             .build();
     }
 
-    public interface PeerOutput {
+    public interface ChannelOutput {
         void ping();
         boolean isClosed();
     }
 
-    public interface PeerInput {}
+    public interface ChannelInput {}
 }

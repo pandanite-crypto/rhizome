@@ -6,6 +6,7 @@ import java.util.UUID;
 import io.activej.promise.Promise;
 import lombok.Builder;
 import lombok.Getter;
+import rhizome.net.transport.TransportChannel;
 
 @Builder @Getter
 public class Peer {
@@ -16,7 +17,7 @@ public class Peer {
     private final long lastPingTime;
     private final long clockDelta;
     private final long version;
-    private final PeerChannel channel;
+    private final TransportChannel channel;
 
     /**
      * 

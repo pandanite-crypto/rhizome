@@ -3,7 +3,7 @@
  * Reimplementation of ActiveJ RPC Client Connection
  */
 
-package rhizome.net.p2p.rpc.client;
+package rhizome.net.transport.rpc.client;
 
 import io.activej.async.callback.Callback;
 import io.activej.async.exception.AsyncCloseException;
@@ -25,11 +25,11 @@ import io.activej.rpc.protocol.RpcException;
 import io.activej.rpc.protocol.RpcMandatoryData;
 import io.activej.rpc.protocol.RpcOverloadException;
 import io.activej.rpc.protocol.RpcRemoteException;
-import rhizome.net.p2p.peer.PeerChannel.PeerOutput;
-import rhizome.net.p2p.rpc.Listener;
-import rhizome.net.p2p.rpc.PeerStream;
 import rhizome.net.protocol.Message;
 import rhizome.net.protocol.MessageCode;
+import rhizome.net.transport.TransportChannel.ChannelOutput;
+import rhizome.net.transport.rpc.Listener;
+import rhizome.net.transport.rpc.PeerStream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 import static io.activej.common.Checks.checkState;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public final class RpcClientConnection implements PeerOutput, Listener, RpcSender, JmxRefreshable {
+public final class RpcClientConnection implements ChannelOutput, Listener, RpcSender, JmxRefreshable {
 	private static final Logger logger = getLogger(RpcClientConnection.class);
 	private static final boolean CHECK = Checks.isEnabled(RpcClientConnection.class);
 

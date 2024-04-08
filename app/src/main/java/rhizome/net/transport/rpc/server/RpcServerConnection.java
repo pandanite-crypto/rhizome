@@ -1,4 +1,4 @@
-package rhizome.net.p2p.rpc.server;
+package rhizome.net.transport.rpc.server;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -19,10 +19,10 @@ import io.activej.promise.Promise;
 import io.activej.rpc.protocol.RpcRemoteException;
 import io.activej.rpc.server.RpcRequestHandler;
 import lombok.extern.slf4j.Slf4j;
-import rhizome.net.p2p.rpc.Listener;
-import rhizome.net.p2p.rpc.PeerStream;
 import rhizome.net.protocol.Message;
 import rhizome.net.protocol.MessageCode;
+import rhizome.net.transport.rpc.Listener;
+import rhizome.net.transport.rpc.PeerStream;
 
 @Slf4j
 public class RpcServerConnection implements Listener, JmxRefreshable{
