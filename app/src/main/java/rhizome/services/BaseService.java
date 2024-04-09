@@ -10,9 +10,10 @@ import io.activej.async.function.AsyncRunnables;
 import io.activej.async.service.EventloopService;
 import io.activej.eventloop.Eventloop;
 import io.activej.promise.Promise;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+@Slf4j @Getter
 public abstract class BaseService implements EventloopService {
 
     private Eventloop eventloop;
@@ -39,7 +40,7 @@ public abstract class BaseService implements EventloopService {
         return eventloop;
     }
 
-    private static Promise<Void> asyncRun(List<AsyncRunnable> runnables) {
+    static Promise<Void> asyncRun(List<AsyncRunnable> runnables) {
         return Promise.ofCallback(callback -> {
             Promise<Void> promise = Promise.complete();
             for (AsyncRunnable runnable : runnables) {
