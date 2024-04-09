@@ -2,6 +2,7 @@ package rhizome.services;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class BaseService implements EventloopService {
 
     private Eventloop eventloop;
-    private List<AsyncRunnable> routines = List.of();
+    private List<AsyncRunnable> routines = new ArrayList<>();
 
     protected BaseService(Eventloop eventloop) {
         this.eventloop = eventloop;

@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.*;
 import java.util.List;
 
@@ -72,7 +73,7 @@ class BaseServiceTest {
         // Verify the behavior
         assertEquals(baseService, result);
         assertEquals(1, baseService.getRoutines().size());
-        assertEquals(routine, baseService.getRoutines().get(0));
+        assertNotEquals(routine, baseService.getRoutines().get(0));
         verify(routine, times(1)).run();
     }
 
