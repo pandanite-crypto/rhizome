@@ -3,7 +3,7 @@ package rhizome.net.p2p.peer;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
-import rhizome.net.transport.PeerState;
+import rhizome.net.p2p.PeerState;
 
 public class PeerInitializer {
     

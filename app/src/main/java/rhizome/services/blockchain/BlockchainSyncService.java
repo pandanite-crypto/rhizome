@@ -1,4 +1,4 @@
-package rhizome.services.network;
+package rhizome.services.blockchain;
 
 import java.util.List;
 
@@ -7,6 +7,8 @@ import io.activej.async.function.AsyncRunnables;
 import io.activej.eventloop.Eventloop;
 import io.activej.promise.Promise;
 import lombok.Builder;
+import rhizome.services.BaseService;
+import rhizome.services.network.PeerManagerService;
 
 public class BlockchainSyncService extends BaseService {
     

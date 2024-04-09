@@ -1,7 +1,7 @@
 package rhizome.net.p2p.peer;
 
 import io.activej.promise.Promise;
-import rhizome.net.transport.PeerState;
+import rhizome.net.p2p.PeerState;
 
 @FunctionalInterface
 public interface EventListener {

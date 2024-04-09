@@ -6,7 +6,7 @@ import java.util.UUID;
 import io.activej.promise.Promise;
 import lombok.Builder;
 import lombok.Getter;
-import rhizome.net.transport.PeerState;
+import rhizome.net.p2p.PeerState;
 import rhizome.net.transport.TransportChannel;
 
 @Builder @Getter

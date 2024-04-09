@@ -16,11 +16,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import rhizome.net.p2p.DiscoveryService;
+import rhizome.net.p2p.PeerState;
 import rhizome.net.p2p.PeerSystem;
 import rhizome.net.p2p.peer.Peer;
 import rhizome.net.p2p.peer.EventListener;
 import rhizome.net.protocol.Message;
-import rhizome.net.transport.PeerState;
 
 import static io.activej.common.Checks.checkState;
 
