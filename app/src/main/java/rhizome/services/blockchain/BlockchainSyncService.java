@@ -1,33 +1,26 @@
 package rhizome.services.blockchain;
 
-import java.util.List;
-
-import io.activej.async.function.AsyncRunnable;
-import io.activej.async.function.AsyncRunnables;
 import io.activej.eventloop.Eventloop;
 import io.activej.promise.Promise;
-import lombok.Builder;
 import rhizome.services.BaseService;
 import rhizome.services.network.PeerManagerService;
 
 public class BlockchainSyncService extends BaseService {
     
-    private final List<AsyncRunnable> routines = List.of(
-        AsyncRunnables.reuse(this::sync)
-    );
-
+    private final PeerManagerService peerManagerService;
+    
     private BlockchainSyncService(Eventloop eventloop, PeerManagerService peerManagerService) {
-        super(eventloop, routines);
+        super(eventloop);
         this.peerManagerService = peerManagerService;
     }
 
     public static BlockchainSyncService create(Eventloop eventloop, PeerManagerService peerManagerService) {
-        return new BlockchainSyncService(eventloop, peerManagerService);
+        return new BlockchainSyncService(eventloop, peerManagerService)
+            .addRoutine(BlockchainSyncService::sync)
+            .build();
     }
 
-    private final PeerManagerService peerManagerService;
-
-    private Promise<Void> sync() {
+    private static Promise<Void> sync() {
         return Promise.complete();
     }
 }

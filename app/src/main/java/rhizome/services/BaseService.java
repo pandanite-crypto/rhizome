@@ -16,22 +16,16 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class BaseService implements EventloopService {
 
     private Eventloop eventloop;
-    private final List<AsyncRunnable> routines;
+    private List<AsyncRunnable> routines = List.of();
 
-    protected BaseService(Eventloop eventloop, List<AsyncRunnable> routines) {
+    protected BaseService(Eventloop eventloop) {
         this.eventloop = eventloop;
-        this.routines = Collections.unmodifiableList(routines.stream().map(AsyncRunnables::reuse).toList());
-    }
-
-    public Promise<Void> refresh() {
-        routines.forEach(AsyncRunnable::run);
-        return Promise.complete();
     }
 
     @Override
     public @NotNull Promise<?> start() {
         log.info("|SERVICE STARTING|");
-        return refresh();
+        return asyncRun(routines).whenResult(() -> log.info("|SERVICE STARTED|"));
     }
 
     @Override
@@ -43,5 +37,25 @@ public abstract class BaseService implements EventloopService {
     @Override
     public @NotNull Eventloop getEventloop() {
         return eventloop;
+    }
+
+    private static Promise<Void> asyncRun(List<AsyncRunnable> runnables) {
+        return Promise.ofCallback(callback -> {
+            Promise<Void> promise = Promise.complete();
+            for (AsyncRunnable runnable : runnables) {
+                promise = promise.then(runnable::run);
+            }
+            promise.run(callback);
+        });
+    }
+
+    protected BaseService addRoutine(AsyncRunnable routine) {
+        routines.add(routine);
+        return this;
+    }
+
+    public <T extends BaseService> T build() {
+        this.routines = Collections.unmodifiableList(routines.stream().map(AsyncRunnables::reuse).toList());
+        return (T) this;
     }
 }
