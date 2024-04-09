@@ -27,7 +27,7 @@ import io.activej.rpc.protocol.RpcOverloadException;
 import io.activej.rpc.protocol.RpcRemoteException;
 import rhizome.net.protocol.Message;
 import rhizome.net.protocol.MessageCode;
-import rhizome.net.transport.TransportChannel.ChannelOutput;
+import rhizome.net.transport.ChannelOutput;
 import rhizome.net.transport.rpc.Listener;
 import rhizome.net.transport.rpc.PeerStream;
 
