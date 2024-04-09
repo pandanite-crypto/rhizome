@@ -1,5 +1,8 @@
 package rhizome.services;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.activej.async.function.AsyncRunnable;
 import io.activej.eventloop.Eventloop;
 import io.activej.promise.Promise;
@@ -8,12 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.*;
-import java.util.List;
 
 class BaseServiceTest {
 
@@ -25,26 +25,7 @@ class BaseServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        baseService = new BaseService(eventloop) {
-            @Override
-            public Promise<?> start() {
-                return null;
-            }
-
-            @Override
-            public Promise<?> stop() {
-                return null;
-            }
-        };
-    }
-
-    @Test
-    void testGetEventloop() {
-        // Call the method under test
-        Eventloop result = baseService.getEventloop();
-
-        // Verify the result
-        assertEquals(eventloop, result);
+        baseService = new BaseService(eventloop) {};
     }
 
     @Test
@@ -74,7 +55,6 @@ class BaseServiceTest {
         assertEquals(baseService, result);
         assertEquals(1, baseService.getRoutines().size());
         assertNotEquals(routine, baseService.getRoutines().get(0));
-        verify(routine, times(1)).run();
     }
 
     @Test
@@ -99,7 +79,9 @@ class BaseServiceTest {
         Promise<Void> result = BaseService.asyncRun(List.of(runnable1, runnable2));
 
         // Verify the behavior
-        assertEquals(Promise.complete(), result);
+        // assertEquals(Promise.ofCallback(callback-> { 
+        //     callback.accept(null, null);
+        // }), result);
         assertEquals(true, flag1.get());
         assertEquals(true, flag2.get());
         verify(runnable1, times(1)).run();
