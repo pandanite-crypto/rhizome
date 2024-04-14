@@ -27,16 +27,19 @@ public final class NetworkModule extends AbstractModule {
         return new NetworkModule();
     }
 
-    @Provides @Eager PeerManagerService peerManagerService(Eventloop eventloop, Map<Object, Peer> seeders, PeerSystem peerSystem) {
+    @Provides @Eager 
+    PeerManagerService peerManagerService(Eventloop eventloop, Map<Object, Peer> seeders, PeerSystem peerSystem) {
         return PeerManagerService.create(eventloop, DiscoveryService.create(seeders, peerSystem));
     }
 
-    @Provides PeerSystem peerSystem() {
+    @Provides 
+    PeerSystem peerSystem() {
         //config.get(ofString(), "cluster"), 
         return GossipSystem.builder().build();
     }
     
-    @Provides Map<Object, Peer> seeders(Config config) {
+    @Provides 
+    Map<Object, Peer> seeders(Config config) {
         Map<Object, Peer> peers = new HashMap<>();
         config.get(ofList(ConfigConverters.ofString(), ";"), "seeders").stream()
                 .map(ipAddress -> PeerInitializer.fromAddress(new InetSocketAddress(ipAddress, 8080)))

@@ -8,14 +8,6 @@ import rhizome.net.p2p.peer.Peer;
 import rhizome.net.protocol.Message;
 
 public interface PeerSystem {
-
-    // void start();
-
-    // void notify(Peer member, PeerState state, Object payload);
-
-    // AsyncConsumer<Peer> ping();
-
-    // List<Peer> random();
     DiscoveryService getDiscoveryService(Map<Object, Peer> peers, PeerSystem peerSystem);
 
     Promise<List<InetSocketAddress>> getPeers(Peer peer);

@@ -57,7 +57,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 	private boolean closed;
 
 	private final Eventloop eventloop;
-	private final RpcClient peerClient;
+	private final RpcClient rpcClient;
 	private final PeerStream stream;
 	private final InetSocketAddress address;
 	private final Map<Integer, Callback<?>> activeRequests = new HashMap<>();
@@ -80,7 +80,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 	RpcClientConnection(Eventloop eventloop, RpcClient peerClient, InetSocketAddress address, PeerStream stream,
 			long keepAliveMillis) {
 		this.eventloop = eventloop;
-		this.peerClient = peerClient;
+		this.rpcClient = peerClient;
 		this.stream = stream;
 		this.address = address;
 		this.keepAliveMillis = keepAliveMillis;
@@ -150,7 +150,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 				assert expiredCb == this;
 				// jmx
 				connectionStats.getExpiredRequests().recordEvent();
-				peerClient.getGeneralRequestsStats().getExpiredRequests().recordEvent();
+				rpcClient.getGeneralRequestsStats().getExpiredRequests().recordEvent();
 
 				cb.accept(null, new AsyncTimeoutException("RPC request has timed out"));
 			}
@@ -187,14 +187,14 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 	}
 
 	private <I, O> Callback<O> doJmxMonitoring(I request, int timeout, @NotNull Callback<O> cb) {
-		RpcRequestStats requestStatsPerClass = peerClient.ensureRequestStatsPerClass(request.getClass());
+		RpcRequestStats requestStatsPerClass = rpcClient.ensureRequestStatsPerClass(request.getClass());
 		requestStatsPerClass.getTotalRequests().recordEvent();
 		return new JmxConnectionMonitoringResultCallback<>(requestStatsPerClass, cb, timeout);
 	}
 
 	private <O> void doProcessOverloaded(@NotNull Callback<O> cb) {
 		// jmx
-		peerClient.getGeneralRequestsStats().getRejectedRequests().recordEvent();
+		rpcClient.getGeneralRequestsStats().getRejectedRequests().recordEvent();
 		connectionStats.getRejectedRequests().recordEvent();
 		if (logger.isTraceEnabled()) logger.trace("RPC client uplink is overloaded");
 
@@ -225,9 +225,9 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 		RpcRemoteException remoteException = (RpcRemoteException) message.getData();
 		// jmx
 		connectionStats.getFailedRequests().recordEvent();
-		peerClient.getGeneralRequestsStats().getFailedRequests().recordEvent();
+		rpcClient.getGeneralRequestsStats().getFailedRequests().recordEvent();
 		connectionStats.getServerExceptions().recordException(remoteException, null);
-		peerClient.getGeneralRequestsStats().getServerExceptions().recordException(remoteException, null);
+		rpcClient.getGeneralRequestsStats().getServerExceptions().recordException(remoteException, null);
 
 		// TODO
 		// Callback<?> cb = activeRequests.remove(message.getCookie());
@@ -238,7 +238,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 
 	private void processControlMessage(RpcControlMessage controlMessage) {
 		if (controlMessage == RpcControlMessage.CLOSE) {
-			peerClient.removeConnection(address);
+			rpcClient.removeConnection(address);
 			serverClosing = true;
 			if (activeRequests.size() == 0) {
 				shutdown();
@@ -276,7 +276,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 	public void onReceiverError(@NotNull Exception e) {
 		if (isClosed()) return;
 		logger.error("Receiver error: {}", address, e);
-		peerClient.getLastProtocolError().recordException(e, address);
+		rpcClient.getLastProtocolError().recordException(e, address);
 		doClose();
 	}
 
@@ -284,7 +284,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 	public void onSenderError(@NotNull Exception e) {
 		if (isClosed()) return;
 		logger.error("Sender error: {}", address, e);
-		peerClient.getLastProtocolError().recordException(e, address);
+		rpcClient.getLastProtocolError().recordException(e, address);
 		doClose();
 	}
 
@@ -292,7 +292,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 	public void onSerializationError(Message message, @NotNull Exception e) {
 		if (isClosed()) return;
 		logger.error("Serialization error: {} for data {}", address, message.getData(), e);
-		peerClient.getLastProtocolError().recordException(e, address);
+		rpcClient.getLastProtocolError().recordException(e, address);
 
 		// TODO
 		// activeRequests.remove(message.getCookie()).accept(null, e);
@@ -322,7 +322,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 		stream.close();
 		downstreamDataAcceptor = null;
 		closed = true;
-		peerClient.removeConnection(address);
+		rpcClient.removeConnection(address);
 
 		while (!activeRequests.isEmpty()) {
 			for (Integer cookie : new HashSet<>(activeRequests.keySet())) {
@@ -399,7 +399,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 			int responseTime = timeElapsed();
 			connectionStats.getResponseTime().recordValue(responseTime);
 			requestStatsPerClass.getResponseTime().recordValue(responseTime);
-			peerClient.getGeneralRequestsStats().getResponseTime().recordValue(responseTime);
+			rpcClient.getGeneralRequestsStats().getResponseTime().recordValue(responseTime);
 			recordOverdue();
 			callback.accept(result, null);
 		}
@@ -412,7 +412,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 				connectionStats.getServerExceptions().recordException(e, null);
 				requestStatsPerClass.getFailedRequests().recordEvent();
 				requestStatsPerClass.getResponseTime().recordValue(responseTime);
-				peerClient.getGeneralRequestsStats().getResponseTime().recordValue(responseTime);
+				rpcClient.getGeneralRequestsStats().getResponseTime().recordValue(responseTime);
 				requestStatsPerClass.getServerExceptions().recordException(e, null);
 				recordOverdue();
 			} else if (e instanceof AsyncTimeoutException) {
@@ -434,7 +434,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 			if (overdue > 0) {
 				connectionStats.getOverdues().recordValue(overdue);
 				requestStatsPerClass.getOverdues().recordValue(overdue);
-				peerClient.getGeneralRequestsStats().getOverdues().recordValue(overdue);
+				rpcClient.getGeneralRequestsStats().getOverdues().recordValue(overdue);
 			}
 		}
 	}

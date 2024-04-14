@@ -1,13 +1,8 @@
 package rhizome.services.network;
 
-import java.util.HashMap;
-import java.util.Map;
 import io.activej.eventloop.Eventloop;
 import rhizome.net.p2p.DiscoveryService;
-import rhizome.net.p2p.peer.Peer;
 import rhizome.net.protocol.Message;
-
-import static java.util.Collections.unmodifiableMap;
 
 /**
  * This service execute the service manager process.
@@ -18,18 +13,6 @@ import static java.util.Collections.unmodifiableMap;
 public interface PeerManagerService {
 
     static final int PING_INTERVAL = 10;
-
-    static final Map<Object, Peer> peers = new HashMap<>();
-    static final Map<Object, Peer> peersView = unmodifiableMap(peers);
-
-    static final Map<Object, Peer> alivePeers = new HashMap<>();
-    static final Map<Object, Peer> alivePeersView = unmodifiableMap(alivePeers);
-
-    static final Map<Object, Peer> deadPeers = new HashMap<>();
-    static final Map<Object, Peer> deadPeersView = unmodifiableMap(deadPeers);
-
-    static final Map<Object, Peer> connectedPeers = new HashMap<>();
-    static final Map<Object, Peer> connectedPeersView = unmodifiableMap(connectedPeers);
 
     /**
      * Factory method

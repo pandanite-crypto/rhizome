@@ -2,6 +2,8 @@ package rhizome.services.network;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.HashMap;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +17,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import rhizome.net.p2p.DiscoveryService;
 import rhizome.net.p2p.peer.Peer;
+
+import static java.util.Collections.unmodifiableMap;
 import static java.util.Map.Entry;
 import static io.activej.async.util.LogUtils.toLogger;
 
@@ -33,8 +37,20 @@ abstract class AbstractPeerManagerService implements PeerManagerService, Eventlo
     private final AsyncRunnable checkAllPeers = AsyncRunnables.reuse(this::doCheckAllPeers);
     private final AsyncRunnable checkDeadPeers = AsyncRunnables.reuse(this::doCheckDeadPeers);
 
+    private final Map<Object, Peer> peers = new HashMap<>();
+    private final Map<Object, Peer> peersView = unmodifiableMap(peers);
+
+    private final Map<Object, Peer> alivePeers = new HashMap<>();
+    private final Map<Object, Peer> alivePeersView = unmodifiableMap(alivePeers);
+
+    private final Map<Object, Peer> deadPeers = new HashMap<>();
+    private final Map<Object, Peer> deadPeersView = unmodifiableMap(deadPeers);
+
+    private final Map<Object, Peer> connectedPeers = new HashMap<>();
+    private final Map<Object, Peer> connectedPeersView = unmodifiableMap(connectedPeers);
     /**
-     * Private constructor
+ 
+    * Private constructor
      * 
      * @param eventloop
      * @param discoveryService

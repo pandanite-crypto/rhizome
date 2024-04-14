@@ -21,14 +21,15 @@ import io.activej.rpc.server.RpcRequestHandler;
 import lombok.extern.slf4j.Slf4j;
 import rhizome.net.protocol.Message;
 import rhizome.net.protocol.MessageCode;
+import rhizome.net.transport.ChannelInput;
 import rhizome.net.transport.rpc.Listener;
 import rhizome.net.transport.rpc.PeerStream;
 
 @Slf4j
-public class RpcServerConnection implements Listener, JmxRefreshable{
+public class RpcServerConnection implements ChannelInput, Listener, JmxRefreshable {
 
     private StreamDataAcceptor<Message> downstreamDataAcceptor;
-	private final RpcServer peerServer;
+	private final RpcServer rpcServer;
 	private PeerStream stream;
 	private final Map<Class<?>, RpcRequestHandler<?,?>> handlers;
 	private int activeRequests = 1;
@@ -45,7 +46,7 @@ public class RpcServerConnection implements Listener, JmxRefreshable{
             InetAddress remoteAddress,
             Map<Class<?>, RpcRequestHandler<?,?>> handlers, 
             PeerStream stream) {
-        this.peerServer = peerServer;
+        this.rpcServer = peerServer;
         this.handlers = handlers;
         this.stream = stream;
 
@@ -87,13 +88,13 @@ public class RpcServerConnection implements Listener, JmxRefreshable{
                 if (startTime != 0) {
                     int value = (int) (System.currentTimeMillis() - startTime);
                     requestHandlingTime.recordValue(value);
-                    peerServer.getRequestHandlingTime().recordValue(value);
+                    rpcServer.getRequestHandlingTime().recordValue(value);
                 }
                 if (e == null) {
                     downstreamDataAcceptor.accept(Message.of(messageCode, result));
 
                     successfulRequests.recordEvent();
-                    peerServer.getSuccessfulRequests().recordEvent();
+                    rpcServer.getSuccessfulRequests().recordEvent();
                 } else {
                     log.warn("Exception while processing request ID {}", messageCode, e);
                     var errorMessage = Message.of(messageCode, new RpcRemoteException(e));
@@ -119,7 +120,7 @@ public class RpcServerConnection implements Listener, JmxRefreshable{
 	@Override
 	public void onReceiverError(@NotNull Exception e) {
 		log.error("Receiver error {}", remoteAddress, e);
-		peerServer.getLastProtocolError().recordException(e, remoteAddress);
+		rpcServer.getLastProtocolError().recordException(e, remoteAddress);
 		doClose();
 		stream.close();
 	}
@@ -127,7 +128,7 @@ public class RpcServerConnection implements Listener, JmxRefreshable{
 	@Override
 	public void onSenderError(@NotNull Exception e) {
 		log.error("Sender error: {}", remoteAddress, e);
-		peerServer.getLastProtocolError().recordException(e, remoteAddress);
+		rpcServer.getLastProtocolError().recordException(e, remoteAddress);
 		doClose();
 		stream.close();
 	}
@@ -153,13 +154,13 @@ public class RpcServerConnection implements Listener, JmxRefreshable{
     private void sendError(Message errorMessage, Object messageData, @Nullable Exception e) {
 		downstreamDataAcceptor.accept(errorMessage);
 		lastRequestHandlingException.recordException(e, messageData);
-		peerServer.getLastRequestHandlingException().recordException(e, messageData);
+		rpcServer.getLastRequestHandlingException().recordException(e, messageData);
 		failedRequests.recordEvent();
-		peerServer.getFailedRequests().recordEvent();
+		rpcServer.getFailedRequests().recordEvent();
 	}
 
     private void doClose() {
-		peerServer.remove(this);
+		rpcServer.remove(this);
 		downstreamDataAcceptor = i -> {};
 	}
 

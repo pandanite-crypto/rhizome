@@ -1,65 +1,29 @@
 package rhizome.net.transport;
 
-import java.util.EnumMap;
-import io.activej.csp.queue.ChannelBuffer;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import rhizome.net.p2p.peer.Peer;
+import io.activej.promise.Promise;
 import rhizome.net.p2p.peer.Protocol;
 import rhizome.net.protocol.Message;
-import rhizome.net.protocol.MessageCode;
-import rhizome.net.protocol.MessageHandler;
 
 public interface TransportChannel {
-
-    // Message queue for the peer
-    // static final ChannelBuffer<Message> messageQueue = new ChannelBuffer<>(5, 10);
-
-    // Handlers for messages
-    static final EnumMap<MessageCode, MessageHandler> messageHandlers = new EnumMap<>(MessageCode.class);
-
-    // Current state of the peer connection
-    private ChannelOutput output;
-    private ChannelInput input;
-
-    // Protocol used to communicate with the peer
-    protected Protocol protocol;
-
-    // Stats of current peer connection
-    protected ChannelStats stats;
     
-    // public static TransportChannel connect(Peer peer) {
-    //     log.info("Connecting to peer: {}", peer);
+    // Send a message to the peer
+    public Promise<?> send(Message message);
 
-    //     // Create a new peer channel
-    //     return TransportChannel.builder()
-    //         .output(new ChannelOutput() {
-    //             @Override
-    //             public void ping() {
-    //                 log.info("Pinging peer: {}", peer);
-    //             }
+    // Receive a message from the peer
+    public void receive(Message message);
 
-    //             @Override
-    //             public boolean isClosed() {
-    //                 return true;
-    //             }
-            
-    //         })
-    //         .build();
-    // }
+    // Close the connection to the peer
+    public void close();
 
-    // // Initialize the peer channel
-    // public static TransportChannel init(ChannelOutput output) {
-    //     return builder()
-    //         .output(output)
-    //         .build();
-    // }
+    // Get the output channel
+    public ChannelOutput getOutput();
 
-    // public static TransportChannel init(ChannelInput input) {
-    //     return builder()
-    //         .input(input)
-    //         .build();
-    // }
+    // Get the input channel
+    public ChannelInput getInput();
+
+    // Get the protocol used to communicate with the peer
+    public Protocol getProtocol();
+
+    // Get the stats of the current peer connection
+    public ChannelStats getStats();
 }
