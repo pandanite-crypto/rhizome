@@ -24,14 +24,12 @@ import java.nio.ByteBuffer;
 import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@Getter
-@Setter
-@Slf4j
-public class DataStore {
+@Getter @Setter @Slf4j
+public class LevelDBDataStore {
     private DB db;
     private String path;
 
-    public DataStore() {
+    public LevelDBDataStore() {
         this.db = null;
         this.path = "";
     }
@@ -53,7 +51,7 @@ public class DataStore {
         try {
             FileUtils.deleteDirectory(directory);
         } catch (IOException e) {
-            throw new DataStoreException("Could not clear path " + path, e);
+            throw new LevelDBException("Could not clear path " + path, e);
         }
     }
 
@@ -62,7 +60,7 @@ public class DataStore {
             try {
                 this.db.close();
             } catch (IOException e) {
-                throw new DataStoreException("Could not close DataStore db", e);
+                throw new LevelDBException("Could not close DataStore db", e);
             }
             this.db = null;
         }
@@ -75,7 +73,7 @@ public class DataStore {
                 db.delete(key.getBytes(UTF_8));
             }
         } catch (IOException e) {
-            throw new DataStoreException("Could not clear data store", e);
+            throw new LevelDBException("Could not clear data store", e);
         }
     }
 
@@ -117,7 +115,7 @@ public class DataStore {
     protected Object get(byte[] key, Class<?> type) {
         var value = db.get(key, new ReadOptions());
         if (value == null) {
-            throw new DataStoreException("Empty key: " + key);
+            throw new LevelDBException("Empty key: " + key);
         }
 
         if(type == String.class) {
@@ -135,12 +133,12 @@ public class DataStore {
             buff.put(value);
 
             if (!buff.canRead()) {
-                throw new DataStoreException("Could not read value of record " + key + " from BlockStore db.");
+                throw new LevelDBException("Could not read value of record " + key + " from BlockStore db.");
             }
 
             return buff;
         } else {
-            throw new DataStoreException("Unsupported type");
+            throw new LevelDBException("Unsupported type");
         }
     }
 

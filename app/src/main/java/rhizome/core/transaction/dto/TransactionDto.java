@@ -5,12 +5,13 @@ import org.jetbrains.annotations.NotNull;
 import io.activej.serializer.annotations.Deserialize;
 import io.activej.serializer.annotations.Serialize;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 import rhizome.core.crypto.PublicKey;
 import rhizome.core.ledger.PublicAddress;
 import rhizome.core.serialization.BinarySerializable;
 import rhizome.core.transaction.TransactionSignature;
 
-@Getter
+@Accessors(fluent = true) @Getter
 public class TransactionDto implements BinarySerializable {
     @Serialize public final TransactionSignature signature;
     @Serialize public final PublicKey signingKey;

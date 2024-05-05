@@ -261,13 +261,13 @@ public class PeerManagerImplOLD {
     public String getGoodHost() {
         if (currPeers.isEmpty()) return "";
         BigInteger bestWork = BigInteger.ZERO;
-        String bestHost = currPeers.get(0).getHost();
+        String bestHost = currPeers.get(0).host();
         lock.lock();
         try {
             for (PeerOLD h : currPeers) {
                 if (h.getTotalWork().compareTo(bestWork) > 0) {
                     bestWork = h.getTotalWork();
-                    bestHost = h.getHost();
+                    bestHost = h.host();
                 }
             }
         } finally {
@@ -280,7 +280,7 @@ public class PeerManagerImplOLD {
     public Map<String, Pair<Long, String>> getHeaderChainStats() {
         Map<String, Pair<Long, String>> ret = new HashMap<>();
         for (PeerOLD h : currPeers) {
-            ret.put(h.getHost(), new Pair<>(h.getCurrentDownloaded(), version)); // Remplacez 'version' par la variable/le champ approprié
+            ret.put(h.host(), new Pair<>(h.getCurrentDownloaded(), version)); // Remplacez 'version' par la variable/le champ approprié
         }
         return ret;
     }
@@ -328,7 +328,7 @@ public class PeerManagerImplOLD {
         lock.lock();
         try {
             for (PeerOLD h : currPeers) {
-                if (h.getHost().equals(host)) {
+                if (h.host().equals(host)) {
                     ret = h.getHash(blockId);
                     break;
                 }

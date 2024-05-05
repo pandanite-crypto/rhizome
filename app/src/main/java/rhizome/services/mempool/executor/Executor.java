@@ -30,5 +30,11 @@ public class Executor implements EventloopService {
         throw new UnsupportedOperationException("Unimplemented method 'stop'");
     }
 
+    @Override
+    public @NotNull Eventloop getEventloop() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getEventloop'");
+    }
+
     
 }

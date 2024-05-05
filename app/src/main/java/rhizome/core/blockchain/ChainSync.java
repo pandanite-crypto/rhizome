@@ -13,14 +13,14 @@ public class ChainSync implements Runnable {
     @Override
     public void run() {
         while (true) {
-            if (!chain.isTriedBlockStoreCache() && chain.getBlockStore() != null) {
-                long chainLength = chain.getBlockStore().getBlockCount();
+            if (!chain.triedBlockStoreCache() && chain.blockStore() != null) {
+                long chainLength = chain.blockStore().getBlockCount();
                 for (long i = 1; i <= chainLength; i++) {
-                    chain.getBlockHashes().add(chain.getBlockStore().getBlock((int)i).getHash());
+                    chain.blockHashes().add(chain.blockStore().getBlock((int)i).hash());
                 }
-                chain.setTotalWork(chain.getBlockStore().getTotalWork());
-                chain.setChainLength(chainLength);
-                chain.setTriedBlockStoreCache(true);
+                chain.totalWork(chain.blockStore().getTotalWork());
+                chain.chainLength(chainLength);
+                chain.triedBlockStoreCache(true);
                 chain.load();
             } else {
                 chain.load();

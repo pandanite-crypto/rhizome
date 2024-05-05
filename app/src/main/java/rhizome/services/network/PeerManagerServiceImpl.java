@@ -1,5 +1,7 @@
 package rhizome.services.network;
 
+import org.jetbrains.annotations.NotNull;
+
 import io.activej.eventloop.Eventloop;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -38,5 +40,11 @@ public class PeerManagerServiceImpl extends AbstractPeerManagerService {
 
     public void sync() {
         // peerSystem.broadcast(connectedPeersView, message);
+    }
+
+    @Override
+    public @NotNull Eventloop getEventloop() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getEventloop'");
     }
 }

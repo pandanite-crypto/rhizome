@@ -46,8 +46,8 @@ public class GossipSystem implements PeerSystem {
         // checkState(handlers != null && !handlers.isEmpty(), "Handlers must be set before starting the gossip system");
         checkState(listener != null, "Listener must be set before starting the gossip system");
         log.debug("|Gossip system starting for cluster[%s] ip[%s] port[%d] id[%s]|",
-                localhostPeer.getAddress().getHostName(), localhostPeer.getAddress().getPort(),
-                localhostPeer.getId());
+                localhostPeer.address().getHostName(), localhostPeer.address().getPort(),
+                localhostPeer.id());
 
         notify(localhostPeer, PeerState.JOIN, null);
     }
@@ -67,7 +67,7 @@ public class GossipSystem implements PeerSystem {
 
     @Override
     public Promise<List<InetSocketAddress>> getPeers(Peer peer) {
-        return httpClient.request(HttpRequest.get(peer.getAddress() + "/peers"))
+        return httpClient.request(HttpRequest.get(peer.address() + "/peers"))
                 .then(response -> response.loadBody())
                 .map(body -> {
                     var peerBytes = body.getString(UTF_8).getBytes();

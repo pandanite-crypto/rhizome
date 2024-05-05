@@ -22,20 +22,20 @@ class TransactionTests {
         assertTrue(t2.signatureValid());
 
         // Test the send transaction
-        long ts = ((TransactionImpl) t2).getTimestamp();
+        long ts = ((TransactionImpl) t2).timestamp();
         Transaction deserialized = Transaction.of(t2.toJson());
 
         assertTrue(deserialized.signatureValid());
         assertEquals(t2, deserialized);
-        assertEquals(ts, ((TransactionImpl) deserialized).getTimestamp());
+        assertEquals(ts, ((TransactionImpl) deserialized).timestamp());
 
         // Test mining transaction
         deserialized = Transaction.of(t.toJson());
-        ts = ((TransactionImpl) t).getTimestamp();
+        ts = ((TransactionImpl) t).timestamp();
 
         assertEquals(t.hashContents(), deserialized.hashContents());
         assertEquals(t, deserialized);
-        assertEquals(ts, ((TransactionImpl) deserialized).getTimestamp());
+        assertEquals(ts, ((TransactionImpl) deserialized).timestamp());
     }
 
     @Test
@@ -49,22 +49,22 @@ class TransactionTests {
         assertTrue(t2.signatureValid());
 
         // Test the send transaction
-        long ts = ((TransactionImpl) t2).getTimestamp();
+        long ts = ((TransactionImpl) t2).timestamp();
         TransactionDto serialized = t2.serialize();
         Transaction deserialized = Transaction.of(serialized);
 
         assertTrue(deserialized.signatureValid());
         assertEquals(t2, deserialized);
-        assertEquals(ts, ((TransactionImpl) deserialized).getTimestamp());
+        assertEquals(ts, ((TransactionImpl) deserialized).timestamp());
 
         // Test mining transaction
         serialized = t.serialize();
         deserialized = Transaction.of(serialized);
-        ts = ((TransactionImpl) t).getTimestamp();
+        ts = ((TransactionImpl) t).timestamp();
 
         assertEquals(t.hashContents(), deserialized.hashContents());
         assertEquals(t, deserialized);
-        assertEquals(ts, ((TransactionImpl) deserialized).getTimestamp());
+        assertEquals(ts, ((TransactionImpl) deserialized).timestamp());
     }
 
     @Test

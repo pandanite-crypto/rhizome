@@ -28,5 +28,11 @@ public class BlockchainService extends AbstractBlockchain implements EventloopSe
         throw new UnsupportedOperationException("Unimplemented method 'stop'");
     }
 
+    @Override
+    public @NotNull Eventloop getEventloop() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getEventloop'");
+    }
+
     
 }

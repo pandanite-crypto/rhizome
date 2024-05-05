@@ -43,12 +43,12 @@ public final class NetworkModule extends AbstractModule {
         Map<Object, Peer> peers = new HashMap<>();
         config.get(ofList(ConfigConverters.ofString(), ";"), "seeders").stream()
                 .map(ipAddress -> PeerInitializer.fromAddress(new InetSocketAddress(ipAddress, 8080)))
-                .forEach(peer -> peers.put(peer.getAddress(), peer));
+                .forEach(peer -> peers.put(peer.address(), peer));
 
         config.get(ofList(ConfigConverters.ofString(), ";"), "dns").stream()
                 .flatMap(hostname -> NetworkUtils.getIPAddresses(hostname).stream())
                 .map(ipAddress -> PeerInitializer.fromAddress(new InetSocketAddress(ipAddress, 8080))) 
-                .forEach(peer -> peers.put(peer.getAddress(), peer));
+                .forEach(peer -> peers.put(peer.address(), peer));
         return peers;
     }
 }

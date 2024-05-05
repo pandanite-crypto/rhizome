@@ -9,8 +9,7 @@ import static rhizome.core.common.Crypto.concatHashes;
 
 import java.util.*;
 
-@Getter
-@Setter
+@Getter @Setter
 public class MerkleTree {
     private HashTree root;
     private Map<SHA256Hash, HashTree> fringeNodes;
@@ -22,28 +21,28 @@ public class MerkleTree {
 
     public void setItems(List<Transaction> items) {
         var sortedItems = new ArrayList<>(items);
-        sortedItems.sort(Comparator.comparing(Transaction::getHash).reversed());
+        sortedItems.sort(Comparator.comparing(Transaction::hash).reversed());
 
         var q = new LinkedList<HashTree>();
         sortedItems.forEach(item -> {
-            var hash = item.getHash();
+            var hash = item.hash();
             var node = new HashTree(hash);
             fringeNodes.put(hash, node);
             q.add(node);
         });
 
         if (q.size() % 2 == 1) {
-            q.add(new HashTree(q.peek().getHash()));
+            q.add(new HashTree(q.peek().hash()));
         }
 
         while (q.size() > 1) {
             var a = q.poll();
             var b = q.poll();
-            var parent = new HashTree(concatHashes(a.getHash(), b.getHash(), false, false));
-            a.setParent(parent);
-            b.setParent(parent);
-            parent.setLeft(a);
-            parent.setRight(b);
+            var parent = new HashTree(concatHashes(a.hash(), b.hash(), false, false));
+            a.parent(parent);
+            b.parent(parent);
+            parent.left(a);
+            parent.right(b);
             q.add(parent);
         }
 
@@ -51,27 +50,27 @@ public class MerkleTree {
     }
 
     public SHA256Hash getRootHash() {
-        return this.root.getHash();
+        return this.root.hash();
     }
 
     public Optional<HashTree> getMerkleProof(Transaction t) {
-        return Optional.ofNullable(fringeNodes.get(t.getHash()))
+        return Optional.ofNullable(fringeNodes.get(t.hash()))
                        .map(f -> buildProof(f, null));
     }
     
     private HashTree buildProof(HashTree fringe, HashTree previousNode) {
-        var result = new HashTree(fringe.getHash());
+        var result = new HashTree(fringe.hash());
         if (previousNode != null) {
-            if (fringe.getLeft() != null && fringe.getLeft() != previousNode) {
-                result.setLeft(fringe.getLeft());
-                result.setRight(previousNode);
-            } else if (fringe.getRight() != null && fringe.getRight() != previousNode) {
-                result.setRight(fringe.getRight());
-                result.setLeft(previousNode);
+            if (fringe.left() != null && fringe.left() != previousNode) {
+                result.left(fringe.left());
+                result.right(previousNode);
+            } else if (fringe.right() != null && fringe.right() != previousNode) {
+                result.right(fringe.right());
+                result.left(previousNode);
             }
         }
-        if (fringe.getParent() != null) {
-            return buildProof(fringe.getParent(), fringe);
+        if (fringe.parent() != null) {
+            return buildProof(fringe.parent(), fringe);
         } else {
             return result;
         }

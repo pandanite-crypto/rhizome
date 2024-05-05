@@ -38,8 +38,8 @@ class BaseServiceTest {
 
         // Verify the behavior
         assertEquals(baseService, result);
-        assertEquals(1, baseService.getRoutines().size());
-        assertEquals(routine, baseService.getRoutines().get(0));
+        assertEquals(1, baseService.routines().size());
+        assertEquals(routine, baseService.routines().get(0));
     }
 
     @Test
@@ -53,8 +53,8 @@ class BaseServiceTest {
 
         // Verify the behavior
         assertEquals(baseService, result);
-        assertEquals(1, baseService.getRoutines().size());
-        assertNotEquals(routine, baseService.getRoutines().get(0));
+        assertEquals(1, baseService.routines().size());
+        assertNotEquals(routine, baseService.routines().get(0));
     }
 
     @Test

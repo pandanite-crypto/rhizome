@@ -19,8 +19,7 @@ import rhizome.core.common.Constants;
 import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.transaction.Transaction;
 
-@Data
-@Builder
+@Data @Builder
 public final class BlockImpl implements Block {
 
     /**
@@ -63,7 +62,7 @@ public final class BlockImpl implements Block {
      * @return
      * @throws NoSuchAlgorithmException
      */
-    public SHA256Hash getHash() {
+    public SHA256Hash hash() {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
 
@@ -83,8 +82,8 @@ public final class BlockImpl implements Block {
     }
 
     public boolean verifyNonce() {
-        boolean usePufferfish = this.getId() > Constants.PUFFERFISH_START_BLOCK;
-        return verifyHash(getHash(), nonce, difficulty, usePufferfish, true);
+        boolean usePufferfish = id() > Constants.PUFFERFISH_START_BLOCK;
+        return verifyHash(hash(), nonce, difficulty, usePufferfish, true);
     }
 
     /**

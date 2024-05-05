@@ -99,15 +99,15 @@ public class PeerOLD {
                 for (BlockDto b : blockHeaders) {
                     ArrayList<Transaction> empty = new ArrayList<>();
                     var block = Block.of(b, empty);
-                    long curr = b.getId();
+                    long curr = b.id();
 
-                    if (this.bannedHashes.containsKey(curr) && block.getHash().equals(this.bannedHashes.get(curr))) {
+                    if (this.bannedHashes.containsKey(curr) && block.hash().equals(this.bannedHashes.get(curr))) {
                         log.info("Banned hash found for block: {}", curr);
                         failure = true;
                         break;
                     }
 
-                    if (this.checkPoints.containsKey(curr) && !block.getHash().equals(this.checkPoints.get(curr))) {
+                    if (this.checkPoints.containsKey(curr) && !block.hash().equals(this.checkPoints.get(curr))) {
                         failure = true;
                         break;
                     }
@@ -117,14 +117,14 @@ public class PeerOLD {
                         break;
                     }
 
-                    if (!block.getLastBlockHash().equals(lastHash)) {
+                    if (!block.lastBlockHash().equals(lastHash)) {
                         failure = true;
                         break;
                     }
 
-                    lastHash = block.getHash();
+                    lastHash = block.hash();
                     this.blockHashes.add(lastHash);
-                    totalWork = addWork(totalWork, block.getDifficulty());
+                    totalWork = addWork(totalWork, block.difficulty());
                     numBlocks++;
                     this.chainLength = numBlocks;
                     this.totalWork = totalWork;

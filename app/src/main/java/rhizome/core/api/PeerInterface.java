@@ -68,10 +68,10 @@ public class PeerInterface {
 
             BlockDto b = block.serialize();
             ByteBuffer buffer = ByteBuffer.allocate(BLOCKHEADER_BUFFER_SIZE +
-                                                    TRANSACTIONINFO_BUFFER_SIZE * b.getNumTransactions());
+                                                    TRANSACTIONINFO_BUFFER_SIZE * b.numTransactions());
             buffer.put(b.toBuffer());
             
-            for (Transaction t : block.getTransactions()) {
+            for (Transaction t : block.transactions()) {
                 TransactionDto tx = t.serialize();
                 buffer.put(tx.toBuffer());
             }
@@ -184,7 +184,7 @@ public class PeerInterface {
             bytesRead += BLOCKHEADER_BUFFER_SIZE;
 
             List<Transaction> transactions = new ArrayList<>();
-            for (int i = 0; i < blockHeader.getNumTransactions(); i++) {
+            for (int i = 0; i < blockHeader.numTransactions(); i++) {
                 TransactionDto transactionInfo = BinarySerializable.fromBuffer(bytes, currIndex, TransactionDto.class);
                 transactions.add(Transaction.of(transactionInfo));
                 currIndex += TRANSACTIONINFO_BUFFER_SIZE;

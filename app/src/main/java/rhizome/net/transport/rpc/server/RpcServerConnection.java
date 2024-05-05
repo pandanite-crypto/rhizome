@@ -81,8 +81,8 @@ public class RpcServerConnection implements ChannelInput, Listener, JmxRefreshab
 
 		var startTime = monitoring ? System.currentTimeMillis() : 0;
 
-        var messageCode = message.getMessageType();
-        Object messageData = message.getData();
+        var messageCode = message.messageType();
+        Object messageData = message.data();
         serve(messageData)
             .run((result, e) -> {
                 if (startTime != 0) {
@@ -135,9 +135,9 @@ public class RpcServerConnection implements ChannelInput, Listener, JmxRefreshab
 
 	@Override
 	public void onSerializationError(Message message, @NotNull Exception e) {
-		log.error("Serialization error: {} for data {}", remoteAddress, message.getData(), e);
-		var errorMessage = Message.of(message.getMessageType(), new RpcRemoteException(e));
-		sendError(errorMessage, message.getData(), e);
+		log.error("Serialization error: {} for data {}", remoteAddress, message.data(), e);
+		var errorMessage = Message.of(message.messageType(), new RpcRemoteException(e));
+		sendError(errorMessage, message.data(), e);
 	}
 
 	@Override

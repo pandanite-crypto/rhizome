@@ -29,11 +29,11 @@ public interface User {
         return serializer().fromJson(json);
     }
 
-    public PublicKey getPublicKey();
-    public PrivateKey getPrivateKey();
+    public PublicKey publicKey();
+    public PrivateKey privateKey();
 
     default PublicAddress getAddress() {
-        return PublicAddress.of(getPublicKey());
+        return PublicAddress.of(publicKey());
     }
 
     default Transaction mine() {
@@ -45,12 +45,12 @@ public interface User {
     }
 
     default Transaction send(User to, TransactionAmount amount) {
-        return Transaction.of(getAddress(), to.getAddress(), amount, getPublicKey())
-            .sign(getPrivateKey());
+        return Transaction.of(getAddress(), to.getAddress(), amount, publicKey())
+            .sign(privateKey());
     }
 
     default void signTransaction(Transaction transaction) {
-        transaction.sign(getPrivateKey());
+        transaction.sign(privateKey());
     }
 
     public JSONObject toJson();
@@ -96,8 +96,8 @@ public interface User {
         public JSONObject toJson(User user) {
             var userImpl = (UserImpl) user;
             JSONObject result = new JSONObject();
-            result.put(PUBLIC_KEY, userImpl.getPublicKey().toHexString());
-            result.put(PRIVATE_KEY, userImpl.getPrivateKey().toHexString());
+            result.put(PUBLIC_KEY, userImpl.publicKey().toHexString());
+            result.put(PRIVATE_KEY, userImpl.privateKey().toHexString());
             return result;
         }
     }

@@ -203,10 +203,10 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 
 	@Override
 	public void accept(Message message) {
-		if (message.getData().getClass() == RpcRemoteException.class) {
+		if (message.data().getClass() == RpcRemoteException.class) {
 			processErrorMessage(message);
-		} else if (message.getData().getClass() == RpcControlMessage.class) {
-			processControlMessage((RpcControlMessage) message.getData());
+		} else if (message.data().getClass() == RpcControlMessage.class) {
+			processControlMessage((RpcControlMessage) message.data());
 		} else {
 
 			//TODO
@@ -222,7 +222,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 	}
 
 	private void processErrorMessage(Message message) {
-		RpcRemoteException remoteException = (RpcRemoteException) message.getData();
+		RpcRemoteException remoteException = (RpcRemoteException) message.data();
 		// jmx
 		connectionStats.getFailedRequests().recordEvent();
 		rpcClient.getGeneralRequestsStats().getFailedRequests().recordEvent();
@@ -291,7 +291,7 @@ public final class RpcClientConnection implements ChannelOutput, Listener, RpcSe
 	@Override
 	public void onSerializationError(Message message, @NotNull Exception e) {
 		if (isClosed()) return;
-		logger.error("Serialization error: {} for data {}", address, message.getData(), e);
+		logger.error("Serialization error: {} for data {}", address, message.data(), e);
 		rpcClient.getLastProtocolError().recordException(e, address);
 
 		// TODO
