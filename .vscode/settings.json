@@ -8,22 +8,20 @@
     "java.configuration.runtimes": [
         {
             "name": "JavaSE-21",
-            "path": "/home/vscode/graalvm-jdk-21.0.2+13.1",
-            "default": true
+            "path": "/home/vscode/graalvm-jdk-21.0.3+7.1"
         }
     ],
-    "graalvm.home": "/home/vscode/graalvm-jdk-21.0.2+13.1",
     "graalvm.installations": [
-        "/home/vscode/graalvm-jdk-21.0.2+13.1"
+        "/home/vscode/graalvm-jdk-21.0.3+7.1"
     ],
     "terminal.integrated.env.linux": {
-        "GRAALVM_HOME": "/home/vscode/graalvm-jdk-21.0.2+13.1"
+        "GRAALVM_HOME": "/home/vscode/graalvm-jdk-21.0.3+7.1"
     },
-    "java.jdt.ls.java.home": "/home/vscode/graalvm-jdk-21.0.2+13.1",
+    "java.jdt.ls.java.home": "/home/vscode/graalvm-jdk-21.0.3+7.1",
     "maven.terminal.customEnv": [
         {
             "environmentVariable": "JAVA_HOME",
-            "value": "/home/vscode/graalvm-jdk-21.0.2+13.1"
+            "value": "/home/vscode/graalvm-jdk-21.0.3+7.1"
         }
     ]
 }
