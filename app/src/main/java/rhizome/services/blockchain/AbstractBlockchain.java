@@ -13,7 +13,6 @@ import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.ledger.Ledger;
 import rhizome.persistence.BlockPersistence;
 import rhizome.persistence.TransactionStore;
-import rhizome.services.network.PeerManager;
 
 @Getter
 @Setter
@@ -21,7 +20,6 @@ public abstract class AbstractBlockchain implements Blockchain {
 
     protected boolean isSyncing;
     protected boolean shutdown;
-    protected PeerManager peers;
     protected MemPool memPool;
     protected int numBlocks;
     protected int retries;
@@ -36,3 +34,4 @@ public abstract class AbstractBlockchain implements Blockchain {
     protected List<Thread> syncThread;
     protected Map<Integer, SHA256Hash> checkpoints;
 }
+ 

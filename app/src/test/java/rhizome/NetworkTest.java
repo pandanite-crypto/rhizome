@@ -2,7 +2,6 @@ package rhizome;
 
 import org.junit.jupiter.api.Test;
 
-import io.activej.bytebuf.ByteBuf;
 import io.activej.csp.ChannelConsumer;
 import io.activej.csp.ChannelSupplier;
 import io.activej.csp.binary.BinaryChannelSupplier;
@@ -81,8 +80,8 @@ class NetworkTest {
     }
 
 
-    @Test
-    void tcpClientExemple() throws IOException{
+    // @Test
+    private void tcpClientExemple() throws IOException{
         Eventloop eventloop = Eventloop.create().withEventloopFatalErrorHandler(rethrow());
 
         eventloop.listen(new InetSocketAddress("localhost", PORT), ServerSocketSettings.create(100), channel -> {

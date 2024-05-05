@@ -1,4 +1,27 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "files.watcherExclude": {
+        "**/target": true
+    },
+    "java.format.settings.url": "eclipse-formatter.xml",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-21",
+            "path": "/home/vscode/graalvm-jdk-21.0.3+7.1"
+        }
+    ],
+    "graalvm.installations": [
+        "/home/vscode/graalvm-jdk-21.0.3+7.1"
+    ],
+    "terminal.integrated.env.linux": {
+        "GRAALVM_HOME": "/home/vscode/graalvm-jdk-21.0.3+7.1"
+    },
+    "java.jdt.ls.java.home": "/home/vscode/graalvm-jdk-21.0.3+7.1",
+    "maven.terminal.customEnv": [
+        {
+            "environmentVariable": "JAVA_HOME",
+            "value": "/home/vscode/graalvm-jdk-21.0.3+7.1"
+        }
+    ]
 }

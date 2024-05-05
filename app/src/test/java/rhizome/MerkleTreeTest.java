@@ -26,19 +26,19 @@ class MerkleTreeTest {
         items.add(a);
         m.setItems(items);
         var proof = m.getMerkleProof(a);
-        assertEquals(proof.get().getLeft().getHash(), a.getHash());
-        assertEquals(proof.get().getRight().getHash(), a.getHash());
-        SHA256Hash ha = a.getHash();
-        assertEquals(proof.get().getHash(), concatHashes(ha, ha, false, false));
+        assertEquals(proof.get().left().hash(), a.hash());
+        assertEquals(proof.get().right().hash(), a.hash());
+        SHA256Hash ha = a.hash();
+        assertEquals(proof.get().hash(), concatHashes(ha, ha, false, false));
     }
 
     private boolean checkProofRecursive(HashTree hashTree) {
-        if (hashTree.getLeft() == null && hashTree.getRight() == null) {
+        if (hashTree.left() == null && hashTree.right() == null) {
             // fringe node
             return true;
         } else {
-            if (!concatHashes(hashTree.getLeft().getHash(), hashTree.getRight().getHash(), false, false).equals(hashTree.getHash())) return false;
-            return checkProofRecursive(hashTree.getLeft()) && checkProofRecursive(hashTree.getRight());
+            if (!concatHashes(hashTree.left().hash(), hashTree.right().hash(), false, false).equals(hashTree.hash())) return false;
+            return checkProofRecursive(hashTree.left()) && checkProofRecursive(hashTree.right());
         }
     }
 
@@ -57,7 +57,7 @@ class MerkleTreeTest {
         m.setItems(items);
         var proof = m.getMerkleProof(a);
         
-        assertEquals(concatHashes(proof.get().getLeft().getHash(), proof.get().getRight().getHash(), false, false), proof.get().getHash());
+        assertEquals(concatHashes(proof.get().left().hash(), proof.get().right().hash(), false, false), proof.get().hash());
         assertTrue(checkProofRecursive(proof.get()));
     }
 

@@ -3,7 +3,7 @@ package rhizome.core.ledger;
 import org.iq80.leveldb.DBException;
 
 import rhizome.core.transaction.TransactionAmount;
-import rhizome.persistence.leveldb.DataStore;
+import rhizome.persistence.leveldb.LevelDBDataStore;
 
 import static rhizome.core.common.Utils.bytesToLong;
 import static rhizome.core.common.Utils.longToBytes;
@@ -11,7 +11,7 @@ import static rhizome.core.common.Utils.longToBytes;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Ledger extends DataStore {
+public class Ledger extends LevelDBDataStore {
 
     private static final long HUNDRED_MILLIONS = 100_000_000L * 100L;
 
@@ -32,7 +32,7 @@ public class Ledger extends DataStore {
 
     private void setWalletValue(PublicAddress wallet, TransactionAmount amount) {
         try {
-            getDb().put(wallet.address().asArray(), longToBytes(amount.amount()));
+            db().put(wallet.address().asArray(), longToBytes(amount.amount()));
         } catch (DBException e) {
             throw new LedgerException("Failed to set wallet value", e);
         }
@@ -47,7 +47,7 @@ public class Ledger extends DataStore {
     }
 
     private TransactionAmount getWalletValueInternal(PublicAddress wallet) {
-        byte[] value = getDb().get(wallet.address().asArray());
+        byte[] value = db().get(wallet.address().asArray());
         if (value == null) {
             return null;
         }

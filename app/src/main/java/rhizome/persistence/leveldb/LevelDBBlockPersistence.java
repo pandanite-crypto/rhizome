@@ -12,7 +12,7 @@ import rhizome.core.block.Block;
 import rhizome.core.block.dto.BlockDto;
 import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.ledger.PublicAddress;
-import rhizome.net.BinarySerializable;
+import rhizome.core.serialization.BinarySerializable;
 import rhizome.core.transaction.Transaction;
 import rhizome.core.transaction.dto.TransactionDto;
 import rhizome.persistence.BlockPersistence;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class LevelDBBlockPersistence extends DataStore implements BlockPersistence {
+public class LevelDBBlockPersistence extends LevelDBDataStore implements BlockPersistence {
 
     static final String BLOCK_COUNT_KEY = "BLOCK_COUNT";
     static final String TOTAL_WORK_KEY = "TOTAL_WORK";
@@ -65,8 +65,8 @@ public class LevelDBBlockPersistence extends DataStore implements BlockPersisten
 
     public List<TransactionDto> getBlockTransactions(BlockDto block) {
         var transactions = new ArrayList<TransactionDto>();
-        for (int i = 0; i < block.getNumTransactions(); i++) {            
-            var value = (byte[]) get(composeKey(block.getId(), i), byte[].class);
+        for (int i = 0; i < block.numTransactions(); i++) {            
+            var value = (byte[]) get(composeKey(block.id(), i), byte[].class);
             transactions.add(BinarySerializable.fromBuffer(value, TransactionDto.class));
         }
         return transactions;
@@ -74,7 +74,7 @@ public class LevelDBBlockPersistence extends DataStore implements BlockPersisten
 
     public ByteBuf getRawData(int blockId) {
         var blockHeader = getBlockHeader(blockId);
-        var bufferSize = MemSize.of((long) BlockDto.BUFFER_SIZE + (TransactionDto.BUFFER_SIZE * blockHeader.getNumTransactions()));
+        var bufferSize = MemSize.of((long) BlockDto.BUFFER_SIZE + (TransactionDto.BUFFER_SIZE * blockHeader.numTransactions()));
         var buffer = ByteBufPool.allocateExact(bufferSize);
         buffer.put(blockHeader.toBuffer());
 
@@ -91,7 +91,7 @@ public class LevelDBBlockPersistence extends DataStore implements BlockPersisten
     
         var block = Block.of(blockHeader, new ArrayList<>());
     
-        for (var i = 0; i < blockHeader.getNumTransactions(); i++) {
+        for (var i = 0; i < blockHeader.numTransactions(); i++) {
             var transactionData = new byte[TransactionDto.BUFFER_SIZE];
             buffer.read(transactionData);
             TransactionDto transactionDto = BinarySerializable.fromBuffer(transactionData, TransactionDto.class);
@@ -113,7 +113,7 @@ public class LevelDBBlockPersistence extends DataStore implements BlockPersisten
         var address = wallet.toBytes();
         List<SHA256Hash> transactions = new ArrayList<>();
 
-        try (DBIterator iterator = getDb().iterator(new ReadOptions())) {
+        try (DBIterator iterator = db().iterator(new ReadOptions())) {
             for(iterator.seek(address); iterator.hasNext(); iterator.next()) {
                 byte[] key = iterator.peekNext().getKey();
                 byte[] addressKey = Arrays.copyOfRange(key, 0, 25);
@@ -125,41 +125,41 @@ public class LevelDBBlockPersistence extends DataStore implements BlockPersisten
                 transactions.add(txid);
             }
         } catch (IOException e) {
-            throw new DataStoreException("Failed to iterate over the database", e);
+            throw new LevelDBException("Failed to iterate over the database", e);
         }
         
         return transactions;
     }
 
     public void removeBlockWalletTransactions(Block block) {
-        for(Transaction t : block.getTransactions()) {
+        for(Transaction t : block.transactions()) {
             SHA256Hash txid = t.hashContents();
             
-            var w1Key = new WalletTransactionKey(t.getFrom(), txid, false);
-            var w2Key = new WalletTransactionKey(t.getTo(), txid, false);
+            var w1Key = new WalletTransactionKey(t.from(), txid, false);
+            var w2Key = new WalletTransactionKey(t.to(), txid, false);
             
             try {
                 deleteTransaction(w1Key);
                 deleteTransaction(w2Key);
             } catch (DBException e) {
-                throw new DataStoreException("Could not remove transaction from wallet in blockstore db: " + e.getMessage(), e);
+                throw new LevelDBException("Could not remove transaction from wallet in blockstore db: " + e.getMessage(), e);
             }
         }
     }
 
     private void deleteTransaction(WalletTransactionKey key) throws DBException {
         WriteOptions writeOptions = new WriteOptions().sync(true);
-        getDb().delete(key.toByteArray(), writeOptions);
+        db().delete(key.toByteArray(), writeOptions);
     }
 
 
-    public void addBlock(Block block) throws DataStoreException {
-        set(block.getId(), block.serialize().toBuffer());
+    public void addBlock(Block block) throws LevelDBException {
+        set(block.id(), block.serialize().toBuffer());
 
-        for (int i = 0; i < block.getTransactions().size(); i++) {
-            var transaction = block.getTransactions().get(i);
+        for (int i = 0; i < block.transactions().size(); i++) {
+            var transaction = block.transactions().get(i);
             var transactionDto = transaction.serialize();
-            set(composeKey(block.getId(), i), transactionDto.toBuffer());
+            set(composeKey(block.id(), i), transactionDto.toBuffer());
             set(composeKey(PublicAddress.of(transactionDto.signingKey).toBytes(), transaction.hashContents().toBytes()), new byte[0]);
             set(composeKey(transactionDto.to.toBytes(), transaction.hashContents().toBytes()), new byte[0]);
         }

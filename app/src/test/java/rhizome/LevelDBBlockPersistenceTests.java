@@ -41,14 +41,14 @@ class LevelDBBlockPersistenceTests {
     void testStoresBlock() throws IOException {
 
         var a = Block.empty();
-        ((BlockImpl) a).setId(2);
+        ((BlockImpl) a).id(2);
         var t = miner.mine();
         a.addTransaction(t);
 
         // send tiny shares to receiver:
         for (int i = 0; i < 5; i++) {
             var t2 = miner.send(receiver, 1);
-            ((TransactionImpl)t2).setTimestamp(i);
+            ((TransactionImpl)t2).timestamp(i);
             a.addTransaction(t2);
         }
 
@@ -79,14 +79,14 @@ class LevelDBBlockPersistenceTests {
     void testBlockstoreStoresMultiple() throws IOException {
         for (int i = 0; i < 30; i++) {
             var a = Block.empty();
-            ((BlockImpl) a).setId(i + 1);
+            ((BlockImpl) a).id(i + 1);
             var t = miner.mine();
             a.addTransaction(t);
 
             // Send tiny shares to receiver
             for (int j = 0; j < 5; j++) {
                 var t2 = miner.send(receiver, 1);
-                ((TransactionImpl) t2).setTimestamp(j);
+                ((TransactionImpl) t2).timestamp(j);
                 a.addTransaction(t2);
             }
 
@@ -106,7 +106,7 @@ class LevelDBBlockPersistenceTests {
     @Test
     void testBlockstoreReturnsValidRawData() throws IOException {
         var a = Block.empty();
-        a.setId(1);
+        a.id(1);
         Transaction t = miner.mine();
         a.addTransaction(t);
 
@@ -117,7 +117,7 @@ class LevelDBBlockPersistenceTests {
 
         blocks.addBlock(a);
 
-        var buffer = blocks.getRawData(a.getId()).asArray();
+        var buffer = blocks.getRawData(a.id()).asArray();
         var b = blocks.fromRawData(buffer);
         assertEquals(a, b);
     }

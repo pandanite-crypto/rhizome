@@ -2,7 +2,7 @@ package rhizome.persistence;
 
 import org.iq80.leveldb.*;
 import rhizome.core.transaction.Transaction;
-import rhizome.persistence.leveldb.DataStore;
+import rhizome.persistence.leveldb.LevelDBDataStore;
 import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.ledger.LedgerException;
 
@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.io.IOException;
 
 
-public class TransactionStore extends DataStore {
+public class TransactionStore extends LevelDBDataStore {
 
     public TransactionStore(String path) throws IOException {
         super.init(path);
@@ -20,7 +20,7 @@ public class TransactionStore extends DataStore {
         SHA256Hash txHash = t.hashContents();
         byte[] key = txHash.toBytes();
         try {
-            byte[] value = getDb().get(key);
+            byte[] value = db().get(key);
             return value != null;
         } catch (DBException e) {
             throw new LedgerException("Failed to check transaction existence", e);
@@ -31,7 +31,7 @@ public class TransactionStore extends DataStore {
         SHA256Hash txHash = t.hashContents();
         byte[] key = txHash.toBytes();
         try {
-            byte[] value = getDb().get(key);
+            byte[] value = db().get(key);
             if (value == null) {
                 return 0; // Or throw an exception if that's the required logic
             }
@@ -45,7 +45,7 @@ public class TransactionStore extends DataStore {
     public int blockForTransactionId(SHA256Hash txHash) {
         byte[] key = txHash.toBytes();
         try {
-            byte[] value = getDb().get(key);
+            byte[] value = db().get(key);
             if (value == null) {
                 return 0; // Or throw an exception if that's the required logic
             }
@@ -62,7 +62,7 @@ public class TransactionStore extends DataStore {
         ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
         buffer.putInt(blockId);
         try {
-            getDb().put(key, buffer.array());
+            db().put(key, buffer.array());
         } catch (DBException e) {
             throw new LedgerException("Could not write transaction to DB", e);
         }
@@ -72,7 +72,7 @@ public class TransactionStore extends DataStore {
         SHA256Hash txHash = t.hashContents();
         byte[] key = txHash.toBytes();
         try {
-            getDb().delete(key);
+            db().delete(key);
         } catch (DBException e) {
             throw new LedgerException("Could not remove transaction from DB", e);
         }

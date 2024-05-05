@@ -6,14 +6,15 @@ import io.activej.promise.Promise;
 import rhizome.core.block.Block;
 import rhizome.core.block.dto.BlockDto;
 import rhizome.core.transaction.dto.TransactionDto;
+import rhizome.net.p2p.peer.Peer;
 
 public interface NodeInterface {
     Promise<Boolean> isOnline();
     Promise<Long> getCurrentBlockCount();
     Promise<BigInteger> getTotalWork();
     Promise<String> getName();
-    Promise<?> getPeers();
-    Promise<?> addPeer();
+    Promise<List<Peer>> getPeers();
+    Promise<Boolean> addPeer();
     Promise<BlockDto> getBlock();
     Promise<Boolean> submitBlock(BlockDto block);
     Promise<List<Block>> readBlocks(long startId, long endId);

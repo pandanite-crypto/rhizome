@@ -7,6 +7,7 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.json.JSONObject;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import rhizome.core.crypto.PrivateKey;
 import rhizome.core.crypto.PublicKey;
 import rhizome.core.crypto.SHA256Hash;
@@ -17,8 +18,7 @@ import static rhizome.core.common.Crypto.signWithPrivateKey;
 import static rhizome.core.common.Crypto.checkSignature;
 import static rhizome.core.common.Utils.longToBytes;
 
-@Data
-@Builder
+@Data @Builder
 public final class TransactionImpl implements Transaction, Comparable<Transaction> {
     
     @Builder.Default
@@ -60,7 +60,7 @@ public final class TransactionImpl implements Transaction, Comparable<Transactio
         return checkSignature(hashContents().toBytes(), this.signature.toBytes(), this.signingKey);
     }
 
-    public SHA256Hash getHash() {
+    public SHA256Hash hash() {
         var digest = new SHA256Digest();
         var sha256Hash = new byte[SHA256Hash.SIZE];
 

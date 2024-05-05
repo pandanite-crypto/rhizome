@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import rhizome.core.block.dto.BlockDto;
 import rhizome.core.crypto.SHA256Hash;
-import rhizome.net.Serializable;
+import rhizome.core.serialization.Serializable;
 import rhizome.core.transaction.Transaction;
 
 import java.util.List;
@@ -26,24 +26,24 @@ public sealed interface Block permits BlockImpl {
     public static Block of(Block block) {
         var blockImpl = (BlockImpl) block;
         return BlockImpl.builder()
-                .id(blockImpl.getId())
-                .timestamp(blockImpl.getTimestamp())
-                .difficulty(blockImpl.getDifficulty())
-                .merkleRoot(blockImpl.getMerkleRoot())
-                .lastBlockHash(blockImpl.getLastBlockHash())
-                .nonce(blockImpl.getNonce())
-                .transactions(blockImpl.getTransactions())
+                .id(blockImpl.id())
+                .timestamp(blockImpl.timestamp())
+                .difficulty(blockImpl.difficulty())
+                .merkleRoot(blockImpl.merkleRoot())
+                .lastBlockHash(blockImpl.lastBlockHash())
+                .nonce(blockImpl.nonce())
+                .transactions(blockImpl.transactions())
                 .build();
     }
 
     public static Block of(BlockDto blockDto, List<Transaction> transactions) {
         return BlockImpl.builder()
-                .id(blockDto.getId())
-                .timestamp(blockDto.getTimestamp())
-                .difficulty(blockDto.getDifficulty())
-                .merkleRoot(blockDto.getMerkleRoot())
-                .lastBlockHash(blockDto.getLastBlockHash())
-                .nonce(blockDto.getNonce())
+                .id(blockDto.id())
+                .timestamp(blockDto.timestamp())
+                .difficulty(blockDto.difficulty())
+                .merkleRoot(blockDto.merkleRoot())
+                .lastBlockHash(blockDto.lastBlockHash())
+                .nonce(blockDto.nonce())
                 .transactions(transactions)
                 .build();
     }
@@ -58,14 +58,14 @@ public sealed interface Block permits BlockImpl {
         return serializer().toJson(block);
     }
 
-    public int getId();
-    public void setId(int id);
+    public int id();
+    public Block id(int id);
     public void addTransaction(Transaction t);
-    public List<Transaction> getTransactions();
+    public List<Transaction> transactions();
     public boolean verifyNonce();
-    public SHA256Hash getHash();
-    public SHA256Hash getLastBlockHash();
-    public int getDifficulty();
+    public SHA256Hash hash();
+    public SHA256Hash lastBlockHash();
+    public int difficulty();
 
     /**
      * Get instance of the serializer
@@ -95,13 +95,13 @@ public sealed interface Block permits BlockImpl {
         public BlockDto serialize(Block block) {
             var blockImpl = (BlockImpl) block;
             return new BlockDto(
-                blockImpl.getId(),
-                blockImpl.getTimestamp(),
-                blockImpl.getDifficulty(),
-                blockImpl.getTransactions().size(),
-                blockImpl.getLastBlockHash(),
-                blockImpl.getMerkleRoot(),
-                blockImpl.getNonce()
+                blockImpl.id(),
+                blockImpl.timestamp(),
+                blockImpl.difficulty(),
+                blockImpl.transactions().size(),
+                blockImpl.lastBlockHash(),
+                blockImpl.merkleRoot(),
+                blockImpl.nonce()
             );
         }
     
@@ -114,19 +114,19 @@ public sealed interface Block permits BlockImpl {
         public JSONObject toJson(Block block) {
             var blockImpl = (BlockImpl) block;
             JSONObject result = new JSONObject();
-            result.put(ID, blockImpl.getId());
+            result.put(ID, blockImpl.id());
             try {
-                result.put(HASH, blockImpl.getHash().toHexString());
+                result.put(HASH, blockImpl.hash().toHexString());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            result.put(DIFFICULTY, blockImpl.getDifficulty());
-            result.put(NONCE, blockImpl.getNonce().toHexString());
-            result.put(TIMESTAMP, Long.toString(blockImpl.getTimestamp()));
-            result.put(MERKLE_ROOT, blockImpl.getMerkleRoot().toHexString());
-            result.put(LAST_BLOCK_HASH, blockImpl.getLastBlockHash().toHexString());
+            result.put(DIFFICULTY, blockImpl.difficulty());
+            result.put(NONCE, blockImpl.nonce().toHexString());
+            result.put(TIMESTAMP, Long.toString(blockImpl.timestamp()));
+            result.put(MERKLE_ROOT, blockImpl.merkleRoot().toHexString());
+            result.put(LAST_BLOCK_HASH, blockImpl.lastBlockHash().toHexString());
             JSONArray transactionsArray = new JSONArray();
-            for (Transaction transaction : blockImpl.getTransactions()) {
+            for (Transaction transaction : blockImpl.transactions()) {
                 transactionsArray.put(transaction.toJson());
             }
             result.put(TRANSACTIONS, transactionsArray);

@@ -1,55 +1,42 @@
 package rhizome.services.network;
 
-import org.jetbrains.annotations.NotNull;
-
-import io.activej.async.function.AsyncRunnable;
-import io.activej.async.function.AsyncRunnables;
-import io.activej.async.service.EventloopService;
 import io.activej.eventloop.Eventloop;
-import io.activej.promise.Promise;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import rhizome.services.network.discovery.PeerDiscoveryListener;
-import rhizome.services.network.discovery.PeerDiscoveryService.DiscoveryPeer;
+import rhizome.net.p2p.DiscoveryService;
+import rhizome.net.protocol.Message;
 
-@Slf4j
-@Getter
-@Setter
-public class PeerManagerService implements EventloopService, PeerDiscoveryListener {
+/**
+ * This service execute the service manager process.
+ * It pings all peers and marks them as dead or alive accordingly.
+ * It also pings all dead peers and marks them as alive if they respond.
+ * It also rediscover the peers.
+ */
+public interface PeerManagerService {
 
-    private Eventloop eventloop;
-    private final AsyncRunnable refresh;
+    static final int PING_INTERVAL = 10;
 
-    public PeerManagerService(Eventloop eventloop, PeerManager manager) {
-        this.eventloop = eventloop;
-        this.refresh = AsyncRunnables.reuse(() -> doRefresh(manager));
+    /**
+     * Factory method
+     * 
+     * @param eventloop
+     * @param discoveryService
+     * @return new instance of PeerManagerService
+     */
+    static PeerManagerService create(Eventloop eventloop, DiscoveryService discoveryService) {
+        return new PeerManagerServiceImpl(eventloop, discoveryService);
     }
 
-	public Promise<Void> refresh() {
-		return refresh.run();
-	}
+    /**
+     * Publishes a message to connected peers following the strategy of the peer
+     * system
+     * 
+     * @param message
+     */
+    void broadcast(Message message);
 
-    @Override
-    public @NotNull Promise<?> start() {
-        log.info("|PEER MANAGER STARTING|");
-        return refresh();    
-    }
 
-    @Override
-    public @NotNull Promise<?> stop() {
-        log.info("|PEER MANAGER STARTING|");
-        return Promise.complete().whenResult(() -> log.info("|PEER MANAGER STOPPED|"));    
-    }
-
-    private Promise<Void> doRefresh(PeerManager manager) {
-        // TODO Auto-generated method stub
-        return Promise.complete();
-    }
-
-    @Override
-    public void onNewPeerDiscovered(DiscoveryPeer peer) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'onNewPeerDiscovered'");
-    }
+    /*
+     * 
+     * 
+     */
+    void sync();
 }

@@ -6,7 +6,7 @@ import rhizome.core.crypto.PrivateKey;
 import rhizome.core.crypto.PublicKey;
 import rhizome.core.crypto.SHA256Hash;
 import rhizome.core.ledger.PublicAddress;
-import rhizome.net.Serializable;
+import rhizome.core.serialization.Serializable;
 import rhizome.core.transaction.dto.TransactionDto;
 
 public sealed interface Transaction permits TransactionImpl {
@@ -22,14 +22,14 @@ public sealed interface Transaction permits TransactionImpl {
     public static Transaction of(Transaction transaction) {
         var transactionImpl = (TransactionImpl) transaction;
         return TransactionImpl.builder()
-                .from(transactionImpl.getFrom())
-                .to(transactionImpl.getTo())
-                .amount(transactionImpl.getAmount())
+                .from(transactionImpl.from())
+                .to(transactionImpl.to())
+                .amount(transactionImpl.amount())
                 .isTransactionFee(transactionImpl.isTransactionFee())
-                .timestamp(transactionImpl.getTimestamp())
-                .fee(transactionImpl.getFee())
-                .signingKey(transactionImpl.getSigningKey())
-                .signature(transactionImpl.getSignature())
+                .timestamp(transactionImpl.timestamp())
+                .fee(transactionImpl.fee())
+                .signingKey(transactionImpl.signingKey())
+                .signature(transactionImpl.signature())
                 .build();
     }
 
@@ -94,9 +94,9 @@ public sealed interface Transaction permits TransactionImpl {
     public Transaction sign(PrivateKey privateKey);
     public boolean signatureValid();
     public SHA256Hash hashContents();
-    public SHA256Hash getHash();
-    public PublicAddress getFrom();
-    public PublicAddress getTo();
+    public SHA256Hash hash();
+    public PublicAddress from();
+    public PublicAddress to();
 
     /**
      * Get instance of the serializer
@@ -126,12 +126,12 @@ public sealed interface Transaction permits TransactionImpl {
         public TransactionDto serialize(Transaction transaction) {
             var transactionImpl = (TransactionImpl) transaction;
             return new TransactionDto(
-                transactionImpl.getSignature(),
-                transactionImpl.getSigningKey(),
-                transactionImpl.getTimestamp(),
-                transactionImpl.getTo(),
-                transactionImpl.getAmount().amount(),
-                transactionImpl.getFee().amount(),
+                transactionImpl.signature(),
+                transactionImpl.signingKey(),
+                transactionImpl.timestamp(),
+                transactionImpl.to(),
+                transactionImpl.amount().amount(),
+                transactionImpl.fee().amount(),
                 transactionImpl.isTransactionFee()
             );
         }
@@ -154,16 +154,16 @@ public sealed interface Transaction permits TransactionImpl {
         public JSONObject toJson(Transaction transaction) {
             var transactionImpl = (TransactionImpl) transaction;    
             JSONObject result = new JSONObject();
-            result.put(TO, transactionImpl.getTo().toHexString());
-            result.put(AMOUNT, transactionImpl.getAmount().amount());
-            result.put(TIMESTAMP, Long.toString(transactionImpl.getTimestamp()));
-            result.put(FEE, transactionImpl.getFee().amount());
+            result.put(TO, transactionImpl.to().toHexString());
+            result.put(AMOUNT, transactionImpl.amount().amount());
+            result.put(TIMESTAMP, Long.toString(transactionImpl.timestamp()));
+            result.put(FEE, transactionImpl.fee().amount());
             
             if (!transactionImpl.isTransactionFee()) {
                 result.put(TXID, transactionImpl.hashContents().toHexString());
-                result.put(FROM, transactionImpl.getFrom().toHexString());
-                result.put(SIGNING_KEY, transactionImpl.getSigningKey().toHexString());
-                result.put(SIGNATURE, transactionImpl.getSignature().toHexString());
+                result.put(FROM, transactionImpl.from().toHexString());
+                result.put(SIGNING_KEY, transactionImpl.signingKey().toHexString());
+                result.put(SIGNATURE, transactionImpl.signature().toHexString());
             } else {
                 result.put(TXID, transactionImpl.hashContents().toHexString());
                 result.put(FROM, "");
